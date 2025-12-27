@@ -1,0 +1,35 @@
+# System
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+.output/
+.nuxt/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Backup
+mirauni-frontend-backup-vite/
+_archive_*/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
