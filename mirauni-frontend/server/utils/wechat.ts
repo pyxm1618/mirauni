@@ -54,7 +54,19 @@ export async function getWechatAccessToken(code: string): Promise<{
     const config = useRuntimeConfig()
     const url = `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${config.wechatAppId}&secret=${config.wechatAppSecret}&code=${code}&grant_type=authorization_code`
 
+    console.log('[微信API] 请求 access_token')
+    console.log('[微信API] AppID:', config.wechatAppId)
+    console.log('[微信API] Code 前10位:', code.substring(0, 10))
+
     const response = await $fetch<any>(url)
+
+    console.log('[微信API] access_token 响应:', JSON.stringify({
+        hasToken: !!response.access_token,
+        openid: response.openid,
+        scope: response.scope,
+        errcode: response.errcode,
+        errmsg: response.errmsg
+    }))
 
     if (response.errcode) {
         throw new Error(`微信授权失败: ${response.errmsg}`)
@@ -77,7 +89,17 @@ export async function getWechatUserInfo(accessToken: string, openid: string): Pr
 }> {
     const url = `https://api.weixin.qq.com/sns/userinfo?access_token=${accessToken}&openid=${openid}&lang=zh_CN`
 
+    console.log('[微信API] 请求用户信息')
+    console.log('[微信API] access_token 前20位:', accessToken.substring(0, 20))
+    console.log('[微信API] openid:', openid)
+
     const response = await $fetch<any>(url)
+
+    console.log('[微信API] 用户信息响应:', JSON.stringify({
+        hasNickname: !!response.nickname,
+        errcode: response.errcode,
+        errmsg: response.errmsg
+    }))
 
     if (response.errcode) {
         throw new Error(`获取用户信息失败: ${response.errmsg}`)
