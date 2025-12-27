@@ -1,18 +1,29 @@
 <template>
   <div class="container mx-auto px-4 py-12">
-    <header class="text-center mb-16">
-      <h1 class="text-5xl md:text-7xl font-display font-bold mb-6">
-        找到你的<span class="bg-indie-primary px-2">技术合伙人</span>
+    <header class="text-center mb-16 flex flex-col items-center">
+      <!-- Badge -->
+      <div class="inline-block bg-indie-primary border-2 border-indie-border px-3 py-1 text-sm font-bold mb-6 shadow-brutal transform -rotate-2">
+        🚀 SHIP FASTER
+      </div>
+
+      <h1 class="text-6xl md:text-8xl font-display font-bold mb-8 leading-tight">
+        找到你的<br>
+        <span class="text-indie-secondary text-transparent bg-clip-text" style="-webkit-text-stroke: 2px #000;">技术合伙人</span>
       </h1>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-        独立开发者找合伙人的第一站。发布你的项目，找到志同道合的开发者，一起创造。
-      </p>
-      <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-        <NuxtLink to="/projects" class="px-8 py-4 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold text-lg text-center">
-          浏览项目
+      
+      <!-- Boxed Subtext -->
+      <div class="bg-white border-2 border-indie-border shadow-brutal p-6 max-w-2xl mx-auto mb-10 transform rotate-1">
+        <p class="text-xl text-indie-text font-bold">
+          独立开发者找合伙人的第一站。发布你的项目，找到志同道合的开发者，一起创造。
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row justify-center gap-6">
+        <NuxtLink to="/projects" class="px-8 py-4 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-lg text-center uppercase tracking-wide">
+          START PROJECT
         </NuxtLink>
-        <NuxtLink to="/developers" class="px-8 py-4 bg-white border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold text-lg text-center">
-          找开发者
+        <NuxtLink to="/developers" class="px-8 py-4 bg-indie-secondary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-lg text-center uppercase tracking-wide">
+          BROWSE TALENT
         </NuxtLink>
       </div>
     </header>
