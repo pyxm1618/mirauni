@@ -65,7 +65,9 @@
 
         <!-- 首充优惠提示 -->
         <div class="bg-indie-accent border-3 border-black p-6 mb-12 shadow-brutal flex items-center gap-6">
-            <div class="text-5xl bg-white border-3 border-black w-20 h-20 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">🎉</div>
+            <div class="text-5xl bg-white border-3 border-black w-20 h-20 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <UIcon name="i-heroicons-gift-solid" class="w-10 h-10" />
+            </div>
             <div>
               <p class="font-black text-xl uppercase mb-1">FIRST TOP-UP BONUS</p>
               <p class="font-bold">GET 20% OFF + 30% EXTRA CREDITS ON YOUR FIRST PURCHASE!</p>
@@ -85,7 +87,7 @@
             <div v-for="i in 5" :key="i" class="p-6 border-b-3 border-black last:border-b-0 flex items-center justify-between group hover:bg-gray-50 transition-colors">
               <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-indie-secondary border-3 border-black flex items-center justify-center text-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                  👤
+                   <UIcon name="i-heroicons-user-solid" class="w-6 h-6" />
                 </div>
                 <div>
                   <p class="font-black uppercase text-lg">USER_NICKNAME</p>

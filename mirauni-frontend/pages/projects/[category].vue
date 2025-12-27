@@ -16,7 +16,7 @@
       <ProjectCard v-for="p in projects" :key="p.id" :project="p" />
     </div>
     <div v-else class="text-center py-20 bg-white border-3 border-black shadow-brutal">
-        <div class="text-6xl mb-4 grayscale">📂</div>
+        <div class="text-6xl mb-4 grayscale font-black">/</div>
         <p class="font-black text-2xl uppercase text-gray-400">NO PROJECTS FOUND IN THIS CATEGORY</p>
     </div>
   </div>

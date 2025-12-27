@@ -12,7 +12,7 @@
           class="w-16 h-16 rounded-full border-3 border-black"
         />
         <div v-else class="w-16 h-16 rounded-full bg-indie-secondary border-3 border-black flex items-center justify-center text-3xl">
-          👤
+          <UIcon name="i-heroicons-user-solid" class="w-8 h-8" />
         </div>
         <div>
           <p class="font-black text-lg">{{ wxNickname || 'WECHAT_USER' }}</p>

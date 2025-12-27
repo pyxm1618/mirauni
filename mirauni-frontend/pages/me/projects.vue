@@ -61,7 +61,7 @@
 
         <!-- 无项目时 -->
         <div v-if="false" class="bg-white border-3 border-black shadow-brutal p-20 text-center">
-          <div class="text-8xl mb-6 grayscale opacity-20">📝</div>
+          <div class="text-8xl mb-6 grayscale opacity-20 font-black">/</div>
           <p class="text-2xl font-black text-gray-400 uppercase mb-8">NO PROJECTS YET</p>
           <NuxtLink to="/projects/create" class="inline-block px-8 py-3 bg-indie-primary border-3 border-black shadow-brutal hover:shadow-brutal-hover transform transition-all font-black uppercase">
             LAUNCH FIRST PROJECT

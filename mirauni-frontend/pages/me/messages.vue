@@ -32,7 +32,7 @@
         </div>
 
         <div v-else-if="conversations.length === 0" class="text-center py-20 bg-white border-3 border-black shadow-brutal">
-          <div class="text-8xl mb-6 grayscale opacity-20">📭</div>
+          <div class="text-8xl mb-6 grayscale opacity-20 font-black">/</div>
           <h3 class="text-2xl font-black uppercase mb-4">NO MESSAGES YET</h3>
           <p class="text-gray-500 font-bold uppercase mb-8">START CONNECTING WITH OTHERS</p>
           <div class="flex justify-center gap-6">

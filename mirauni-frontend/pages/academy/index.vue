@@ -40,7 +40,7 @@
       </div>
 
       <div v-else class="text-center py-24 bg-white border-3 border-dashed border-gray-400">
-        <div class="text-6xl mb-6 grayscale">🌵</div>
+        <div class="text-6xl mb-6 grayscale font-black">/</div>
         <div class="text-3xl font-black uppercase text-gray-400 mb-4">NO ARTICLES FOUND</div>
         <button @click="filters.category = 'all'" class="text-black font-bold uppercase underline hover:bg-black hover:text-white px-2 transition-colors">
             VIEW ALL CATEGORIES

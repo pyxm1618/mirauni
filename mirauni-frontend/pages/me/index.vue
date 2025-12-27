@@ -53,9 +53,9 @@
                      :src="form.avatar_url" 
                      class="w-full h-full rounded-full border-3 border-black object-cover"
                    />
-                   <div v-else class="w-full h-full bg-indie-secondary border-3 border-black rounded-full flex items-center justify-center text-4xl">
-                     👤
-                   </div>
+                   <div v-else class="w-20 h-20 rounded-full border-3 border-black bg-indie-secondary flex items-center justify-center text-4xl shadow-brutal mb-4 group-hover:scale-105 transition-transform">
+                    <UIcon name="i-heroicons-user-solid" class="w-10 h-10" />
+                  </div>
                    
                    <!--上传遮罩-->
                    <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
