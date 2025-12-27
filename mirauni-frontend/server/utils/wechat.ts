@@ -60,13 +60,8 @@ export async function getWechatAccessToken(code: string): Promise<{
 
     const response = await $fetch<any>(url)
 
-    console.log('[微信API] access_token 响应:', JSON.stringify({
-        hasToken: !!response.access_token,
-        openid: response.openid,
-        scope: response.scope,
-        errcode: response.errcode,
-        errmsg: response.errmsg
-    }))
+    // 输出完整响应用于调试
+    console.log('[微信API] access_token 完整响应:', JSON.stringify(response, null, 2))
 
     if (response.errcode) {
         throw new Error(`微信授权失败: ${response.errmsg}`)
@@ -95,11 +90,8 @@ export async function getWechatUserInfo(accessToken: string, openid: string): Pr
 
     const response = await $fetch<any>(url)
 
-    console.log('[微信API] 用户信息响应:', JSON.stringify({
-        hasNickname: !!response.nickname,
-        errcode: response.errcode,
-        errmsg: response.errmsg
-    }))
+    // 输出完整响应用于调试
+    console.log('[微信API] 用户信息完整响应:', JSON.stringify(response, null, 2))
 
     if (response.errcode) {
         throw new Error(`获取用户信息失败: ${response.errmsg}`)
