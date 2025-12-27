@@ -1,71 +1,110 @@
 /**
  * 认证相关的组合式函数
  */
+import { useAuthStore } from '~/stores/auth'
+
 export function useAuth() {
     const supabase = useSupabaseClient()
-    const user = useSupabaseUser()
+    const authStore = useAuthStore()
+    const router = useRouter()
+    const route = useRoute()
 
-    const isAuthenticated = computed(() => !!user.value)
+    const isAuthenticated = computed(() => authStore.isAuthenticated)
+    const user = computed(() => authStore.user)
+    const isLoading = computed(() => authStore.isLoading)
 
     /**
      * 发送短信验证码
      */
     async function sendSmsCode(phone: string) {
-        const { data, error } = await useFetch('/api/auth/send-code', {
+        const response = await $fetch('/api/auth/send-code', {
             method: 'POST',
             body: { phone }
         })
 
-        if (error.value) {
-            throw new Error(error.value.message || '发送验证码失败')
-        }
-
-        return data.value
+        return response
     }
 
     /**
      * 验证码登录
      */
     async function loginWithCode(phone: string, code: string) {
-        const { data, error } = await useFetch('/api/auth/verify-code', {
+        const response = await $fetch<{
+            success: boolean
+            user: any
+            session: {
+                access_token: string
+                refresh_token: string
+                expires_at: number
+            } | null
+        }>('/api/auth/verify-code', {
             method: 'POST',
             body: { phone, code }
         })
 
-        if (error.value) {
-            throw new Error(error.value.message || '登录失败')
+        if (response.success && response.session) {
+            // 设置 Supabase session
+            await supabase.auth.setSession({
+                access_token: response.session.access_token,
+                refresh_token: response.session.refresh_token
+            })
+
+            // 更新 store
+            authStore.setUser(response.user)
+
+            // 跳转
+            const redirect = route.query.redirect as string
+            await router.push(redirect || '/')
+
+            return response
         }
 
-        return data.value
+        throw new Error('登录失败')
     }
 
     /**
      * 获取微信登录 URL
      */
     async function getWechatLoginUrl() {
-        const { data, error } = await useFetch('/api/auth/wechat/url')
+        const response = await $fetch<{ url: string }>('/api/auth/wechat/url')
+        return response.url
+    }
 
-        if (error.value) {
-            throw new Error(error.value.message || '获取微信登录链接失败')
-        }
+    /**
+     * 绑定手机号
+     */
+    async function bindPhone(phone: string, code: string, openid: string) {
+        const response = await $fetch('/api/auth/bind-phone', {
+            method: 'POST',
+            body: { phone, code, openid }
+        })
 
-        return data.value
+        return response
     }
 
     /**
      * 退出登录
      */
     async function logout() {
-        await supabase.auth.signOut()
-        navigateTo('/login')
+        await authStore.logout()
+    }
+
+    /**
+     * 刷新用户信息
+     */
+    async function refreshUser() {
+        await authStore.fetchUser()
     }
 
     return {
         user,
         isAuthenticated,
+        isLoading,
         sendSmsCode,
         loginWithCode,
         getWechatLoginUrl,
-        logout
+        bindPhone,
+        logout,
+        refreshUser
     }
 }

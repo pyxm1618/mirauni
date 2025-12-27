@@ -5,13 +5,36 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   modules: [
-    '@nuxtjs/tailwindcss',
+    '@nuxt/ui',
     '@pinia/nuxt',
     '@nuxtjs/supabase'
   ],
 
   supabase: {
     redirect: false
+  },
+
+  runtimeConfig: {
+    // 阿里云短信配置（仅服务端可用）
+    aliyunAccessKeyId: process.env.ALIYUN_ACCESS_KEY_ID,
+    aliyunAccessKeySecret: process.env.ALIYUN_ACCESS_KEY_SECRET,
+    aliyunSmsSignName: process.env.ALIYUN_SMS_SIGN_NAME,
+    aliyunSmsTemplateCode: process.env.ALIYUN_SMS_TEMPLATE_CODE,
+
+    // 微信开放平台配置（仅服务端可用）
+    wechatAppId: process.env.WECHAT_APP_ID,
+    wechatAppSecret: process.env.WECHAT_APP_SECRET,
+    wechatMchId: process.env.WECHAT_MCH_ID,
+    wechatApiKey: process.env.WECHAT_API_KEY,
+
+    // 百度推送令牌（仅服务端可用）
+    baiduPushToken: process.env.BAIDU_PUSH_TOKEN,
+
+    // 公开配置（客户端可用）
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://mirauni.com',
+      baiduAnalyticsId: process.env.NUXT_PUBLIC_BAIDU_ANALYTICS_ID || ''
+    }
   },
 
   css: ['~/assets/css/main.css'],

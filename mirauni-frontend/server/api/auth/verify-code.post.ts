@@ -1,20 +1,38 @@
 /**
- * 验证码登录
+ * 验证码登录 API
+ * POST /api/auth/verify-code
+ * Body: { phone: string, code: string }
+ * 
+ * 登录逻辑：
+ * 1. 验证验证码
+ * 2. 查找或创建用户
+ * 3. 使用 Supabase Auth 创建/登录用户
+ * 4. 返回 session
  */
+import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
+
 export default defineEventHandler(async (event) => {
     const { phone, code } = await readBody(event)
 
     // 验证参数
-    if (!phone || !code) {
+    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
         throw createError({
             statusCode: 400,
-            message: '手机号和验证码不能为空'
+            message: '请输入正确的手机号'
+        })
+    }
+
+    if (!code || !/^\d{6}$/.test(code)) {
+        throw createError({
+            statusCode: 400,
+            message: '请输入6位验证码'
         })
     }
 
     const supabase = await serverSupabaseClient(event)
+    const supabaseAdmin = serverSupabaseServiceRole(event)
 
-    // 验证验证码
+    // 1. 验证验证码
     const { data: smsData, error: smsError } = await supabase
         .from('sms_codes')
         .select()
@@ -30,43 +48,125 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 查找或创建用户
-    let { data: user } = await supabase
+    // 2. 删除已使用的验证码
+    await supabase.from('sms_codes').delete().eq('phone', phone)
+
+    // 3. 查找现有用户
+    let { data: existingUser } = await supabase
         .from('users')
-        .select()
+        .select('*')
         .eq('phone', phone)
         .single()
 
-    if (!user) {
-        // 创建新用户
-        const { data: newUser, error: createError } = await supabase
-            .from('users')
-            .insert({ phone })
-            .select()
-            .single()
+    // 4. 使用 Supabase Auth 登录或创建用户
+    // 构造一个基于手机号的邮箱（Supabase Auth 需要邮箱）
+    const email = `${phone}@phone.mirauni.com`
+    const password = `mirauni_${phone}_secure_pwd`
 
-        if (createError) {
+    let authUser
+
+    if (existingUser) {
+        // 用户已存在，登录
+        const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+            email,
+            password
+        })
+
+        if (signInError) {
+            // 可能是首次迁移的老用户，尝试创建 auth 账户
+            const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+                email,
+                password,
+                email_confirm: true,
+                user_metadata: {
+                    phone,
+                    user_id: existingUser.id
+                }
+            })
+
+            if (signUpError) {
+                console.error('创建 Auth 用户失败:', signUpError)
+                throw createError({
+                    statusCode: 500,
+                    message: '登录失败，请稍后重试'
+                })
+            }
+
+            // 再次登录
+            const { data: retrySignIn } = await supabaseAdmin.auth.signInWithPassword({
+                email,
+                password
+            })
+            authUser = retrySignIn
+        } else {
+            authUser = signInData
+        }
+    } else {
+        // 5. 新用户，创建 Auth 账户和用户记录
+        const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: { phone }
+        })
+
+        if (signUpError) {
+            console.error('创建用户失败:', signUpError)
             throw createError({
                 statusCode: 500,
-                message: '创建用户失败'
+                message: '注册失败，请稍后重试'
             })
         }
 
-        user = newUser
+        // 创建 users 表记录
+        const { data: newUser, error: createUserError } = await supabase
+            .from('users')
+            .insert({
+                id: signUpData.user.id,  // 使用 Auth 用户的 ID
+                phone,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .select()
+            .single()
+
+        if (createUserError) {
+            console.error('创建用户记录失败:', createUserError)
+            // 回滚 Auth 用户
+            await supabaseAdmin.auth.admin.deleteUser(signUpData.user.id)
+            throw createError({
+                statusCode: 500,
+                message: '注册失败，请稍后重试'
+            })
+        }
+
+        existingUser = newUser
+
+        // 登录新用户
+        const { data: signInData } = await supabaseAdmin.auth.signInWithPassword({
+            email,
+            password
+        })
+        authUser = signInData
     }
 
-    // 删除已使用的验证码
-    await supabase.from('sms_codes').delete().eq('phone', phone)
-
-    // TODO: 生成 JWT Token 或使用 Supabase Auth
-
+    // 6. 返回用户信息和 session
     return {
         success: true,
         user: {
-            id: user.id,
-            phone: user.phone,
-            username: user.username,
-            avatar_url: user.avatar_url
-        }
+            id: existingUser.id,
+            phone: existingUser.phone,
+            username: existingUser.username,
+            avatar_url: existingUser.avatar_url,
+            bio: existingUser.bio,
+            skills: existingUser.skills,
+            unlock_credits: existingUser.unlock_credits,
+            is_first_charge: existingUser.is_first_charge
+        },
+        session: authUser?.session ? {
+            access_token: authUser.session.access_token,
+            refresh_token: authUser.session.refresh_token,
+            expires_at: authUser.session.expires_at
+        } : null
     }
 })

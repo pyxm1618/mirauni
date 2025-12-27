@@ -42,8 +42,33 @@
 useSeoMeta({
   title: '小概率 - 独立开发者找合伙人的第一站',
   description: '帮助独立开发者发布项目、寻找技术合伙人，找到靠谱的创业伙伴',
+  keywords: '独立开发者,技术合伙人,找合伙人,创业项目,程序员副业',
   ogTitle: '小概率 - 独立开发者找合伙人的第一站',
   ogDescription: '帮助独立开发者发布项目、寻找技术合伙人，找到靠谱的创业伙伴',
   ogType: 'website'
+})
+
+// 结构化数据 - Organization
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: '小概率',
+        url: 'https://mirauni.com',
+        logo: 'https://mirauni.com/logo.png',
+        description: '独立开发者找合伙人的第一站',
+        sameAs: []
+      })
+    }
+  ]
+})
+
+// 首页浏览埋点
+const { trackPageView } = useTrack()
+onMounted(() => {
+  trackPageView('首页')
 })
 </script>

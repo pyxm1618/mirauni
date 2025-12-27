@@ -95,7 +95,19 @@
 </template>
 
 <script setup lang="ts">
-// TODO: 替换为真实的用户状态
-const user = ref(null)
-const unreadCount = ref(3)
+const user = useSupabaseUser()
+const { unreadCount, fetchUnreadCount } = useMessages()
+
+onMounted(() => {
+  if (user.value) {
+    fetchUnreadCount()
+  }
+})
+
+watch(user, (newUser) => {
+  if (newUser) {
+    fetchUnreadCount()
+  }
+})
+
 </script>

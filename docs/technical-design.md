@@ -299,6 +299,7 @@ CREATE TABLE articles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug VARCHAR(100) UNIQUE,          -- URL别名
   title VARCHAR(200) NOT NULL,
+  summary VARCHAR(500),              -- 文章摘要
   content TEXT,
   category VARCHAR(50),
   cover_url TEXT,

@@ -145,7 +145,7 @@ CREATE TABLE orders (
 -- 3.8 sms_codes 短信验证码表
 CREATE TABLE sms_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  phone VARCHAR(20) NOT NULL,        -- 手机号
+  phone VARCHAR(20) NOT NULL UNIQUE,  -- 手机号（唯一，支持upsert）
   code VARCHAR(6) NOT NULL,          -- 验证码
   expires_at TIMESTAMPTZ NOT NULL,   -- 过期时间
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -182,6 +182,38 @@ CREATE POLICY "Active projects are viewable"
 CREATE POLICY "Users can manage own projects"
   ON projects FOR ALL
   USING (auth.uid() = user_id);
+
+-- 5.3 conversations RLS
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own conversations"
+  ON conversations FOR SELECT
+  USING (auth.uid() = user1_id OR auth.uid() = user2_id);
+
+CREATE POLICY "Users can create conversations"
+  ON conversations FOR INSERT
+  WITH CHECK (auth.uid() = user1_id OR auth.uid() = user2_id);
+
+-- 5.4 messages RLS
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own messages"
+  ON messages FOR SELECT
+  USING (auth.uid() = from_user_id OR auth.uid() = to_user_id);
+
+CREATE POLICY "Users can send messages"
+  ON messages FOR INSERT
+  WITH CHECK (auth.uid() = from_user_id);
+
+CREATE POLICY "Recipients can update message status"
+  ON messages FOR UPDATE
+  USING (auth.uid() = to_user_id);
+
+-- ==============================================================================
+-- 9. Realtime Setup
+-- ==============================================================================
+-- Enable Realtime for messages table
+alter publication supabase_realtime add table messages;
 
 -- ==============================================================================
 -- 6. Storage Buckets & Policies
@@ -229,3 +261,19 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_articles_updated_at BEFORE UPDATE ON articles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+-- ==============================================================================
+-- 8. RPC Functions
+-- ==============================================================================
+
+-- 8.1 add_credits: 增加用户解锁次数（原子操作）
+CREATE OR REPLACE FUNCTION add_credits(p_user_id UUID, p_credits INT)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE users
+    SET unlock_credits = unlock_credits + p_credits,
+        is_first_charge = false,
+        updated_at = NOW()
+    WHERE id = p_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

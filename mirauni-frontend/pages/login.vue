@@ -3,6 +3,11 @@
     <div class="w-full max-w-md bg-white border-2 border-indie-border shadow-brutal-lg p-8">
       <h1 class="text-3xl font-display font-bold mb-6 text-center">登录 / 注册</h1>
       
+      <!-- 错误提示 -->
+      <div v-if="error" class="mb-4 p-3 bg-red-50 border-2 border-red-300 text-red-600 text-sm">
+        {{ error }}
+      </div>
+
       <!-- 手机号登录 -->
       <div v-if="!showCodeInput" class="space-y-4">
         <div>
@@ -11,15 +16,17 @@
             v-model="phone"
             type="tel" 
             placeholder="请输入手机号"
-            class="w-full px-4 py-3 border-2 border-indie-border text-lg"
+            class="w-full px-4 py-3 border-2 border-indie-border text-lg focus:outline-none focus:border-indie-text"
             maxlength="11"
+            @keyup.enter="sendCode"
           />
         </div>
         <button 
           @click="sendCode"
-          class="w-full px-6 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold"
+          :disabled="isSending || phone.length !== 11"
+          class="w-full px-6 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-brutal disabled:hover:translate-x-0 disabled:hover:translate-y-0"
         >
-          获取验证码
+          {{ isSending ? '发送中...' : '获取验证码' }}
         </button>
       </div>
 
@@ -31,19 +38,37 @@
             v-model="code"
             type="text" 
             placeholder="请输入6位验证码"
-            class="w-full px-4 py-3 border-2 border-indie-border text-lg text-center tracking-widest"
+            class="w-full px-4 py-3 border-2 border-indie-border text-lg text-center tracking-widest focus:outline-none focus:border-indie-text"
             maxlength="6"
+            @keyup.enter="login"
           />
-          <p class="text-sm text-gray-500 mt-2">验证码已发送至 {{ phone }}</p>
+          <div class="flex justify-between items-center mt-2">
+            <p class="text-sm text-gray-500">验证码已发送至 {{ phone }}</p>
+            <button 
+              v-if="countdown > 0"
+              disabled
+              class="text-sm text-gray-400"
+            >
+              {{ countdown }}秒后重发
+            </button>
+            <button 
+              v-else
+              @click="sendCode"
+              class="text-sm text-indie-text hover:underline"
+            >
+              重新发送
+            </button>
+          </div>
         </div>
         <button 
           @click="login"
-          class="w-full px-6 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold"
+          :disabled="isLoggingIn || code.length !== 6"
+          class="w-full px-6 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          登录
+          {{ isLoggingIn ? '登录中...' : '登录' }}
         </button>
         <button 
-          @click="showCodeInput = false"
+          @click="goBack"
           class="w-full text-sm text-gray-500 hover:text-gray-700"
         >
           返回修改手机号
@@ -58,11 +83,15 @@
       </div>
 
       <!-- 微信登录 -->
-      <button class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#07C160] text-white border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold">
+      <button 
+        @click="loginWithWechat"
+        :disabled="isWechatLoading"
+        class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#07C160] text-white border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold disabled:opacity-50"
+      >
         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.045c.133 0 .241-.108.241-.245 0-.06-.024-.12-.04-.177l-.325-1.233a.49.49 0 0 1 .178-.553c1.526-1.122 2.509-2.783 2.509-4.62 0-3.371-3.065-6.124-7.07-6.124zm-2.5 3.39c.535 0 .969.44.969.983a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.543.434-.982.97-.982zm5.002 0c.535 0 .969.44.969.983a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.543.434-.982.97-.982z"/>
         </svg>
-        微信登录
+        {{ isWechatLoading ? '跳转中...' : '微信登录' }}
       </button>
 
       <!-- 协议 -->
@@ -77,21 +106,112 @@
 </template>
 
 <script setup lang="ts">
+const { sendSmsCode, loginWithCode, getWechatLoginUrl } = useAuth()
+
+// 状态
 const phone = ref('')
 const code = ref('')
 const showCodeInput = ref(false)
+const error = ref('')
+const isSending = ref(false)
+const isLoggingIn = ref(false)
+const isWechatLoading = ref(false)
+const countdown = ref(0)
 
-function sendCode() {
-  // TODO: 调用发送验证码 API
-  if (phone.value.length === 11) {
+let countdownTimer: NodeJS.Timeout | null = null
+
+// 发送验证码
+async function sendCode() {
+  if (phone.value.length !== 11) {
+    error.value = '请输入正确的手机号'
+    return
+  }
+
+  error.value = ''
+  isSending.value = true
+
+  try {
+    await sendSmsCode(phone.value)
     showCodeInput.value = true
+    startCountdown()
+  } catch (e: any) {
+    error.value = e.data?.message || e.message || '发送验证码失败'
+  } finally {
+    isSending.value = false
   }
 }
 
-function login() {
-  // TODO: 调用登录 API
-  console.log('Login with:', phone.value, code.value)
+// 登录
+async function login() {
+  if (code.value.length !== 6) {
+    error.value = '请输入6位验证码'
+    return
+  }
+
+  error.value = ''
+  isLoggingIn.value = true
+
+  try {
+    await loginWithCode(phone.value, code.value)
+    // 登录成功后会自动跳转
+  } catch (e: any) {
+    error.value = e.data?.message || e.message || '登录失败'
+  } finally {
+    isLoggingIn.value = false
+  }
 }
+
+// 返回修改手机号
+function goBack() {
+  showCodeInput.value = false
+  code.value = ''
+  error.value = ''
+  stopCountdown()
+}
+
+// 开始倒计时
+function startCountdown() {
+  countdown.value = 60
+  countdownTimer = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      stopCountdown()
+    }
+  }, 1000)
+}
+
+// 停止倒计时
+function stopCountdown() {
+  if (countdownTimer) {
+    clearInterval(countdownTimer)
+    countdownTimer = null
+  }
+  countdown.value = 0
+}
+
+// 微信登录
+async function loginWithWechat() {
+  isWechatLoading.value = true
+  error.value = ''
+
+  try {
+    const url = await getWechatLoginUrl()
+    if (url) {
+      window.location.href = url
+    } else {
+      error.value = '微信登录暂不可用'
+    }
+  } catch (e: any) {
+    error.value = e.data?.message || '获取微信登录链接失败'
+  } finally {
+    isWechatLoading.value = false
+  }
+}
+
+// 清理
+onUnmounted(() => {
+  stopCountdown()
+})
 
 useSeoMeta({
   title: '登录 - 小概率',

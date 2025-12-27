@@ -1,98 +1,54 @@
 <template>
-  <NuxtLink 
-    :to="`/projects/detail/${project.id}`"
-    class="block bg-white border-2 border-indie-border shadow-brutal p-6 hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-  >
+  <div class="bg-white border-2 border-indie-border shadow-brutal p-6 hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all cursor-pointer" @click="navigateTo(`/projects/${project.id}`)">
     <div class="flex items-center gap-2 mb-3">
       <span class="px-2 py-1 bg-indie-secondary text-sm border border-indie-border">
-        {{ categoryLabel }}
+        {{ getCategoryLabel(project.category) }}
       </span>
       <span class="px-2 py-1 bg-gray-100 text-sm border border-gray-300">
-        {{ workModeLabel }}
+        {{ getWorkModeLabel(project.work_mode) }}
       </span>
     </div>
     <h3 class="text-xl font-bold mb-2">{{ project.title }}</h3>
-    <p class="text-gray-600 mb-4 line-clamp-2">{{ project.summary }}</p>
+    <p class="text-gray-600 mb-4 line-clamp-2 h-12">{{ project.summary }}</p>
     <div class="flex flex-wrap gap-2 mb-4">
-      <span 
-        v-for="role in project.roles_needed?.slice(0, 3)" 
-        :key="role"
-        class="px-2 py-1 bg-indie-primary text-sm"
-      >
-        招募：{{ roleLabels[role] || role }}
+      <span v-for="role in project.roles_needed" :key="role" class="px-2 py-1 bg-indie-primary text-sm">
+        招募：{{ getRoleLabel(role) }}
       </span>
     </div>
-    <div class="text-sm text-gray-500">
-      {{ cooperationLabel }} · 发布于 {{ formatDate(project.created_at) }}
+    <div class="flex items-center justify-between mt-auto">
+        <div class="text-sm text-gray-500">
+            {{ getCooperationLabel(project.cooperation_type) }} · 发布于 {{ formatDate(project.created_at) }}
+        </div>
+        <div class="flex items-center gap-2" v-if="project.user">
+             <img :src="project.user.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + project.user.username" class="w-6 h-6 rounded-full border border-black bg-gray-100" />
+             <span class="text-sm font-medium">{{ project.user.username }}</span>
+        </div>
     </div>
-  </NuxtLink>
+  </div>
 </template>
 
 <script setup lang="ts">
-interface Project {
-  id: string
-  title: string
-  summary: string
-  category: string
-  roles_needed: string[]
-  work_mode: string
-  cooperation_type: string
-  created_at: string
-}
+import type { Project } from '~/types'
+import { PROJECT_CATEGORIES, WORK_MODES, COOPERATION_TYPES, ROLES } from '~/types'
 
 const props = defineProps<{
   project: Project
 }>()
 
-const categoryMap: Record<string, string> = {
-  'saas': 'SaaS 工具',
-  'app': '移动应用',
-  'game': '游戏',
-  'ai': 'AI / 人工智能',
-  'ecommerce': '电商',
-  'content': '内容/社区',
-  'hardware': '智能硬件',
-  'other': '其他'
-}
+const getCategoryLabel = (val: string) => PROJECT_CATEGORIES.find(c => c.value === val)?.label || val
+const getWorkModeLabel = (val: string) => WORK_MODES.find(c => c.value === val)?.label || val
+const getRoleLabel = (val: string) => ROLES.find(c => c.value === val)?.label || val
+const getCooperationLabel = (val: string) => COOPERATION_TYPES.find(c => c.value === val)?.label || val
 
-const workModeMap: Record<string, string> = {
-  'remote': '远程',
-  'onsite': '坐班',
-  'hybrid': '混合'
-}
+const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diff = (now.getTime() - date.getTime()) / 1000 // seconds
 
-const cooperationMap: Record<string, string> = {
-  'equity': '股权合作',
-  'salary': '薪酬合作',
-  'revenue_share': '收益分成',
-  'volunteer': '纯兴趣'
-}
-
-const roleLabels: Record<string, string> = {
-  'frontend': '前端开发',
-  'backend': '后端开发',
-  'fullstack': '全栈开发',
-  'mobile': '移动端开发',
-  'design': 'UI/UX 设计',
-  'product': '产品经理',
-  'operation': '运营',
-  'marketing': '市场推广'
-}
-
-const categoryLabel = computed(() => categoryMap[props.project.category] || props.project.category)
-const workModeLabel = computed(() => workModeMap[props.project.work_mode] || props.project.work_mode)
-const cooperationLabel = computed(() => cooperationMap[props.project.cooperation_type] || props.project.cooperation_type)
-
-function formatDate(dateStr: string) {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  
-  if (diffDays === 0) return '今天'
-  if (diffDays === 1) return '昨天'
-  if (diffDays < 7) return `${diffDays}天前`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`
-  return `${Math.floor(diffDays / 30)}个月前`
+    if (diff < 60) return '刚刚'
+    if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`
+    if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`
+    if (diff < 2592000) return `${Math.floor(diff / 86400)}天前`
+    return date.toLocaleDateString()
 }
 </script>
