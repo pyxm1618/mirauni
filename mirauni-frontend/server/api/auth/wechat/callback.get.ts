@@ -72,14 +72,12 @@ export default defineEventHandler(async (event) => {
                     .eq('id', existingUser.id)
             }
 
-            // 设置 cookie 并跳转
+            // 使用客户端 supabase 设置 session（这会自动设置 cookie）
             if (signInData.session) {
-                // 将 session 信息通过 URL 传递（前端会处理）
-                const sessionData = encodeURIComponent(JSON.stringify({
+                await supabase.auth.setSession({
                     access_token: signInData.session.access_token,
                     refresh_token: signInData.session.refresh_token
-                }))
-                return sendRedirect(event, `/?wechat_session=${sessionData}`)
+                })
             }
 
             return sendRedirect(event, '/')
