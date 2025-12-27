@@ -4,7 +4,7 @@
  * Body: { phone: string }
  */
 import { serverSupabaseClient } from '#supabase/server'
-import { sendAliyunSms, checkSmsRateLimit } from '~/server/utils/aliyun-sms'
+import { sendTencentSms, checkSmsRateLimit } from '~/server/utils/tencent-sms'
 
 export default defineEventHandler(async (event) => {
     const { phone } = await readBody(event)
@@ -63,8 +63,8 @@ export default defineEventHandler(async (event) => {
         console.log(`========================================\n`)
     }
 
-    // 调用阿里云短信发送
-    const sent = await sendAliyunSms({ phone, code })
+    // 调用腾讯云短信发送
+    const sent = await sendTencentSms({ phone, code })
 
     if (!sent && !process.dev) {
         throw createError({

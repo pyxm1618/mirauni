@@ -898,8 +898,8 @@ export default defineEventHandler(async (event) => {
     expires_at: new Date(Date.now() + 5 * 60 * 1000)
   })
   
-  // 3. 调用阿里云短信发送
-  await sendAliyunSms(phone, code)
+  // 3. 调用腾讯云短信发送
+  await sendTencentSms(phone, code)
   
   return { success: true }
 })
@@ -1799,8 +1799,10 @@ supabase db push
 | `WECHAT_SECRET` | 微信开放平台 Secret | ... |
 | `WECHAT_MCH_ID` | 微信支付商户号 | 15... |
 | `WECHAT_API_KEY` | 微信支付 API 密钥 | ... |
-| `ALIYUN_SMS_KEY` | 阿里云短信 AccessKey | LTAI... |
-| `ALIYUN_SMS_SECRET` | 阿里云短信 Secret | ... |
+| `TENCENT_SECRET_ID` | 腾讯云 SecretId | AKIDxxx |
+| `TENCENT_SECRET_KEY` | 腾讯云 SecretKey | ... |
+| `TENCENT_SMS_SDK_APP_ID` | 短信应用 ID | 1400xxx |
+| `TENCENT_SMS_TEMPLATE_ID` | 短信模板 ID | 123456 |
 
 ### 5.4 域名配置
 

@@ -15,11 +15,12 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    // 阿里云短信配置（仅服务端可用）
-    aliyunAccessKeyId: process.env.ALIYUN_ACCESS_KEY_ID,
-    aliyunAccessKeySecret: process.env.ALIYUN_ACCESS_KEY_SECRET,
-    aliyunSmsSignName: process.env.ALIYUN_SMS_SIGN_NAME,
-    aliyunSmsTemplateCode: process.env.ALIYUN_SMS_TEMPLATE_CODE,
+    // 腾讯云短信配置（仅服务端可用）
+    tencentSecretId: process.env.TENCENT_SECRET_ID,
+    tencentSecretKey: process.env.TENCENT_SECRET_KEY,
+    tencentSmsSdkAppId: process.env.TENCENT_SMS_SDK_APP_ID,
+    tencentSmsSignName: process.env.TENCENT_SMS_SIGN_NAME,
+    tencentSmsTemplateId: process.env.TENCENT_SMS_TEMPLATE_ID,
 
     // 微信开放平台配置（仅服务端可用）
     wechatAppId: process.env.WECHAT_APP_ID,
