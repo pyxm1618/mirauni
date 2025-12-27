@@ -18,7 +18,8 @@ export default defineEventHandler(async (event) => {
         '/api/auth/verify-code',
         '/api/auth/wechat/url',
         '/api/auth/wechat/callback',
-        '/api/auth/bind-phone'
+        '/api/auth/bind-phone',
+        '/api/admin/login'
     ]
 
     if (publicPaths.some(path => event.path.startsWith(path))) {
