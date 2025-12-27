@@ -56,7 +56,7 @@ export async function getWechatAccessToken(code: string): Promise<{
 
     console.log('[微信API] 请求 access_token')
     console.log('[微信API] AppID:', config.wechatAppId)
-    console.log('[微信API] Code 前10位:', code.substring(0, 10))
+    console.log('[微信API] Code:', code ? code.substring(0, 10) + '...' : 'undefined')
 
     const response = await $fetch<any>(url)
 
@@ -90,7 +90,7 @@ export async function getWechatUserInfo(accessToken: string, openid: string): Pr
     const url = `https://api.weixin.qq.com/sns/userinfo?access_token=${accessToken}&openid=${openid}&lang=zh_CN`
 
     console.log('[微信API] 请求用户信息')
-    console.log('[微信API] access_token 前20位:', accessToken.substring(0, 20))
+    console.log('[微信API] access_token:', accessToken ? accessToken.substring(0, 20) + '...' : 'undefined')
     console.log('[微信API] openid:', openid)
 
     const response = await $fetch<any>(url)
