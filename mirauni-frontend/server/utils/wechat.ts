@@ -63,13 +63,16 @@ export async function getWechatAccessToken(code: string): Promise<{
     // 输出完整响应用于调试
     console.log('[微信API] access_token 完整响应:', JSON.stringify(response, null, 2))
 
-    if (response.errcode) {
-        throw new Error(`微信授权失败: ${response.errmsg}`)
+    // 如果响应是字符串，手动解析
+    const data = typeof response === 'string' ? JSON.parse(response) : response
+
+    if (data.errcode) {
+        throw new Error(`微信授权失败: ${data.errmsg}`)
     }
 
-    console.log('[微信API] 准备返回，openid:', response.openid, 'access_token 前20位:', response.access_token?.substring(0, 20))
+    console.log('[微信API] 准备返回，openid:', data.openid, 'access_token 前20位:', data.access_token?.substring(0, 20))
 
-    return response
+    return data
 }
 
 // 微信开放平台：获取用户信息
@@ -95,11 +98,14 @@ export async function getWechatUserInfo(accessToken: string, openid: string): Pr
     // 输出完整响应用于调试
     console.log('[微信API] 用户信息完整响应:', JSON.stringify(response, null, 2))
 
-    if (response.errcode) {
-        throw new Error(`获取用户信息失败: ${response.errmsg}`)
+    // 如果响应是字符串，手动解析
+    const data = typeof response === 'string' ? JSON.parse(response) : response
+
+    if (data.errcode) {
+        throw new Error(`获取用户信息失败: ${data.errmsg}`)
     }
 
-    return response
+    return data
 }
 
 // 判断是否在微信浏览器中
