@@ -1,34 +1,42 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-4xl font-display font-bold">创业项目招募</h1>
-        <NuxtLink to="/projects/create" class="bg-indie-primary border-2 border-black px-6 py-2 font-bold hover:shadow-brutal hover:-translate-y-1 transition-all flex items-center gap-2">
-            <span class="text-xl">+</span> 发布项目
-        </NuxtLink>
-    </div>
-    
-    <!-- 筛选栏 -->
-    <div class="bg-white border-2 border-indie-border shadow-brutal p-4 mb-8">
-      <div class="flex flex-wrap gap-4">
-        <select v-model="filters.category" class="px-4 py-2 border-2 border-indie-border bg-white focus:outline-none hover:border-black transition-colors">
-          <option value="">全部分类</option>
-          <option v-for="c in PROJECT_CATEGORIES" :key="c.value" :value="c.value">{{ c.label }}</option>
-        </select>
-        <select v-model="filters.work_mode" class="px-4 py-2 border-2 border-indie-border bg-white focus:outline-none hover:border-black transition-colors">
-          <option value="">工作模式</option>
-          <option v-for="c in WORK_MODES" :key="c.value" :value="c.value">{{ c.label }}</option>
-        </select>
-        <select v-model="filters.role" class="px-4 py-2 border-2 border-indie-border bg-white focus:outline-none hover:border-black transition-colors">
-          <option value="">需求角色</option>
-          <option v-for="c in ROLES" :key="c.value" :value="c.value">{{ c.label }}</option>
-        </select>
-        <input 
-          v-model.lazy="filters.keyword"
-          type="text" 
-          placeholder="搜索项目..."
-          class="flex-1 min-w-[200px] px-4 py-2 border-2 border-indie-border focus:outline-none focus:shadow-brutal-sm transition-all"
-        />
-      </div>
+    <div class="mb-12 border-b-4 border-black pb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
+          <h1 class="text-6xl md:text-7xl font-display font-black uppercase">Projects<br>Square</h1>
+          <NuxtLink to="/projects/create" class="px-8 py-3 bg-black text-white border-3 border-black font-bold text-xl shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center gap-2">
+              <span class="text-2xl">+</span> 发布项目
+          </NuxtLink>
+        </div>
+        
+        <!-- Brutalist Search & Filter -->
+        <div class="flex flex-col gap-6">
+            <!-- Search -->
+            <div class="relative w-full md:max-w-xl">
+                <div class="absolute inset-0 bg-black translate-x-2 translate-y-2"></div>
+                <input 
+                  v-model.lazy="filters.keyword"
+                  type="text" 
+                  placeholder="SEARCH_PROJECTS..." 
+                  class="relative w-full bg-white border-3 border-black p-4 font-bold text-xl focus:outline-none placeholder-gray-400 uppercase"
+                />
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-4">
+               <select v-model="filters.category" class="px-4 py-2 border-3 border-black bg-white font-bold focus:outline-none hover:shadow-brutal hover:-translate-y-1 transition-all cursor-pointer">
+                  <option value="">CATEGORY / 全部分类</option>
+                  <option v-for="c in PROJECT_CATEGORIES" :key="c.value" :value="c.value">{{ c.label }}</option>
+                </select>
+                <select v-model="filters.work_mode" class="px-4 py-2 border-3 border-black bg-white font-bold focus:outline-none hover:shadow-brutal hover:-translate-y-1 transition-all cursor-pointer">
+                  <option value="">MODE / 工作模式</option>
+                  <option v-for="c in WORK_MODES" :key="c.value" :value="c.value">{{ c.label }}</option>
+                </select>
+                <select v-model="filters.role" class="px-4 py-2 border-3 border-black bg-white font-bold focus:outline-none hover:shadow-brutal hover:-translate-y-1 transition-all cursor-pointer">
+                  <option value="">ROLE / 需求角色</option>
+                  <option v-for="c in ROLES" :key="c.value" :value="c.value">{{ c.label }}</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <!-- 项目列表 -->

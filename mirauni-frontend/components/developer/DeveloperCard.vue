@@ -1,64 +1,33 @@
 <template>
-  <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-100 flex flex-col h-full">
-    <div class="flex items-start gap-4 mb-4">
-      <img 
-        :src="developer.avatar_url || 'https://via.placeholder.com/150'" 
-        alt="Avatar" 
-        class="w-16 h-16 rounded-full object-cover border border-gray-200"
-      />
-      <div>
-        <h3 class="text-lg font-bold text-gray-900 line-clamp-1">
-          <NuxtLink :to="`/developers/${developer.username}`" class="hover:text-primary-600 transition-colors">
-            {{ developer.username }}
-          </NuxtLink>
-        </h3>
-        <p class="text-sm text-gray-500 mb-1">
-          {{ developer.profession || '独立开发者' }} 
-          <span v-if="developer.position">· {{ developer.position }}</span>
-        </p>
-        <div class="flex items-center text-xs text-gray-400 gap-2">
-          <span v-if="developer.location"><UIcon name="i-heroicons-map-pin" class="w-3 h-3" /> {{ developer.location }}</span>
-          <span v-if="developer.experience_years"><UIcon name="i-heroicons-briefcase" class="w-3 h-3" /> {{ developer.experience_years }}年经验</span>
+  <div class="relative group h-full">
+    <!-- Shadow/Background Element -->
+    <div class="absolute inset-0 bg-black translate-x-3 translate-y-3"></div>
+    
+    <!-- Card Content -->
+    <div class="relative bg-white border-3 border-black p-6 h-full flex flex-col transition-transform group-hover:-translate-y-1 group-hover:-translate-x-1" @click="navigateTo(`/developers/${developer.username}`)">
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-4 border-b-3 border-black pb-4">
+            <div>
+                <h2 class="text-2xl font-black uppercase leading-none mb-1">{{ developer.username }}</h2>
+                <div class="text-indie-primary font-black bg-black text-white inline-block px-1 text-xs uppercase">{{ developer.profession || 'DEV' }}</div>
+            </div>
+            <div class="text-xl font-bold font-mono">{{ developer.experience_years ? `${developer.experience_years}Y EXP` : 'NEW' }}</div>
         </div>
-      </div>
-    </div>
-
-    <div class="mb-4 flex-grow">
-      <p class="text-gray-600 text-sm line-clamp-3">
-        {{ developer.bio || '暂无简介' }}
-      </p>
-    </div>
-
-    <div class="mt-auto">
-      <div class="flex flex-wrap gap-2 mb-3">
-        <span 
-          v-for="skill in (developer.skills || []).slice(0, 5)" 
-          :key="skill"
-          class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md"
-        >
-          {{ skill }}
-        </span>
-        <span v-if="(developer.skills || []).length > 5" class="text-xs text-gray-400 self-center">
-          +{{ developer.skills.length - 5 }}
-        </span>
-      </div>
-      
-      <div class="flex items-center justify-between border-t border-gray-50 pt-3">
-         <span class="text-xs font-medium px-2 py-0.5 rounded-full" 
-          :class="{
-            'bg-green-50 text-green-600': developer.work_preference === 'fulltime',
-            'bg-blue-50 text-blue-600': developer.work_preference === 'parttime',
-            'bg-purple-50 text-purple-600': developer.work_preference === 'contract'
-          }">
-           {{ formatWorkPreference(developer.work_preference) }}
-         </span>
-         <NuxtLink 
-           :to="`/developers/${developer.username}`"
-           class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-         >
-           查看详情 &rarr;
-         </NuxtLink>
-      </div>
+        
+        <!-- Bio -->
+        <p class="font-bold text-gray-600 mb-6 flex-grow line-clamp-3">"{{ developer.bio || 'Ready to build something amazing.' }}"</p>
+        
+        <!-- Skills -->
+        <div class="flex flex-wrap gap-2 mb-6">
+            <span v-for="skill in (developer.skills || []).slice(0, 4)" :key="skill" class="bg-gray-200 border-2 border-black px-2 py-0.5 text-xs font-black uppercase">
+                {{ skill }}
+            </span>
+        </div>
+        
+        <!-- Action -->
+        <button class="w-full border-3 border-black py-3 font-black text-lg transition-all flex items-center justify-center gap-2 bg-indie-secondary hover:bg-indie-accent active:translate-y-1 active:translate-x-1 uppercase">
+            VIEW PROFILE
+        </button>
     </div>
   </div>
 </template>

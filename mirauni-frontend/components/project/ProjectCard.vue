@@ -1,28 +1,39 @@
 <template>
-  <div class="bg-white border-2 border-indie-border shadow-brutal p-6 hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all cursor-pointer" @click="navigateTo(`/projects/${project.id}`)">
-    <div class="flex items-center gap-2 mb-3">
-      <span class="px-2 py-1 bg-indie-secondary text-sm border border-indie-border">
+  <div class="bg-white border-3 border-black p-5 shadow-brutal hover:shadow-brutal-lg transition-all hover:-translate-y-1 flex flex-col h-full group pb-16 relative" @click="navigateTo(`/projects/${project.id}`)">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-4">
+        <div class="w-10 h-10 border-3 border-black flex items-center justify-center font-bold bg-indie-primary">
+             <img v-if="project.user?.avatar_url" :src="project.user.avatar_url" class="w-full h-full object-cover border-2 border-black" />
+             <span v-else>{{ project.user?.username?.[0]?.toUpperCase() || 'U' }}</span>
+        </div>
+        <div class="bg-black text-white px-2 py-0.5 text-xs font-bold font-mono">ID:{{ project.id.toString().padStart(3, '0') }}</div>
+    </div>
+
+    <!-- Title -->
+    <h3 class="text-xl font-black uppercase leading-tight mb-2 group-hover:underline decoration-4 decoration-indie-accent cursor-pointer line-clamp-2">
+        {{ project.title }}
+    </h3>
+
+    <!-- Description -->
+    <p class="text-sm font-medium text-gray-600 mb-4 flex-grow border-l-2 border-black pl-3 ml-1 line-clamp-3">
+        {{ project.summary }}
+    </p>
+
+    <!-- Tags -->
+    <div class="flex flex-wrap gap-1 mb-4">
+      <span class="border border-black px-1.5 py-0.5 text-[10px] font-bold uppercase bg-gray-100">
         {{ getCategoryLabel(project.category) }}
       </span>
-      <span class="px-2 py-1 bg-gray-100 text-sm border border-gray-300">
-        {{ getWorkModeLabel(project.work_mode) }}
+      <span v-for="role in project.roles_needed" :key="role" class="border border-black px-1.5 py-0.5 text-[10px] font-bold uppercase bg-indie-secondary/30">
+        NEEDED: {{ getRoleLabel(role) }}
       </span>
     </div>
-    <h3 class="text-xl font-bold mb-2">{{ project.title }}</h3>
-    <p class="text-gray-600 mb-4 line-clamp-2 h-12">{{ project.summary }}</p>
-    <div class="flex flex-wrap gap-2 mb-4">
-      <span v-for="role in project.roles_needed" :key="role" class="px-2 py-1 bg-indie-primary text-sm">
-        招募：{{ getRoleLabel(role) }}
-      </span>
-    </div>
-    <div class="flex items-center justify-between mt-auto">
-        <div class="text-sm text-gray-500">
-            {{ getCooperationLabel(project.cooperation_type) }} · 发布于 {{ formatDate(project.created_at) }}
-        </div>
-        <div class="flex items-center gap-2" v-if="project.user">
-             <img :src="project.user.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + project.user.username" class="w-6 h-6 rounded-full border border-black bg-gray-100" />
-             <span class="text-sm font-medium">{{ project.user.username }}</span>
-        </div>
+
+    <!-- Action Button (Absolute Bottom) -->
+    <div class="absolute bottom-5 left-5 right-5">
+        <button class="w-full border-3 border-black py-2 font-black text-sm hover:bg-indie-primary hover:shadow-brutal-hover transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none bg-white uppercase">
+            VIEW_DETAILS
+        </button>
     </div>
   </div>
 </template>

@@ -1,61 +1,61 @@
 <template>
   <div class="min-h-[80vh] flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white border-2 border-indie-border shadow-brutal-lg p-8">
-      <h1 class="text-3xl font-display font-bold mb-2 text-center">绑定手机号</h1>
-      <p class="text-gray-500 text-center mb-6">首次使用微信登录，请绑定手机号</p>
+    <div class="w-full max-w-md bg-white border-2 border-indie-border shadow-brutal-lg p-8 transform rotate-1 hover:rotate-0 transition-transform duration-300">
+      <h1 class="text-3xl font-display font-black mb-4 text-center border-b-4 border-indie-accent inline-block mx-auto uppercase">BIND PHONE / 绑定手机</h1>
+      <p class="text-gray-500 text-center mb-8 font-bold">Please bind your phone to continue.</p>
       
       <!-- 微信用户信息 -->
-      <div v-if="wxNickname || wxAvatar" class="flex items-center gap-3 mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
+      <div v-if="wxNickname || wxAvatar" class="flex items-center gap-4 mb-8 p-4 bg-gray-50 border-3 border-black shadow-brutal-sm">
         <img 
           v-if="wxAvatar" 
           :src="wxAvatar" 
-          class="w-12 h-12 rounded-full border-2 border-indie-border"
+          class="w-16 h-16 rounded-full border-3 border-black"
         />
-        <div v-else class="w-12 h-12 rounded-full bg-indie-secondary border-2 border-indie-border flex items-center justify-center text-xl">
+        <div v-else class="w-16 h-16 rounded-full bg-indie-secondary border-3 border-black flex items-center justify-center text-3xl">
           👤
         </div>
         <div>
-          <p class="font-bold">{{ wxNickname || '微信用户' }}</p>
-          <p class="text-sm text-gray-500">微信账号</p>
+          <p class="font-black text-lg">{{ wxNickname || 'WECHAT_USER' }}</p>
+          <p class="text-sm text-gray-500 font-bold uppercase">CONNECTED ACCOUNT</p>
         </div>
       </div>
       
       <!-- 错误提示 -->
-      <div v-if="error" class="mb-4 p-3 bg-red-50 border-2 border-red-300 text-red-600 text-sm">
-        {{ error }}
+      <div v-if="error" class="mb-4 p-3 bg-red-100 border-3 border-red-500 text-red-600 font-bold uppercase text-sm">
+        ERROR: {{ error }}
       </div>
 
-      <form @submit.prevent="handleSubmit" class="space-y-4">
+      <form @submit.prevent="handleSubmit" class="space-y-6">
         <!-- 手机号 -->
         <div>
-          <label class="block text-sm font-bold mb-2">手机号</label>
+          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">PHONE NUMBER</label>
           <input 
             v-model="phone"
             type="tel" 
-            placeholder="请输入手机号"
-            class="w-full px-4 py-3 border-2 border-indie-border text-lg focus:outline-none focus:border-indie-text"
+            placeholder="ENTER PHONE NUMBER"
+            class="w-full bg-gray-50 px-4 py-4 border-3 border-black font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
             maxlength="11"
           />
         </div>
 
         <!-- 验证码 -->
         <div>
-          <label class="block text-sm font-bold mb-2">验证码</label>
-          <div class="flex gap-2">
+          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">VERIFICATION CODE</label>
+          <div class="flex gap-4">
             <input 
               v-model="code"
               type="text" 
-              placeholder="6位验证码"
-              class="flex-1 px-4 py-3 border-2 border-indie-border text-lg tracking-widest focus:outline-none focus:border-indie-text"
+              placeholder="6-DIGIT CODE"
+              class="flex-1 bg-gray-50 px-4 py-4 border-3 border-black font-bold text-lg tracking-widest focus:outline-none focus:shadow-brutal text-center"
               maxlength="6"
             />
             <button 
               type="button"
               @click="sendCode"
               :disabled="isSending || countdown > 0 || phone.length !== 11"
-              class="px-4 py-3 border-2 border-indie-border bg-gray-50 hover:bg-gray-100 font-bold whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-6 py-4 border-3 border-black bg-black text-white hover:bg-indie-primary hover:text-black font-black uppercase whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-brutal hover:shadow-brutal-hover transition-all"
             >
-              {{ countdown > 0 ? `${countdown}秒` : (isSending ? '发送中...' : '获取验证码') }}
+              {{ countdown > 0 ? `${countdown}s` : (isSending ? 'SENDING...' : 'GET CODE') }}
             </button>
           </div>
         </div>
@@ -63,15 +63,11 @@
         <button 
           type="submit"
           :disabled="isSubmitting || phone.length !== 11 || code.length !== 6"
-          class="w-full px-6 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-brutal disabled:hover:translate-x-0 disabled:hover:translate-y-0"
+          class="w-full px-6 py-4 bg-indie-primary border-3 border-black shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-black text-xl uppercase disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ isSubmitting ? '绑定中...' : '确认绑定' }}
+          {{ isSubmitting ? 'BINDING...' : 'CONFIRM BINDING' }}
         </button>
       </form>
-
-      <p class="text-xs text-gray-400 text-center mt-6">
-        绑定后可使用手机号或微信登录
-      </p>
     </div>
   </div>
 </template>

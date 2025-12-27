@@ -1,40 +1,40 @@
 <template>
-  <div class="h-[calc(100vh-4rem)] md:h-[calc(100vh-8rem)] flex flex-col bg-gray-50">
+  <div class="h-[calc(100vh-4rem)] md:h-[calc(100vh-8rem)] flex flex-col bg-indie-bg">
     <!-- Header -->
-    <div class="bg-white border-b border-indie-border px-4 py-3 flex items-center gap-3 shadow-sm z-10">
-      <NuxtLink to="/me/messages" class="md:hidden text-2xl mr-2">←</NuxtLink>
+    <div class="bg-white border-b-3 border-black px-6 py-4 flex items-center gap-4 shadow-[0px_4px_0px_0px_rgba(0,0,0,0.1)] z-10">
+      <NuxtLink to="/me/messages" class="md:hidden text-2xl font-black mr-2 hover:translate-x-[-2px] transition-transform">←</NuxtLink>
       <template v-if="otherUser">
         <img 
           :src="otherUser.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + otherUser.username" 
           :alt="otherUser.username"
-          class="w-10 h-10 rounded-full border border-indie-border bg-gray-100"
+          class="w-12 h-12 rounded-full border-3 border-black bg-gray-100 shadow-sm"
         >
         <div>
-          <h2 class="font-bold">{{ otherUser.username }}</h2>
-          <span class="text-xs text-green-500 flex items-center gap-1">
-            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-            在线 (Mock)
+          <h2 class="font-black text-xl uppercase tracking-wide">{{ otherUser.username }}</h2>
+          <span class="text-xs font-bold font-mono bg-green-500 text-black px-2 py-0.5 border-2 border-black inline-flex items-center gap-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase">
+            ONLINE
           </span>
         </div>
       </template>
     </div>
 
     <!-- Messages Area -->
-    <div ref="messageContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div ref="messageContainer" class="flex-1 overflow-y-auto p-6 space-y-6">
       <div v-if="pending" class="flex justify-center py-8">
-        <div class="animate-spin text-2xl">🎲</div>
+        <div class="text-2xl font-black uppercase animate-pulse">LOADING...</div>
       </div>
 
       <template v-else>
         <div 
           v-for="msg in sortedMessages" 
           :key="msg.id" 
-          class="flex gap-2"
+          class="flex gap-4 items-end"
           :class="{ 'flex-row-reverse': isSelf(msg) }"
         >
+          <!-- Message Bubble -->
           <div 
-            class="max-w-[70%] px-4 py-2 rounded-xl text-sm break-words whitespace-pre-wrap shadow-sm"
-            :class="isSelf(msg) ? 'bg-indie-primary text-white rounded-tr-none' : 'bg-white border border-indie-border rounded-tl-none'"
+            class="max-w-[70%] px-6 py-3 border-3 border-black font-bold text-sm md:text-base break-words whitespace-pre-wrap shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            :class="isSelf(msg) ? 'bg-indie-primary text-black rounded-3xl rounded-br-none' : 'bg-white text-black rounded-3xl rounded-bl-none'"
           >
             {{ msg.content }}
           </div>
@@ -43,21 +43,21 @@
     </div>
 
     <!-- Input Area -->
-    <div class="bg-white border-t border-indie-border p-4">
-      <div class="flex gap-2 max-w-4xl mx-auto">
+    <div class="bg-white border-t-3 border-black p-6">
+      <div class="flex gap-4 max-w-4xl mx-auto items-center">
         <input 
           v-model="inputContent"
           type="text" 
-          placeholder="输入消息..." 
-          class="flex-1 px-4 py-2 border-2 border-indie-border rounded-lg focus:outline-none focus:border-indie-accent bg-gray-50"
+          placeholder="TYPE YOUR MESSAGE..." 
+          class="flex-1 px-6 py-4 border-3 border-black bg-gray-50 font-bold focus:outline-none focus:shadow-brutal-hover transition-all uppercase placeholder-gray-400"
           @keydown.enter="handleSend"
         >
         <button 
           @click="handleSend"
           :disabled="!inputContent.trim() || sending"
-          class="px-6 py-2 bg-indie-secondary border-2 border-indie-border shadow-brutal active:shadow-none translate-y-0 active:translate-y-1 transition-all rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-8 py-4 bg-indie-secondary border-3 border-black shadow-brutal hover:shadow-brutal-hover hover:-translate-y-1 active:shadow-brutal-active active:translate-y-1 transition-all font-black uppercase disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ sending ? '...' : '发送' }}
+          {{ sending ? 'SENDING' : 'SEND' }}
         </button>
       </div>
     </div>
@@ -82,8 +82,29 @@ const inputContent = ref('')
 const sending = ref(false)
 const messageContainer = ref<HTMLElement | null>(null)
 
+interface Message {
+  id: string
+  content: string
+  created_at: string
+  from_user_id: string
+  to_user_id: string
+  is_read: boolean
+}
+
+interface ChatResponse {
+  data: Message[]
+  conversation: {
+    id: string
+    otherUser: {
+      id: string
+      username: string
+      avatar_url: string
+    }
+  }
+}
+
 // Fetch initial data
-const { data: result, pending, refresh } = await useFetch(`/api/messages/${conversationId}`)
+const { data: result, pending, refresh } = await useFetch<ChatResponse>(`/api/messages/${conversationId}`)
 
 const messages = ref(result.value?.data || [])
 const otherUser = computed(() => result.value?.conversation?.otherUser)
@@ -121,13 +142,15 @@ const handleSend = async () => {
 
   sending.value = true
   try {
-    const { data: newMsg } = await $fetch('/api/messages/send', {
+    const response = await $fetch<{ data: Message }>('/api/messages/send', {
       method: 'POST',
       body: {
-        toUserId: otherUser.value.id,
+        toUserId: otherUser.value?.id,
         content
       }
     })
+    const newMsg = response.data
+
     
     // Optimistic update or wait for realtime?
     // Let's add it immediately to avoid lag feeling
@@ -159,7 +182,7 @@ onMounted(() => {
       table: 'messages', 
       filter: `conversation_id=eq.${conversationId}` 
     }, (payload) => {
-      const newMsg = payload.new
+      const newMsg = payload.new as unknown as Message
       // Avoid duplicate if sent by me (optimistic update might conflict if we don't handle it)
       // But since I used $fetch to send, I got the ID back.
       // If I receive my OWN message via realtime, I should check if it exists.

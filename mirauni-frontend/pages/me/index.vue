@@ -1,159 +1,159 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-display font-bold mb-8">个人中心</h1>
+  <div class="container mx-auto px-4 py-12">
+    <h1 class="text-5xl font-black font-display mb-12 uppercase">USER_CENTER</h1>
 
     <div class="grid lg:grid-cols-4 gap-8">
       <!-- 侧边栏 -->
       <aside class="lg:col-span-1">
-        <nav class="bg-white border-2 border-indie-border shadow-brutal sticky top-8">
-          <NuxtLink to="/me" class="block px-6 py-4 border-b border-gray-200 font-bold bg-indie-primary">
-            个人资料
+        <nav class="bg-white border-3 border-black shadow-brutal sticky top-8">
+          <NuxtLink to="/me" class="block px-6 py-4 border-b-3 border-black font-black uppercase bg-indie-primary hover:bg-indie-accent transition-colors">
+            PROFILE / 资料
           </NuxtLink>
-          <NuxtLink to="/me/projects" class="block px-6 py-4 border-b border-gray-200 hover:bg-gray-50">
-            我的项目
+          <NuxtLink to="/me/projects" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
+            MY PROJECTS
           </NuxtLink>
-          <NuxtLink to="/me/messages" class="block px-6 py-4 border-b border-gray-200 hover:bg-gray-50">
-            站内信
-            <span v-if="unreadCount > 0" class="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">{{ unreadCount }}</span>
+          <NuxtLink to="/me/messages" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors relative">
+            MESSAGES
+            <span v-if="unreadCount > 0" class="absolute right-4 top-1/2 -translate-y-1/2 px-2 py-1 bg-red-600 text-white text-xs font-black border-2 border-black">{{ unreadCount }}</span>
           </NuxtLink>
-          <NuxtLink to="/me/recharge" class="block px-6 py-4 hover:bg-gray-50">
-            充值
+          <NuxtLink to="/me/recharge" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
+            RECHARGE / 充值
           </NuxtLink>
-          <button @click="handleLogout" class="w-full text-left px-6 py-4 border-t border-gray-200 hover:bg-red-50 text-red-600 font-bold">
-            退出登录
+          <button @click="handleLogout" class="w-full text-left px-6 py-4 bg-red-100 font-black uppercase hover:bg-red-600 hover:text-white transition-colors">
+            LOGOUT / 退出
           </button>
         </nav>
       </aside>
 
       <!-- 主内容区 -->
       <main class="lg:col-span-3">
-        <div class="bg-white border-2 border-indie-border shadow-brutal p-8">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">个人资料</h2>
-            <div class="flex items-center gap-2 bg-yellow-50 px-4 py-2 rounded-lg border border-yellow-200">
-               <span class="text-yellow-700 font-medium">解锁次数:</span>
-               <span class="text-xl font-bold text-yellow-600">{{ authStore.userCredits }}</span>
-               <UButton to="/me/recharge" size="xs" color="yellow" variant="soft">充值</UButton>
+        <div class="bg-white border-3 border-black shadow-brutal p-8">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4 border-b-4 border-black pb-6">
+            <h2 class="text-3xl font-black uppercase">EDIT PROFILE</h2>
+            <div class="flex items-center gap-4 bg-yellow-50 px-6 py-3 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+               <span class="font-black uppercase">CREDITS:</span>
+               <span class="text-2xl font-black">{{ authStore.userCredits }}</span>
+               <UButton to="/me/recharge" size="sm" color="black" variant="solid" class="uppercase font-bold border-2 border-black bg-black text-white hover:bg-gray-800">ADD FUNDS</UButton>
             </div>
           </div>
           
           <!-- 消息提示 -->
-          <div v-if="message" :class="`mb-6 p-4 border-2 border-indie-border ${messageType === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`">
+          <div v-if="message" :class="`mb-8 p-4 border-3 border-black font-bold uppercase shadow-brutal-sm ${messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`">
             {{ message }}
           </div>
 
-          <form @submit.prevent="saveProfile" class="space-y-6">
-            <!-- 头像 -->
-            <div>
-              <label class="block text-sm font-bold mb-2">头像</label>
-              <div class="flex items-center gap-6">
-                <div class="relative group cursor-pointer" @click="triggerFileInput">
-                  <img 
-                    v-if="form.avatar_url" 
-                    :src="form.avatar_url" 
-                    class="w-24 h-24 rounded-full border-2 border-indie-border object-cover"
-                  />
-                  <div v-else class="w-24 h-24 bg-indie-secondary border-2 border-indie-border rounded-full flex items-center justify-center text-4xl">
-                    👤
-                  </div>
-                  
-                  <!--上传遮罩-->
-                  <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span class="text-white text-sm font-bold">更换</span>
-                  </div>
-                </div>
-                
-                <div class="flex flex-col gap-2">
-                  <button 
-                    type="button" 
-                    @click="triggerFileInput"
-                    :disabled="isUploading"
-                    class="px-4 py-2 border-2 border-indie-border hover:bg-gray-50 font-bold text-sm bg-white"
-                  >
-                    {{ isUploading ? '上传中...' : '上传头像' }}
-                  </button>
-                  <p class="text-xs text-gray-400">支持 JPG, PNG, WebP (最大 500KB)</p>
-                </div>
-                
-                <input 
-                  type="file" 
-                  ref="fileInput" 
-                  class="hidden" 
-                  accept="image/jpeg,image/png,image/webp"
-                  @change="handleFileChange"
-                />
-              </div>
-            </div>
+          <form @submit.prevent="saveProfile" class="space-y-8">
+             <!-- 头像 -->
+             <div>
+               <label class="block font-black mb-4 uppercase">AVATAR</label>
+               <div class="flex items-center gap-6">
+                 <div class="relative group cursor-pointer w-24 h-24" @click="triggerFileInput">
+                   <img 
+                     v-if="form.avatar_url" 
+                     :src="form.avatar_url" 
+                     class="w-full h-full rounded-full border-3 border-black object-cover"
+                   />
+                   <div v-else class="w-full h-full bg-indie-secondary border-3 border-black rounded-full flex items-center justify-center text-4xl">
+                     👤
+                   </div>
+                   
+                   <!--上传遮罩-->
+                   <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                     <span class="text-white text-sm font-black uppercase">CHANGE</span>
+                   </div>
+                 </div>
+                 
+                 <div class="flex flex-col gap-2">
+                   <button 
+                     type="button" 
+                     @click="triggerFileInput"
+                     :disabled="isUploading"
+                     class="px-6 py-2 border-3 border-black font-black text-sm bg-white hover:bg-black hover:text-white uppercase transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:translate-x-1 active:shadow-none"
+                   >
+                     {{ isUploading ? 'UPLOADING...' : 'UPLOAD NEW AVATAR' }}
+                   </button>
+                   <p class="text-xs font-bold text-gray-400 uppercase">JPG, PNG, WEBP (MAX 500KB)</p>
+                 </div>
+                 
+                 <input 
+                   type="file" 
+                   ref="fileInput" 
+                   class="hidden" 
+                   accept="image/jpeg,image/png,image/webp"
+                   @change="handleFileChange"
+                 />
+               </div>
+             </div>
 
             <!-- 用户名 -->
             <div>
-              <label class="block text-sm font-bold mb-2">用户名 <span class="text-red-500">*</span></label>
+              <label class="block font-black mb-2 uppercase">USERNAME <span class="text-red-600">*</span></label>
               <input 
                 v-model="form.username" 
                 type="text" 
                 required
-                class="w-full px-4 py-3 border-2 border-indie-border focus:outline-none focus:border-indie-text" 
-                placeholder="设置唯一用户名（2-20位字母数字）" 
+                class="w-full px-4 py-3 bg-gray-50 border-3 border-black font-bold focus:outline-none focus:shadow-brutal-hover transition-all" 
+                placeholder="UNIQUE USERNAME" 
               />
-              <p class="text-sm text-gray-500 mt-1">用于个人主页 URL：mirauni.com/developer/{{ form.username || 'username' }}</p>
+              <p class="text-sm font-bold text-gray-500 mt-2 uppercase">URL: mirauni.com/developer/{{ form.username || 'username' }}</p>
             </div>
 
             <!-- 职位/职业 -->
-            <div class="grid md:grid-cols-2 gap-4">
+            <div class="grid md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-bold mb-2">职业</label>
+                <label class="block font-black mb-2 uppercase">PROFESSION</label>
                 <input 
                   v-model="form.profession" 
                   type="text" 
-                  class="w-full px-4 py-3 border-2 border-indie-border focus:outline-none focus:border-indie-text" 
-                  placeholder="例如：前端工程师" 
+                  class="w-full px-4 py-3 bg-gray-50 border-3 border-black font-bold focus:outline-none focus:shadow-brutal-hover transition-all" 
+                  placeholder="E.G. FRONTEND ENGINEER" 
                 />
               </div>
               <div>
-                <label class="block text-sm font-bold mb-2">当前职位</label>
+                <label class="block font-black mb-2 uppercase">CURRENT TITLE</label>
                 <input 
                   v-model="form.position" 
                   type="text" 
-                  class="w-full px-4 py-3 border-2 border-indie-border focus:outline-none focus:border-indie-text" 
-                  placeholder="例如：高级开发专家" 
+                  class="w-full px-4 py-3 bg-gray-50 border-3 border-black font-bold focus:outline-none focus:shadow-brutal-hover transition-all" 
+                  placeholder="E.G. SENIOR DEV" 
                 />
               </div>
             </div>
 
             <!-- 简介 -->
             <div>
-              <label class="block text-sm font-bold mb-2">个人简介</label>
+              <label class="block font-black mb-2 uppercase">BIO</label>
               <textarea 
                 v-model="form.bio" 
-                rows="3" 
-                class="w-full px-4 py-3 border-2 border-indie-border focus:outline-none focus:border-indie-text" 
-                placeholder="介绍一下你的经历、专长和兴趣..."
+                rows="4" 
+                class="w-full p-4 bg-gray-50 border-3 border-black font-bold focus:outline-none focus:shadow-brutal-hover transition-all font-mono" 
+                placeholder="TELL US ABOUT YOURSELF..."
                 maxlength="200"
               ></textarea>
-              <p class="text-right text-xs text-gray-400">{{ form.bio?.length || 0 }}/200</p>
+              <p class="text-right text-xs font-bold text-gray-400 mt-1">{{ form.bio?.length || 0 }}/200</p>
             </div>
 
             <!-- 技能 -->
             <div>
-              <label class="block text-sm font-bold mb-2">技能标签 (最多10个)</label>
-              <div class="flex flex-wrap gap-2 mb-3">
+              <label class="block font-black mb-2 uppercase">SKILLS (MAX 10)</label>
+              <div class="flex flex-wrap gap-2 mb-4">
                 <span 
                   v-for="skill in form.skills" 
                   :key="skill"
-                  class="px-3 py-1 bg-indie-primary border border-indie-border flex items-center gap-2 text-sm font-bold"
+                  class="px-3 py-1 bg-indie-primary border-2 border-black flex items-center gap-2 text-sm font-black uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                 >
                   {{ getSkillLabel(skill) }}
-                  <button type="button" @click="removeSkill(skill)" class="text-gray-500 hover:text-red-500 ml-1">×</button>
+                  <button type="button" @click="removeSkill(skill)" class="hover:text-white transition-colors ml-1">×</button>
                 </span>
               </div>
               
               <div class="relative">
                 <select 
                   @change="addSkill($event)" 
-                  class="w-full px-4 py-2 border-2 border-indie-border bg-white appearance-none cursor-pointer hover:bg-gray-50"
+                  class="w-full px-4 py-3 border-3 border-black bg-white appearance-none cursor-pointer hover:bg-gray-50 font-bold uppercase"
                   :disabled="form.skills?.length >= 10"
                 >
-                  <option value="">+ 添加技能</option>
+                  <option value="">+ ADD SKILL</option>
                   <optgroup v-for="group in skillGroups" :key="group.label" :label="group.label">
                     <option 
                       v-for="skill in group.options" 
@@ -165,78 +165,78 @@
                     </option>
                   </optgroup>
                 </select>
-                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none font-black">▼</div>
               </div>
             </div>
 
             <!-- 经验与偏好 -->
-            <div class="grid md:grid-cols-3 gap-4">
+            <div class="grid md:grid-cols-3 gap-6">
               <div>
-                <label class="block text-sm font-bold mb-2">经验年限</label>
+                <label class="block font-black mb-2 uppercase">YEARS OF EXP</label>
                 <input 
                   v-model.number="form.experience_years" 
                   type="number" 
                   min="0"
                   max="50"
-                  class="w-full px-4 py-3 border-2 border-indie-border focus:outline-none focus:border-indie-text" 
+                  class="w-full px-4 py-3 bg-gray-50 border-3 border-black font-bold focus:outline-none focus:shadow-brutal-hover transition-all" 
                 />
               </div>
               <div>
-                <label class="block text-sm font-bold mb-2">工作偏好</label>
+                <label class="block font-black mb-2 uppercase">PREFERENCE</label>
                 <select 
                   v-model="form.work_preference" 
-                  class="w-full px-4 py-3 border-2 border-indie-border bg-white"
+                  class="w-full px-4 py-3 border-3 border-black bg-white font-bold uppercase appearance-none"
                 >
-                  <option value="fulltime">全职</option>
-                  <option value="parttime">兼职/外包</option>
+                  <option value="fulltime">FULL-TIME</option>
+                  <option value="parttime">PART-TIME / CONTRACT</option>
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-bold mb-2">所在地</label>
+                <label class="block font-black mb-2 uppercase">LOCATION</label>
                 <input 
                   v-model="form.location" 
                   type="text" 
-                  class="w-full px-4 py-3 border-2 border-indie-border focus:outline-none focus:border-indie-text" 
-                  placeholder="例如：北京" 
+                  class="w-full px-4 py-3 bg-gray-50 border-3 border-black font-bold focus:outline-none focus:shadow-brutal-hover transition-all" 
+                  placeholder="E.G. BEIJING" 
                 />
               </div>
             </div>
 
             <!-- 联系方式（付费可见） -->
-            <div class="pt-6 border-t-2 border-gray-100 bg-gray-50 p-4 -mx-4 md:mx-0 md:rounded-lg">
-              <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                🔒 本人联系方式
-                <span class="text-xs font-normal bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">付费后对方可见</span>
+            <div class="pt-8 border-t-4 border-black bg-indie-bg p-6 -mx-8 md:mx-0 md:border-3 md:bg-gray-50 md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">
+              <h3 class="text-xl font-black mb-6 flex items-center gap-4 uppercase">
+                 PRIVATE CONTACT INFO
+                <span class="text-xs font-black bg-yellow-300 text-black border-2 border-black px-2 py-0.5 uppercase shadow-sm">VISIBLE AFTER UNLOCK</span>
               </h3>
-              <div class="grid md:grid-cols-2 gap-4">
+              <div class="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-sm font-bold mb-2">微信号</label>
+                  <label class="block font-black mb-2 uppercase">WECHAT ID</label>
                   <input 
                     v-model="form.wechat_id" 
                     type="text" 
-                    class="w-full px-4 py-3 border-2 border-indie-border focus:outline-none focus:border-indie-text" 
-                    placeholder="请输入微信号" 
+                    class="w-full px-4 py-3 bg-white border-3 border-black font-bold focus:outline-none focus:shadow-brutal-hover transition-all" 
+                    placeholder="YOUR WECHAT ID" 
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-bold mb-2">邮箱</label>
+                  <label class="block font-black mb-2 uppercase">EMAIL</label>
                   <input 
                     v-model="form.email" 
                     type="email" 
-                    class="w-full px-4 py-3 border-2 border-indie-border focus:outline-none focus:border-indie-text" 
-                    placeholder="常用邮箱" 
+                    class="w-full px-4 py-3 bg-white border-3 border-black font-bold focus:outline-none focus:shadow-brutal-hover transition-all" 
+                    placeholder="YOUR EMAIL" 
                   />
                 </div>
               </div>
             </div>
 
-            <div class="flex justify-end pt-4">
+            <div class="flex justify-end pt-8">
               <button 
                 type="submit" 
                 :disabled="isSaving"
-                class="px-8 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-12 py-4 bg-indie-primary border-3 border-black shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-black uppercase text-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {{ isSaving ? '保存中...' : '保存资料' }}
+                {{ isSaving ? 'SAVING...' : 'SAVE PROFILE' }}
               </button>
             </div>
           </form>

@@ -1,58 +1,58 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-display font-bold mb-8">我的项目</h1>
+  <div class="container mx-auto px-4 py-12">
+    <h1 class="text-5xl font-black font-display mb-12 uppercase">MY PROJECTS</h1>
 
     <div class="grid lg:grid-cols-4 gap-8">
       <!-- 侧边栏 -->
       <aside class="lg:col-span-1">
-        <nav class="bg-white border-2 border-indie-border shadow-brutal">
-          <NuxtLink to="/me" class="block px-6 py-4 border-b border-gray-200 hover:bg-gray-50">
-            个人资料
+        <nav class="bg-white border-3 border-black shadow-brutal sticky top-8">
+          <NuxtLink to="/me" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
+            PROFILE
           </NuxtLink>
-          <NuxtLink to="/me/projects" class="block px-6 py-4 border-b border-gray-200 font-bold bg-indie-primary">
-            我的项目
+          <NuxtLink to="/me/projects" class="block px-6 py-4 border-b-3 border-black font-black uppercase bg-indie-primary hover:bg-indie-accent transition-colors">
+            MY PROJECTS / 项目
           </NuxtLink>
-          <NuxtLink to="/me/messages" class="block px-6 py-4 border-b border-gray-200 hover:bg-gray-50">
-            站内信
+          <NuxtLink to="/me/messages" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
+            MESSAGES
           </NuxtLink>
-          <NuxtLink to="/me/recharge" class="block px-6 py-4 hover:bg-gray-50">
-            充值
+          <NuxtLink to="/me/recharge" class="block px-6 py-4 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
+            RECHARGE
           </NuxtLink>
         </nav>
       </aside>
 
       <!-- 主内容区 -->
       <main class="lg:col-span-3">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold">项目列表</h2>
-          <button class="px-6 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover transition-all font-bold">
-            + 发布新项目
-          </button>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b-4 border-black pb-6">
+          <h2 class="text-3xl font-black uppercase">PROJECT LIST</h2>
+          <NuxtLink to="/projects/create" class="px-8 py-3 bg-indie-primary border-3 border-black shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-black uppercase flex items-center gap-2">
+            <span>+</span> LAUNCH NEW
+          </NuxtLink>
         </div>
 
         <!-- 项目列表 -->
-        <div class="space-y-4">
-          <div v-for="i in 3" :key="i" class="bg-white border-2 border-indie-border shadow-brutal p-6">
-            <div class="flex justify-between items-start">
+        <div class="space-y-6">
+          <div v-for="i in 3" :key="i" class="bg-white border-3 border-black shadow-brutal p-6 hover:shadow-brutal-hover transition-all group">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-6">
               <div class="flex-1">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="px-2 py-1 text-sm" :class="i === 1 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
-                    {{ i === 1 ? '招募中' : (i === 2 ? '待审核' : '已关闭') }}
+                <div class="flex items-center gap-3 mb-3">
+                  <span class="px-3 py-1 text-sm font-black uppercase border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" :class="i === 1 ? 'bg-green-300' : (i === 2 ? 'bg-yellow-300' : 'bg-gray-300')">
+                    {{ i === 1 ? 'RECRUITING' : (i === 2 ? 'PENDING' : 'CLOSED') }}
                   </span>
-                  <span class="px-2 py-1 bg-indie-secondary text-sm">SaaS 工具</span>
+                  <span class="px-3 py-1 bg-indie-secondary border-2 border-black text-xs font-black uppercase">SAAS TOOL</span>
                 </div>
-                <h3 class="text-xl font-bold mb-2">我的项目名称 {{ i }}</h3>
-                <p class="text-gray-600 mb-3">项目的一句话简介...</p>
-                <div class="text-sm text-gray-500">
-                  浏览 128 · 发布于 3天前
+                <h3 class="text-2xl font-black mb-3 uppercase group-hover:text-indie-primary transition-colors">MY COOL PROJECT {{ i }}</h3>
+                <p class="text-gray-600 font-bold mb-4 line-clamp-2">A SHORT DESCRIPTION OF THE PROJECT GOES HERE...</p>
+                <div class="text-xs font-bold text-gray-400 uppercase font-mono border-t-2 border-dashed border-gray-300 pt-3">
+                  VIEWS: 128 · POSTED: 3 DAYS AGO
                 </div>
               </div>
-              <div class="flex gap-2 ml-4">
-                <button class="px-4 py-2 border-2 border-indie-border hover:bg-gray-50">
-                  编辑
+              <div class="flex gap-4 w-full md:w-auto">
+                <button class="flex-1 md:flex-none px-6 py-2 border-3 border-black font-black uppercase hover:bg-black hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]">
+                  EDIT
                 </button>
-                <button class="px-4 py-2 border-2 border-indie-border hover:bg-gray-50 text-red-500">
-                  {{ i === 3 ? '删除' : '下架' }}
+                <button class="flex-1 md:flex-none px-6 py-2 border-3 border-black font-black uppercase text-red-600 hover:bg-red-600 hover:text-white transition-all bg-red-50 shadow-[2px_2px_0px_0px_rgba(220,38,38,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]">
+                  {{ i === 3 ? 'DELETE' : 'CLOSE' }}
                 </button>
               </div>
             </div>
@@ -60,12 +60,12 @@
         </div>
 
         <!-- 无项目时 -->
-        <div v-if="false" class="bg-white border-2 border-indie-border shadow-brutal p-12 text-center">
-          <div class="text-6xl mb-4">📝</div>
-          <p class="text-gray-500 mb-4">你还没有发布任何项目</p>
-          <button class="px-6 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal font-bold">
-            发布第一个项目
-          </button>
+        <div v-if="false" class="bg-white border-3 border-black shadow-brutal p-20 text-center">
+          <div class="text-8xl mb-6 grayscale opacity-20">📝</div>
+          <p class="text-2xl font-black text-gray-400 uppercase mb-8">NO PROJECTS YET</p>
+          <NuxtLink to="/projects/create" class="inline-block px-8 py-3 bg-indie-primary border-3 border-black shadow-brutal hover:shadow-brutal-hover transform transition-all font-black uppercase">
+            LAUNCH FIRST PROJECT
+          </NuxtLink>
         </div>
       </main>
     </div>

@@ -1,58 +1,37 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="min-h-screen bg-indie-bg py-8">
     <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <h1 class="text-2xl font-bold text-gray-900">发现开发者</h1>
-      </div>
-
-      <!-- Search & Filter Bar -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <UInput 
-            v-model="filters.keyword"
-            icon="i-heroicons-magnifying-glass-20-solid"
-            placeholder="搜索名字、技能、简介..."
-            @keyup.enter="refresh"
-          />
-          
-          <UInput 
-            v-model="filters.location"
-            icon="i-heroicons-map-pin"
-            placeholder="所在地"
-            @keyup.enter="refresh"
-          />
-          
-          <USelect 
-            v-model="filters.skill"
-            placeholder="选择技能"
-            :options="skillOptions"
-          />
-          
-          <USelect 
-            v-model="filters.work_preference"
-            placeholder="工作模式"
-            :options="[
-              { label: '全部模式', value: '' },
-              { label: '全职', value: 'fulltime' },
-              { label: '兼职', value: 'parttime' },
-              { label: '自由职业', value: 'freelance' }
-            ]"
-          />
-          
-          <USelect 
-             v-model="filters.min_exp"
-             placeholder="经验要求"
-             :options="[
-               { label: '不限经验', value: '' },
-               { label: '1年以上', value: '1' },
-               { label: '3年以上', value: '3' },
-               { label: '5年以上', value: '5' }
-             ]"
-          />
-        </div>
-        <div class="flex justify-end mt-4 gap-2">
-          <UButton variant="ghost" @click="resetFilters">清除筛选</UButton>
-          <UButton @click="refresh" color="primary">搜索</UButton>
+      <div class="mb-12">
+        <h1 class="text-7xl font-black uppercase mb-6 tracking-tighter">Talent Hunt<br><span class="text-4xl text-indie-secondary">发现开发者</span></h1>
+        
+        <div class="flex flex-col md:flex-row gap-6 items-start md:items-end justify-between border-b-4 border-black pb-8">
+            <!-- Brutalist Search -->
+            <div class="w-full md:w-1/2">
+                <label class="block font-black text-xl mb-2 bg-black text-white inline-block px-2">FIND_DEV:</label>
+                <div class="relative">
+                    <div class="absolute inset-0 bg-indie-accent translate-x-2 translate-y-2 border-2 border-black"></div>
+                    <input 
+                      v-model="filters.keyword"
+                      type="text" 
+                      placeholder="NAME OR ROLE..." 
+                      class="relative w-full bg-white border-3 border-black p-4 font-bold text-xl focus:outline-none placeholder-gray-400 uppercase focus:translate-x-1 focus:translate-y-1 transition-transform"
+                      @keyup.enter="refresh"
+                    />
+                </div>
+            </div>
+            
+            <!-- Skill Filter -->
+            <div class="flex flex-wrap gap-2 justify-end">
+                <button 
+                v-for="skill in ['ALL', 'Vue', 'React', 'Node', 'AI']" 
+                :key="skill"
+                @click="filters.skill = (skill === 'ALL' ? '' : skill)"
+                class="border-3 border-black px-3 py-1 font-black text-sm uppercase transition-all hover:-translate-y-1"
+                :class="(filters.skill === skill || (skill === 'ALL' && !filters.skill)) ? 'bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]' : 'bg-white text-black hover:bg-gray-100'"
+                >
+                    {{ skill }}
+                </button>
+            </div>
         </div>
       </div>
 

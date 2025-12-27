@@ -1,6 +1,6 @@
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-3xl">
-    <h1 class="text-3xl font-display font-bold mb-8">发布新项目</h1>
+  <div class="container mx-auto px-4 py-12 max-w-4xl">
+    <h1 class="text-4xl font-black font-display mb-8 uppercase text-center border-b-4 border-black inline-block mx-auto">LAUNCH NEW PROJECT</h1>
     <ProjectForm @submit="onSubmit" :loading="loading" />
   </div>
 </template>

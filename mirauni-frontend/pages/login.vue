@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-[80vh] flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white border-2 border-indie-border shadow-brutal-lg p-8">
-      <h1 class="text-3xl font-display font-bold mb-6 text-center">登录 / 注册</h1>
+    <div class="w-full max-w-md bg-white border-2 border-indie-border shadow-brutal-lg p-8 transform rotate-1 hover:rotate-0 transition-transform duration-300">
+      <h1 class="text-4xl font-display font-black mb-8 border-b-4 border-indie-accent pb-2 inline-block">LOGIN / 注册</h1>
       
       <!-- 错误提示 -->
       <div v-if="error" class="mb-4 p-3 bg-red-50 border-2 border-red-300 text-red-600 text-sm">
@@ -11,12 +11,12 @@
       <!-- 手机号登录 -->
       <div v-if="!showCodeInput" class="space-y-4">
         <div>
-          <label class="block text-sm font-bold mb-2">手机号</label>
+          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">手机号 / Phone</label>
           <input 
             v-model="phone"
             type="tel" 
             placeholder="请输入手机号"
-            class="w-full px-4 py-3 border-2 border-indie-border text-lg focus:outline-none focus:border-indie-text"
+            class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
             maxlength="11"
             @keyup.enter="sendCode"
           />
@@ -24,21 +24,21 @@
         <button 
           @click="sendCode"
           :disabled="isSending || phone.length !== 11"
-          class="w-full px-6 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-brutal disabled:hover:translate-x-0 disabled:hover:translate-y-0"
+          class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ isSending ? '发送中...' : '获取验证码' }}
+          {{ isSending ? 'SEND CODE' : '获取验证码' }}
         </button>
       </div>
 
       <!-- 验证码输入 -->
       <div v-else class="space-y-4">
         <div>
-          <label class="block text-sm font-bold mb-2">验证码</label>
+          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">验证码 / Code</label>
           <input 
             v-model="code"
             type="text" 
             placeholder="请输入6位验证码"
-            class="w-full px-4 py-3 border-2 border-indie-border text-lg text-center tracking-widest focus:outline-none focus:border-indie-text"
+            class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg text-center tracking-widest focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all"
             maxlength="6"
             @keyup.enter="login"
           />
@@ -63,9 +63,9 @@
         <button 
           @click="login"
           :disabled="isLoggingIn || code.length !== 6"
-          class="w-full px-6 py-3 bg-indie-primary border-2 border-indie-border shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ isLoggingIn ? '登录中...' : '登录' }}
+          {{ isLoggingIn ? 'LOGGING IN...' : '登 录 / ENTER' }}
         </button>
         <button 
           @click="goBack"

@@ -1,15 +1,15 @@
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-3xl">
-    <div class="flex items-center justify-between mb-8">
-        <h1 class="text-3xl font-display font-bold">编辑项目</h1>
+  <div class="container mx-auto px-4 py-12 max-w-4xl">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
+        <h1 class="text-4xl font-black font-display uppercase border-b-4 border-black">EDIT PROJECT</h1>
          <!-- Delete/Close Button -->
-         <button @click="onCloseProject" class="text-red-600 font-bold border-b-2 border-red-200 hover:border-red-600 transition-colors">
-            下架项目
+         <button @click="onCloseProject" class="px-6 py-2 bg-red-100 text-red-600 font-black uppercase border-3 border-red-600 hover:bg-red-600 hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(220,38,38,1)] active:translate-y-1 active:translate-x-1 active:shadow-none">
+            CLOSE PROJECT / 下架项目
          </button>
     </div>
     
-    <div v-if="pending" class="text-center py-12">加载中...</div>
-    <div v-else-if="!project" class="text-center py-12 text-red-500">项目不存在或无法访问</div>
+    <div v-if="pending" class="text-center py-12 font-bold uppercase">LOADING...</div>
+    <div v-else-if="!project" class="text-center py-12 text-red-600 font-bold border-3 border-red-600 bg-red-100 uppercase">PROJECT NOT FOUND</div>
     <ProjectForm v-else :initialData="project" :isEdit="true" @submit="onSubmit" :loading="saving" />
   </div>
 </template>
@@ -37,7 +37,7 @@ const onSubmit = async (formData: any) => {
   saving.value = true
   try {
     await $fetch(`/api/projects/${id}`, {
-      method: 'PUT',
+      method: 'PUT' as any,
       body: formData
     })
     useRouter().push(`/projects/${id}`)

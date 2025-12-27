@@ -11,9 +11,9 @@
 
           <!-- 桌面端导航 -->
           <nav class="hidden md:flex items-center gap-8">
-            <NuxtLink to="/projects" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">EXPLORE</NuxtLink>
-            <NuxtLink to="/developers" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">PROJECTS</NuxtLink>
-            <NuxtLink to="/academy" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">TALENT</NuxtLink>
+            <NuxtLink to="/projects" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">PROJECTS</NuxtLink>
+            <NuxtLink to="/developers" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">TALENT</NuxtLink>
+            <NuxtLink to="/academy" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">ACADEMY</NuxtLink>
           </nav>
         </div>
 
