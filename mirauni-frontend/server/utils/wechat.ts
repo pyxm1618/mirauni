@@ -67,6 +67,8 @@ export async function getWechatAccessToken(code: string): Promise<{
         throw new Error(`微信授权失败: ${response.errmsg}`)
     }
 
+    console.log('[微信API] 准备返回，openid:', response.openid, 'access_token 前20位:', response.access_token?.substring(0, 20))
+
     return response
 }
 
