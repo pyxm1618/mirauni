@@ -1,0 +1,61 @@
+{
+    "common": {
+        "login": "Login",
+        "logout": "Logout",
+        "register": "Register",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search",
+        "loading": "Loading...",
+        "noData": "No data",
+        "viewMore": "View more",
+        "back": "Back"
+    },
+    "nav": {
+        "home": "Home",
+        "projects": "Projects",
+        "developers": "Developers",
+        "academy": "Academy",
+        "messages": "Messages",
+        "profile": "Profile"
+    },
+    "home": {
+        "title": "Mirauni - Find Your Co-founder",
+        "subtitle": "Help indie developers publish projects and find technical partners",
+        "startProject": "Start Project",
+        "findPartner": "Find Partner"
+    },
+    "project": {
+        "title": "Project Title",
+        "description": "Description",
+        "category": "Category",
+        "status": "Status",
+        "budget": "Budget",
+        "skills": "Required Skills",
+        "apply": "Apply",
+        "contact": "Contact Owner"
+    },
+    "developer": {
+        "skills": "Skills",
+        "experience": "Experience",
+        "bio": "Bio",
+        "contact": "Contact"
+    },
+    "auth": {
+        "phone": "Phone",
+        "code": "Verification Code",
+        "getCode": "Get Code",
+        "loginWithPhone": "Login with Phone",
+        "loginWithWechat": "Login with WeChat"
+    },
+    "footer": {
+        "about": "About Us",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "contact": "Contact Us"
+    }
+}
