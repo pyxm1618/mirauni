@@ -90,6 +90,16 @@ export default defineNuxtConfig({
     '/developers': { swr: 600 },
     '/developers/**': { swr: 3600 },
     '/academy': { swr: 3600 },
-    '/academy/**': { swr: 86400 }
+    '/academy/**': { swr: 86400 },
+    // 管理后台 API CORS 配置
+    '/api/admin/**': {
+      cors: true,
+      headers: {
+        'Access-Control-Allow-Origin': 'https://admin.mirauni.com',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+      }
+    }
   }
 })
