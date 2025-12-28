@@ -5,6 +5,14 @@
 import { createAdminSupabaseClient, signAdminToken, verifyPassword } from '~/server/utils/admin-auth'
 
 export default defineEventHandler(async (event) => {
+    // 设置 CORS 响应头
+    const origin = getHeader(event, 'origin') || ''
+    const allowedOrigins = ['https://admin.mirauni.com', 'http://localhost:3001', 'http://localhost:5173']
+    if (allowedOrigins.includes(origin)) {
+        setResponseHeader(event, 'Access-Control-Allow-Origin', origin)
+    }
+    setResponseHeader(event, 'Access-Control-Allow-Credentials', 'true')
+
     const body = await readBody(event)
     const { username, password } = body
 
