@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/supabase/supabase_client.dart';
 import '../core/storage/local_cache.dart';
@@ -61,7 +62,7 @@ final developerFilterProvider = StateProvider<DeveloperFilter>((ref) {
   return const DeveloperFilter();
 });
 
-/// 开发者列表 Provider（带缓存）
+/// 开发者列表 Provider（带缓存 - 优先返回缓存）
 final developerListProvider = FutureProvider.family<List<AppUser>, DeveloperFilter>(
   (ref, filter) async {
     final cache = await LocalCache.getInstance();
@@ -72,17 +73,32 @@ final developerListProvider = FutureProvider.family<List<AppUser>, DeveloperFilt
     
     // 仅对首页（offset=0）进行缓存
     if (filter.offset == 0) {
-      // 尝试读取缓存
+      // 尝试读取缓存（即使过期也返回，实现快速显示）
       final cachedData = cache.getStale<List<dynamic>>(cacheKey);
       if (cachedData != null) {
+        final cachedDevelopers = cachedData.map((e) => AppUser.fromJson(e as Map<String, dynamic>)).toList();
+        
         // 如果缓存未过期，直接返回
         if (!cache.isExpired(cacheKey)) {
-          return cachedData.map((e) => AppUser.fromJson(e as Map<String, dynamic>)).toList();
+          return cachedDevelopers;
         }
+        
+        // 缓存过期：后台刷新（不阻塞返回）
+        Future.microtask(() async {
+          try {
+            final freshData = await _fetchDevelopers(filter);
+            await cache.set(cacheKey, freshData.map((e) => e.toJson()).toList());
+          } catch (e) {
+            debugPrint('后台刷新开发者列表失败: $e');
+          }
+        });
+        
+        // 立即返回缓存的数据
+        return cachedDevelopers;
       }
     }
     
-    // 请求网络数据
+    // 没有缓存时，请求网络数据
     final result = await _fetchDevelopers(filter);
     
     // 缓存首页数据

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/constants.dart';
+import '../../widgets/common/brutalist_card.dart';
 
 /// 首页
 class HomePage extends ConsumerWidget {
@@ -10,239 +11,328 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppConstants.appName),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: 搜索功能
-            },
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          // TODO: 刷新数据
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 欢迎横幅
-              _buildWelcomeBanner(context),
-              const SizedBox(height: AppSpacing.lg),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // TODO: 刷新数据
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // "SHIP FASTER" Label
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    border: Border.all(color: Colors.black, width: 3),
+                    boxShadow: const [
+                       BoxShadow(
+                         color: Colors.black,
+                         offset: Offset(4, 4),
+                         blurRadius: 0,
+                       )
+                    ],
+                  ),
+                  transform: Matrix4.rotationZ(-0.03), 
+                  child: const Text(
+                    '🚀 SHIP FASTER',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
 
-              // 快捷入口
-              _buildQuickActions(context),
-              const SizedBox(height: AppSpacing.lg),
+                // Hero Title
+                const Text(
+                  'BUILD.',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w900,
+                    height: 1.0,
+                    color: Colors.black,
+                  ),
+                ),
+                // Using underline instead of expensive stroke paint
+                Text(
+                  'CONNECT.',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w900,
+                    height: 1.0,
+                    color: AppColors.secondary,
+                    decoration: TextDecoration.underline,
+                    decorationColor: AppColors.secondary,
+                    decorationThickness: 3,
+                  ),
+                ),
+                const Text(
+                  'LAUNCH.',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w900,
+                    height: 1.0,
+                    color: Colors.black,
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Description Box
+                Container(
+                   padding: const EdgeInsets.all(16),
+                   decoration: const BoxDecoration(
+                     color: Colors.white,
+                     border: Border(left: BorderSide(color: Colors.black, width: 4)),
+                     boxShadow: [
+                        BoxShadow(
+                          color: Colors.black,
+                          offset: Offset(4, 4),
+                          blurRadius: 0,
+                        )
+                     ],
+                   ),
+                   child: const Text(
+                     'Access the underground network of independent developers. No suits. Just code.',
+                     style: TextStyle(
+                       fontSize: 16,
+                       fontWeight: FontWeight.bold,
+                       color: Colors.black,
+                     ),
+                   ),
+                ),
 
-              // 热门项目
-              _buildSectionHeader(context, '热门项目', onMore: () {
-                context.go('/projects');
-              }),
-              const SizedBox(height: AppSpacing.md),
-              _buildProjectPlaceholder(),
-              const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: 40),
 
-              // 推荐开发者
-              _buildSectionHeader(context, '推荐开发者', onMore: () {
-                context.go('/developers');
-              }),
-              const SizedBox(height: AppSpacing.md),
-              _buildDeveloperPlaceholder(),
-            ],
+                // Action Buttons (Simplified for performance)
+                GestureDetector(
+                  onTap: () {
+                    // TODO: 发布项目
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      border: Border.all(color: Colors.black, width: 3),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0)
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'START PROJECT',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: () => context.go('/developers'),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.black, width: 3),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0)
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'BROWSE TALENT',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 48),
+
+                // Fresh Drops (Projects) Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                     Container(
+                       decoration: const BoxDecoration(
+                         border: Border(bottom: BorderSide(color: Colors.black, width: 4)),
+                       ),
+                       padding: const EdgeInsets.only(bottom: 8),
+                       child: const Text(
+                         'FRESH DROPS',
+                         style: TextStyle(
+                           fontSize: 24,
+                           fontWeight: FontWeight.w900,
+                           color: Colors.black,
+                         ),
+                       ),
+                     ),
+                     InkWell(
+                       onTap: () => context.go('/projects'),
+                       child: const Padding(
+                         padding: EdgeInsets.only(bottom: 8),
+                         child: Text(
+                           'SEE ALL ->',
+                           style: TextStyle(
+                             fontWeight: FontWeight.bold,
+                             decoration: TextDecoration.underline,
+                             decorationThickness: 2,
+                           ),
+                         ),
+                       ),
+                     ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Project Cards (Mock Data for now, later integrate with provider)
+                _buildProjectCard(
+                  title: 'E-COM ANALYTICS',
+                  description: 'Real-time dashboard. Sales tracking. Big Data.',
+                  tags: ['VUE', 'D3', 'NODE'],
+                  author: 'S',
+                  authorColor: AppColors.primary,
+                  likes: 128,
+                ),
+                const SizedBox(height: 16),
+                _buildProjectCard(
+                  title: 'MINDFUL APP',
+                  description: 'Breathe in. Breathe out. Code better.',
+                  tags: ['REACT', 'FASTAPI'],
+                  author: 'D',
+                  authorColor: AppColors.secondary,
+                  likes: 95,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildWelcomeBanner(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
+  Widget _buildProjectCard({
+    required String title,
+    required String description,
+    required List<String> tags,
+    required String author,
+    required Color authorColor,
+    required int likes,
+  }) {
+    return BrutalistCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '找到你的技术合伙人',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: authorColor,
+                  border: Border.all(color: Colors.black, width: 3),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  author,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black, width: 2),
+                ),
+                child: const Text(
+                  'FEATURED',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              height: 1.0,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          const Text(
-            '独立开发者匹配平台，让创业不孤单',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.white70,
-            ),
+          const SizedBox(height: 12),
+          Container(
+             decoration: const BoxDecoration(
+               border: Border(left: BorderSide(color: Colors.grey, width: 4)),
+             ),
+             padding: const EdgeInsets.only(left: 12),
+             child: Text(
+               description,
+               style: const TextStyle(
+                 fontWeight: FontWeight.bold,
+                 color: AppColors.textSecondary,
+               ),
+             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          ElevatedButton(
-            onPressed: () => context.go('/projects'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primary,
-            ),
-            child: const Text('发现项目'),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: tags.map((tag) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              color: Colors.black,
+              child: Text(
+                '#$tag',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )).toList(),
+          ),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.black, thickness: 3),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+               Text(
+                 'LIKED BY $likes',
+                 style: const TextStyle(fontWeight: FontWeight.bold),
+               ),
+               // Static VIEW button for performance
+               Container(
+                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                 decoration: BoxDecoration(
+                   color: AppColors.primary,
+                   border: Border.all(color: Colors.black, width: 2),
+                   boxShadow: const [
+                     BoxShadow(color: Colors.black, offset: Offset(2, 2), blurRadius: 0)
+                   ],
+                 ),
+                 child: const Text(
+                   'VIEW',
+                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+                 ),
+               )
+            ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActions(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildActionCard(
-            context,
-            icon: Icons.add_box_outlined,
-            title: '发布项目',
-            onTap: () {
-              // TODO: 发布项目
-            },
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: _buildActionCard(
-            context,
-            icon: Icons.person_search_outlined,
-            title: '找开发者',
-            onTap: () => context.go('/developers'),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: _buildActionCard(
-            context,
-            icon: Icons.school_outlined,
-            title: '学院',
-            onTap: () {
-              // TODO: 学院模块
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 28, color: AppColors.primary),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(
-    BuildContext context,
-    String title, {
-    VoidCallback? onMore,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        if (onMore != null)
-          TextButton(
-            onPressed: onMore,
-            child: const Text('更多'),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildProjectPlaceholder() {
-    return Container(
-      height: 150,
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.folder_outlined, size: 40, color: AppColors.textLight),
-            SizedBox(height: AppSpacing.sm),
-            Text(
-              '项目列表加载中...',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDeveloperPlaceholder() {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.people_outlined, size: 40, color: AppColors.textLight),
-            SizedBox(height: AppSpacing.sm),
-            Text(
-              '开发者列表加载中...',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
       ),
     );
   }

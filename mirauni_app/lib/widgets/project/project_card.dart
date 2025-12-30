@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/constants.dart';
 import '../../models/project.dart';
+import '../common/brutalist_card.dart';
 
-/// 项目卡片组件
+/// 项目卡片组件 (Brutalist Style)
 class ProjectCard extends StatelessWidget {
   final Project project;
   final VoidCallback? onTap;
@@ -16,163 +16,132 @@ class ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: AppColors.border, width: 1),
-      ),
+    // Keep cards mostly white for readability, maybe just accent?
+    // Let's stick to white for now, as per prototype list items
+
+    return BrutalistCard(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 标题和分类
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+             // Header: Author Icon + ID
+             Row(
+               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+               children: [
+                 Container(
+                   width: 36,
+                   height: 36,
+                   decoration: BoxDecoration(
+                     color: AppColors.secondary, 
+                     border: Border.all(color: Colors.black, width: 2),
+                   ),
+                   alignment: Alignment.center,
+                   child: Text(
+                     project.user?.displayName.substring(0, 1).toUpperCase() ?? '?',
+                     style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                   ),
+                 ),
+                 Container(
+                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    color: Colors.black,
                     child: Text(
-                      project.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      'ID:${project.id}',
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                    ),
-                    child: Text(
-                      project.categoryName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                 ),
+               ],
+             ),
+             
+             const SizedBox(height: 12),
 
-              // 简介
-              if (project.summary != null && project.summary!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  project.summary!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                  maxLines: 2,
+             // Title
+             Text(
+               project.title.toUpperCase(),
+               style: const TextStyle(
+                 fontSize: 18,
+                 fontWeight: FontWeight.w900,
+                 letterSpacing: -0.5,
+                 decoration: TextDecoration.underline,
+                 decorationThickness: 4,
+                 decorationColor: AppColors.accent,
+               ),
+             ),
+             
+             const SizedBox(height: 8),
+
+             // Description
+             Container(
+               padding: const EdgeInsets.only(left: 8),
+               decoration: const BoxDecoration(
+                 border: Border(left: BorderSide(color: Colors.grey, width: 2)),
+               ),
+               child: Text(
+                  project.summary ?? '',
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+               ),
+             ),
+             
+             const SizedBox(height: 16),
 
-              // 需求技能
-              if (project.needSkills != null &&
-                  project.needSkills!.isNotEmpty) ...[
-                const SizedBox(height: 12),
+             // Tags
+             if (project.needSkills != null)
                 Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: project.needSkills!.take(4).map((skill) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: project.needSkills!.take(3).map((tag) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      border: Border.all(color: Colors.black, width: 1),
+                    ),
+                    child: Text(
+                      tag.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
-                      ),
-                      child: Text(
-                        skill,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                    ),
+                  )).toList(),
                 ),
-              ],
+            
+             const SizedBox(height: 16),
 
-              const SizedBox(height: 12),
-              const Divider(height: 1),
-              const SizedBox(height: 12),
-
-              // 底部：用户信息和预算
-              Row(
-                children: [
-                  // 用户头像和名称
-                  if (project.user != null) ...[
-                    ClipOval(
-                      child: project.user!.avatarUrl != null
-                          ? CachedNetworkImage(
-                              imageUrl: project.user!.avatarUrl!,
-                              width: 24,
-                              height: 24,
-                              fit: BoxFit.cover,
-                              placeholder: (_, __) => Container(
-                                color: AppColors.border,
-                              ),
-                              errorWidget: (_, __, ___) => _defaultAvatar,
-                            )
-                          : _defaultAvatar,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      project.user!.displayName,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                  const Spacer(),
-                  // 预算
-                  if (project.budgetText != null)
-                    Text(
-                      project.budgetText!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.warning,
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
+             // Footer Button (Static visual only to improve scrolling performance)
+             Container(
+               width: double.infinity,
+               padding: const EdgeInsets.symmetric(vertical: 12),
+               decoration: BoxDecoration(
+                 color: Colors.white,
+                 border: Border.all(color: Colors.black, width: 3),
+                 boxShadow: const [
+                   BoxShadow(
+                     color: Colors.black,
+                     offset: Offset(4, 4), // Static shadow
+                     blurRadius: 0,
+                   )
+                 ],
+               ),
+               alignment: Alignment.center,
+               child: const Text(
+                 'VIEW_DETAILS',
+                 style: TextStyle(
+                   fontSize: 12,
+                   fontWeight: FontWeight.w900,
+                   color: AppColors.textPrimary,
+                   letterSpacing: 0.5,
+                 ),
+               ),
+             )
+          ],
         ),
       ),
     );
   }
-
-  Widget get _defaultAvatar => Container(
-        width: 24,
-        height: 24,
-        color: AppColors.border,
-        child: Icon(
-          Icons.person,
-          size: 16,
-          color: AppColors.textLight,
-        ),
-      );
 }

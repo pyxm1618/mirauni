@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../config/constants.dart';
 import '../providers/message_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/rating_service.dart';
+import '../pages/home/home_page.dart';
+import '../pages/projects/project_list_page.dart';
+import '../pages/developers/developer_list_page.dart';
+import '../pages/messages/message_list_page.dart';
+import '../pages/me/me_page.dart';
+
+/// 当前选中的 Tab 索引 Provider
+final currentTabIndexProvider = StateProvider<int>((ref) => 0);
 
 /// 底部导航栏 Shell 组件
+/// 
+/// 使用 IndexedStack 实现页面状态保持，避免每次切换重建页面
 class MainShell extends ConsumerStatefulWidget {
-  final Widget child;
-
-  const MainShell({super.key, required this.child});
+  const MainShell({super.key});
 
   @override
   ConsumerState<MainShell> createState() => _MainShellState();
@@ -17,6 +26,22 @@ class MainShell extends ConsumerStatefulWidget {
 
 class _MainShellState extends ConsumerState<MainShell> {
   bool _hasCheckedRating = false;
+
+  // 所有 Tab 页面 - 只初始化一次，状态永久保持
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始化所有页面（只执行一次）
+    _pages = const [
+      HomePage(),
+      ProjectListPage(),
+      DeveloperListPage(),
+      MessageListPage(),
+      MePage(),
+    ];
+  }
 
   @override
   void didChangeDependencies() {
@@ -42,19 +67,41 @@ class _MainShellState extends ConsumerState<MainShell> {
     }
   }
 
+  void _onTabTapped(int index) {
+    // 检查是否需要登录
+    final isLoggedIn = ref.read(isLoggedInProvider);
+    const protectedTabs = [3, 4]; // 消息、我的 需要登录
+    
+    if (protectedTabs.contains(index) && !isLoggedIn) {
+      // 跳转到登录页
+      context.push('/login');
+      return;
+    }
+    
+    // 直接切换 Tab（秒切）
+    ref.read(currentTabIndexProvider.notifier).state = index;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentIndex = ref.watch(currentTabIndexProvider);
     final unreadCountAsync = ref.watch(unreadCountProvider);
     final unreadCount = unreadCountAsync.valueOrNull ?? 0;
 
     return Scaffold(
-      body: widget.child,
+      // 使用 IndexedStack 保持所有页面状态
+      body: IndexedStack(
+        index: currentIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _calculateIndex(context),
-        onTap: (index) => _onTap(context, index),
+        currentIndex: currentIndex,
+        onTap: _onTabTapped,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primary,
+        selectedItemColor: AppColors.textPrimary,
         unselectedItemColor: AppColors.textSecondary,
+        backgroundColor: Colors.white,
+        elevation: 0,
         items: [
           const BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
@@ -123,19 +170,4 @@ class _MainShellState extends ConsumerState<MainShell> {
       ],
     );
   }
-
-  int _calculateIndex(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-    if (location.startsWith('/projects')) return 1;
-    if (location.startsWith('/developers')) return 2;
-    if (location.startsWith('/messages')) return 3;
-    if (location.startsWith('/me')) return 4;
-    return 0;
-  }
-
-  void _onTap(BuildContext context, int index) {
-    const routes = ['/', '/projects', '/developers', '/messages', '/me'];
-    context.go(routes[index]);
-  }
 }
-

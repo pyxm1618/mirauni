@@ -1,9 +1,11 @@
 {
     "common": {
+        "appName": "Mirauni",
         "login": "Login",
         "logout": "Logout",
         "register": "Register",
         "submit": "Submit",
+        "join": "JOIN NOW",
         "cancel": "Cancel",
         "confirm": "Confirm",
         "save": "Save",
@@ -11,8 +13,8 @@
         "edit": "Edit",
         "search": "Search",
         "loading": "Loading...",
-        "noData": "No data",
-        "viewMore": "View more",
+        "noData": "No Data",
+        "viewMore": "View More",
         "back": "Back"
     },
     "nav": {
@@ -24,10 +26,28 @@
         "profile": "Profile"
     },
     "home": {
-        "title": "Mirauni - Find Your Co-founder",
-        "subtitle": "Help indie developers publish projects and find technical partners",
-        "startProject": "Start Project",
-        "findPartner": "Find Partner"
+        "title": "Mirauni - The First Stop for Indie Developers to Find Partners",
+        "subtitle": "Help indie developers launch projects, find technical partners, and meet reliable co-founders.",
+        "badge": "SHIP FASTER",
+        "heroTitlePrefix": "Find Your",
+        "heroTitleSuffix": "Tech Partner",
+        "heroSubtitle": "The first stop for indie developers to find partners. Ship your project together.",
+        "startProject": "Post Project",
+        "findPartner": "Find Partner",
+        "features": {
+            "post": {
+                "title": "Post Project",
+                "desc": "Have an idea? Post your project and recruit tech partners."
+            },
+            "find": {
+                "title": "Find Partner",
+                "desc": "Browse the developer talent pool to find matching partners."
+            },
+            "chat": {
+                "title": "Chat Directly",
+                "desc": "Unlock contact info and chat directly via internal messages."
+            }
+        }
     },
     "project": {
         "title": "Project Title",
@@ -35,27 +55,489 @@
         "category": "Category",
         "status": "Status",
         "budget": "Budget",
-        "skills": "Required Skills",
+        "skills": "Skills Required",
         "apply": "Apply",
-        "contact": "Contact Owner"
+        "contact": "Contact Owner",
+        "workModes": {
+            "remote": "Remote",
+            "onsite": "On-site",
+            "hybrid": "Hybrid"
+        },
+        "cooperationTypes": {
+            "equity": "Equity",
+            "salary": "Salary",
+            "revenue_share": "Revenue Share",
+            "volunteer": "Volunteer"
+        },
+        "categories": {
+            "saas": "SaaS Tool",
+            "app": "Mobile App",
+            "game": "Game",
+            "ai": "AI / ML",
+            "ecommerce": "E-commerce",
+            "content": "Content / Community",
+            "hardware": "Smart Hardware",
+            "other": "Other"
+        },
+        "square": {
+            "title": "Projects Square",
+            "subtitle": "Recruit Partners",
+            "launch": "Post Project",
+            "search": "Search Projects...",
+            "category": "Category / All",
+            "mode": "Mode / Work Mode",
+            "role": "Role / Role Needed",
+            "loading": "Loading...",
+            "empty": "No projects found",
+            "emptyHint": "Try adjusting filters, or",
+            "launchFirst": "Launch first project",
+            "seoTitle": "Projects Square - Mirauni",
+            "seoDesc": "Find indie developer projects"
+        },
+        "create": {
+            "title": "Launch Project",
+            "basic": "Basic Information",
+            "projectName": "Project Name *",
+            "namePlaceholder": "Give it a catchy name",
+            "summary": "One-liner Summary *",
+            "summaryPlaceholder": "Describe core value (10-50 words)",
+            "category": "Category *",
+            "selectCategory": "Select Category",
+            "cooperationType": "Cooperation Type *",
+            "workMode": "Work Mode *",
+            "roles": "Roles Needed (Multi) *",
+            "description": "Detailed Description",
+            "publicVisible": "Public Visible",
+            "descPlaceholder": "Describe background, pain points, solution...",
+            "demoUrl": "Demo URL",
+            "submit": "Publish Project",
+            "submitting": "Submitting...",
+            "save": "Save Changes",
+            "success": "Published Successfully",
+            "failed": "Publish Failed",
+            "seoTitle": "Launch Project - Mirauni",
+            "seoDesc": "Find technical partners"
+        },
+        "edit": {
+            "title": "Edit Project",
+            "close": "Close Project",
+            "loading": "Loading...",
+            "notFound": "Project Not Found",
+            "closeConfirm": "Are you sure you want to close this project? It will be hidden from lists but data will be preserved.",
+            "closed": "Project Closed",
+            "closeFailed": "Operation Failed",
+            "saveFailed": "Save Failed",
+            "seoTitle": "Edit Project - Mirauni"
+        }
     },
     "developer": {
         "skills": "Skills",
         "experience": "Experience",
         "bio": "Bio",
-        "contact": "Contact"
+        "contact": "Contact",
+        "square": {
+            "title": "Discover Developers",
+            "titleEn": "Talent Hunt",
+            "find": "Find Dev:",
+            "search": "Name or Role...",
+            "empty": "No developers found",
+            "reset": "Reset Filters",
+            "allSkills": "All Skills",
+            "seoTitle": "Find Developers - Mirauni",
+            "seoDesc": "Find technical partners"
+        }
     },
     "auth": {
-        "phone": "Phone",
-        "code": "Verification Code",
-        "getCode": "Get Code",
-        "loginWithPhone": "Login with Phone",
-        "loginWithWechat": "Login with WeChat"
+        "title": "Login / Register",
+        "phoneLabel": "Phone Number",
+        "phonePlaceholder": "Enter phone number",
+        "sendCode": "Get Code",
+        "sending": "Sending",
+        "codeLabel": "Verification Code",
+        "codePlaceholder": "Enter 6-digit code",
+        "codeSent": "Code sent to",
+        "resend": "s to resend",
+        "resendBtn": "Resend",
+        "loginBtn": "Login",
+        "loggingIn": "Logging in...",
+        "back": "Back to edit phone",
+        "or": "OR",
+        "wechatLogin": "WeChat Login",
+        "wechatLoading": "Redirecting...",
+        "agreement": "Login means you agree to",
+        "userProtocol": "User Agreement",
+        "and": "and",
+        "privacyPolicy": "Privacy Policy",
+        "error": {
+            "phone": "Invalid phone number",
+            "code": "Enter 6-digit code",
+            "sendFailed": "Failed to send code",
+            "loginFailed": "Login failed",
+            "bindFailed": "Bind failed",
+            "missingWechat": "WeChat info missing"
+        },
+        "bind": {
+            "title": "Bind Phone",
+            "subtitle": "Please bind your phone to continue",
+            "connected": "Connected Account",
+            "submit": "Confirm Binding",
+            "binding": "Binding...",
+            "seoTitle": "Bind Phone - Mirauni"
+        }
     },
     "footer": {
         "about": "About Us",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy",
-        "contact": "Contact Us"
+        "contact": "Contact Us",
+        "slogan": "The First Stop for Indie Developers to Find Partners",
+        "icp": "京ICP备2024069371号-6"
+    },
+    "me": {
+        "title": "User Center",
+        "nav": {
+            "profile": "Profile",
+            "projects": "My Projects",
+            "messages": "Messages",
+            "recharge": "Recharge",
+            "logout": "Logout"
+        },
+        "profile": {
+            "title": "Edit Profile",
+            "credits": "Credits",
+            "addFunds": "Add Funds",
+            "avatar": "Avatar",
+            "change": "Change",
+            "upload": "Upload New Avatar",
+            "uploading": "Uploading...",
+            "avatarHint": "JPG, PNG, WEBP (Max 500KB)",
+            "username": "Username",
+            "usernamePlaceholder": "Unique Username",
+            "profession": "Profession",
+            "professionPlaceholder": "E.g. Frontend Engineer",
+            "titleLabel": "Current Title",
+            "titlePlaceholder": "E.g. Senior Dev",
+            "bio": "Bio",
+            "bioPlaceholder": "Tell us about yourself...",
+            "skills": "Skills (Max 10)",
+            "addSkill": "Add Skill",
+            "exp": "Years of Exp",
+            "preference": "Preference",
+            "fulltime": "Full-time",
+            "parttime": "Part-time / Contract",
+            "location": "Location",
+            "locationPlaceholder": "E.g. Beijing",
+            "contactInfo": "Private Contact Info",
+            "visibleAfterUnlock": "Visible after unlock",
+            "wechat": "WeChat ID",
+            "wechatPlaceholder": "Your WeChat ID",
+            "email": "Email",
+            "emailPlaceholder": "Your Email",
+            "save": "Save Profile",
+            "saving": "Saving...",
+            "logoutConfirm": "Are you sure you want to logout?",
+            "uploadSuccess": "Avatar uploaded successfully",
+            "saveSuccess": "Profile saved"
+        },
+        "projects": {
+            "title": "My Projects",
+            "launch": "Launch New Project",
+            "edit": "Manage Project",
+            "view": "View Details",
+            "status": {
+                "pending": "Pending",
+                "active": "Recruiting",
+                "closed": "Closed",
+                "rejected": "Rejected"
+            }
+        },
+        "recharge": {
+            "title": "Recharge Center",
+            "nav": {
+                "profile": "Profile",
+                "projects": "My Projects",
+                "messages": "Messages",
+                "recharge": "Recharge"
+            },
+            "balance": "Current Balance",
+            "lifetime": "Lifetime Unlocks",
+            "package": "Select Package",
+            "unlocks": "Unlocks",
+            "perUnlock": "USD/Unlock",
+            "bonus": {
+                "title": "First Top-up Bonus",
+                "desc": "Get 20% off + 30% extra credits!"
+            },
+            "pay": "WeChat Pay",
+            "history": "History",
+            "unlockedVia": "Unlocked via",
+            "sendMessage": "Send Message",
+            "packages": {
+                "basic": "Basic",
+                "standard": "Standard",
+                "premium": "Premium"
+            }
+        }
+    },
+    "messages": {
+        "title": "My Messages",
+        "loading": "Loading messages...",
+        "error": "Failed to load messages",
+        "empty": "No messages yet",
+        "emptyHint": "Start connecting with others",
+        "findTalent": "Find Talent",
+        "exploreProjects": "Explore Projects",
+        "noContent": "No Content"
+    },
+    "skills": {
+        "vue": "Vue.js",
+        "react": "React",
+        "typescript": "TypeScript",
+        "flutter": "Flutter",
+        "swift": "Swift",
+        "kotlin": "Kotlin",
+        "nodejs": "Node.js",
+        "python": "Python",
+        "java": "Java",
+        "golang": "Go",
+        "rust": "Rust",
+        "mysql": "MySQL",
+        "postgresql": "PostgreSQL",
+        "mongodb": "MongoDB",
+        "redis": "Redis",
+        "docker": "Docker",
+        "kubernetes": "Kubernetes",
+        "aws": "AWS",
+        "ai": "AI/ML",
+        "figma": "Figma"
+    },
+    "roles": {
+        "frontend": "Frontend Developer",
+        "backend": "Backend Developer",
+        "fullstack": "Fullstack Developer",
+        "mobile": "Mobile Developer",
+        "design": "UI/UX Designer",
+        "product": "Product Manager",
+        "operation": "Operations",
+        "marketing": "Marketing"
+    },
+    "legal": {
+        "badge": "Legal"
+    },
+    "about": {
+        "badge": "About Us",
+        "title": "About Mirauni",
+        "slogan": "The first stop for indie developers to find partners. We help you find the right co-founder to turn ideas into products.",
+        "whoWeAre": {
+            "title": "Who We Are",
+            "content": "Mirauni is a platform dedicated to connecting indie developers, entrepreneurs, and creative talents. We believe that behind every great product is a team with chemistry. We exist to help you find 'the one'."
+        },
+        "mission": {
+            "title": "Our Mission",
+            "content": "Lower the barrier to starting a business by connecting people through technology and community."
+        },
+        "vision": {
+            "title": "Our Vision",
+            "content": "To become the world's most active collaboration network for indie developers."
+        },
+        "problem": {
+            "title": "The Problem We Solve",
+            "p1": "Many indie developers have great tech skills but lack product or operation capabilities; many entrepreneurs have great ideas but can't find reliable tech partners.",
+            "p2": "Traditional recruitment platforms are inefficient. Mirauni focuses on this niche to provide precise matching."
+        },
+        "whyUs": {
+            "title": "Why Choose Us",
+            "feature1": {
+                "title": "Vertical Focus",
+                "desc": "Only for indie developers and early-stage teams."
+            },
+            "feature2": {
+                "title": "Authentic & Reliable",
+                "desc": "Strict manual review to reject fake info."
+            },
+            "feature3": {
+                "title": "Full Support",
+                "desc": "Direct communication to build trust quickly."
+            }
+        },
+        "contact": {
+            "title": "Contact Us",
+            "intro": "Any questions? Contact us anytime."
+        },
+        "seoTitle": "About Us - Mirauni",
+        "seoDescription": "Learn about Mirauni's mission and how we help indie developers find partners."
+    },
+    "terms": {
+        "title": "Terms of Service",
+        "lastUpdated": "Last Updated",
+        "intro": "Please read this agreement carefully before using Mirauni. By using our service, you agree to these terms.",
+        "section1": {
+            "title": "1. Service Content",
+            "p1": "The platform provides project posting, talent display, and communication services.",
+            "p2": "Users can post project requirements, skills, and communicate with others.",
+            "p3": "We reserve the right to adjust services."
+        },
+        "section2": {
+            "title": "2. Account Registration",
+            "p1": "You need to register to use full features.",
+            "p2": "Ensure your info is true and accurate.",
+            "p3": "Keep your account safe.",
+            "p4": "Notify us if your account is compromised."
+        },
+        "section3": {
+            "title": "3. User Conduct",
+            "intro": "Users shall abide by laws and:",
+            "rule1": "No illegal content;",
+            "rule2": "No fake, scam, porn, violence info;",
+            "rule3": "No harassment;",
+            "rule4": "No scraping;",
+            "rule5": "No illegal commercial use;",
+            "rule6": "No infringement of IP or privacy."
+        },
+        "section4": {
+            "title": "4. Paid Services",
+            "p1": "Some services may require payment.",
+            "p2": "Fees will be clearly displayed.",
+            "p3": "No refunds unless required by law.",
+            "p4": "We reserve the right to adjust fees."
+        },
+        "section5": {
+            "title": "5. Content Posting",
+            "p1": "Content posted must be true and legal.",
+            "p2": "You retain copyright but grant us license to display.",
+            "p3": "We may remove violating content."
+        },
+        "section6": {
+            "title": "6. Intellectual Property",
+            "p1": "Platform design and code belong to us.",
+            "p2": "No copying for commercial use without permission."
+        },
+        "section7": {
+            "title": "7. Disclaimer",
+            "p1": "We do not guarantee truthfulness of user info.",
+            "p2": "Not liable for force majeure.",
+            "p3": "Disputes between users are resolved by users."
+        },
+        "section8": {
+            "title": "8. Amendments",
+            "p1": "We may amend terms.",
+            "p2": "Continued use means acceptance."
+        },
+        "section9": {
+            "title": "9. Dispute Resolution",
+            "p1": "This agreement applies to the laws of the People's Republic of China.",
+            "p2": "Disputes arising from this agreement should be resolved through friendly negotiation; if negotiation fails, a lawsuit may be filed in the court where the Platform is located.",
+            "contact": "Contact Email: legal{'@'}mirauni.com"
+        },
+        "section10": {
+            "title": "10. Contact Us",
+            "p1": "If you have legal questions, contact us via footer links."
+        },
+        "seoTitle": "Terms of Service - Mirauni",
+        "seoDescription": "Mirauni Terms of Service."
+    },
+    "privacy": {
+        "title": "Privacy Policy",
+        "lastUpdated": "Last Updated",
+        "intro": "We value your privacy.",
+        "section1": {
+            "title": "1. Information Collection",
+            "intro": "We collect:",
+            "sub1": {
+                "title": "Provided by you",
+                "item1": "Registration info;",
+                "item2": "Profile info;",
+                "item3": "Posted content."
+            },
+            "sub2": {
+                "title": "Automatically collected",
+                "item1": "Device info;",
+                "item2": "Logs;",
+                "item3": "Cookies."
+            }
+        },
+        "section2": {
+            "title": "2. Information Use",
+            "intro": "Used for:",
+            "use1": "Service provision;",
+            "use2": "Account handling;",
+            "use3": "Recommendations;",
+            "use4": "Notifications;",
+            "use5": "Analysis."
+        },
+        "section3": {
+            "title": "3. Protection",
+            "p1": "We use technical measures to protect data.",
+            "p2": "Stored on secure servers.",
+            "p3": "Please keep your account safe."
+        },
+        "section4": {
+            "title": "4. Sharing",
+            "intro": "We don't share unless:",
+            "case1": "Consent obtained;",
+            "case2": "Legal requirement;",
+            "case3": "Protect rights;",
+            "case4": "Merger/Acquisition."
+        },
+        "section5": {
+            "title": "5. Cookies",
+            "p1": "We use cookies.",
+            "p2": "You can refuse cookies."
+        },
+        "section6": {
+            "title": "6. Your Rights",
+            "intro": "Rights to:",
+            "right1": "Access;",
+            "right2": "Correct;",
+            "right3": "Delete;",
+            "right4": "Delete Account.",
+            "contact": "Contact us to exercise rights."
+        },
+        "section7": {
+            "title": "7. Minors",
+            "p1": "Service for adults. Minors need guardian consent."
+        },
+        "section8": {
+            "title": "8. Updates",
+            "p1": "We may update this policy."
+        },
+        "section9": {
+            "title": "9. Contact",
+            "p1": "Contact us if you have questions."
+        },
+        "seoTitle": "Privacy Policy - Mirauni",
+        "seoDescription": "Mirauni Privacy Policy."
+    },
+    "contact": {
+        "badge": "Contact",
+        "title": "Contact Us",
+        "subtitle": "We want to hear from you",
+        "business": {
+            "title": "Business",
+            "desc": "Partnerships or investment?"
+        },
+        "feedback": {
+            "title": "Feedback",
+            "desc": "Issues or suggestions?"
+        },
+        "media": {
+            "title": "Media",
+            "desc": "Media inquiries."
+        },
+        "social": {
+            "title": "Follow Us",
+            "desc": "Get latest updates.",
+            "wechat": "WeChat",
+            "wechatId": "ID",
+            "jike": "Jike",
+            "jikeId": "ID"
+        },
+        "workHours": {
+            "title": "Work Hours",
+            "time": "Mon-Fri 10:00 - 18:00 (UTC+8)",
+            "note": "We usually reply within 24 hours."
+        },
+        "seoTitle": "Contact Us - Mirauni",
+        "seoDescription": "Contact Mirauni for support."
     }
 }

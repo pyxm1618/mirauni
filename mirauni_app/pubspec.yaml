@@ -34,6 +34,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  google_fonts: ^6.1.0
 
   # Supabase
   supabase_flutter: ^2.0.0
@@ -67,7 +68,8 @@ dependencies:
   in_app_review: ^2.0.0
 
   # 微信 SDK (登录/支付)
-  fluwx: ^4.6.1
+  fluwx: ^5.3.0
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:

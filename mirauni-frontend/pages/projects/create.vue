@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto px-4 py-12 max-w-4xl">
-    <h1 class="text-4xl font-black font-display mb-8 uppercase text-center border-b-4 border-black inline-block mx-auto">LAUNCH NEW PROJECT</h1>
+    <h1 class="text-4xl font-black font-display mb-8 uppercase text-center border-b-4 border-black inline-block mx-auto">{{ $t('project.create.title') }}</h1>
     <ProjectForm @submit="onSubmit" :loading="loading" />
   </div>
 </template>
@@ -33,14 +33,16 @@ const onSubmit = async (formData: any) => {
        navigateTo(`/projects/${response.data.id}`)
     }
   } catch (e: any) {
-    alert('发布失败: ' + (e.data?.message || e.message))
+    alert(t('project.create.failed') + ': ' + (e.data?.message || e.message))
   } finally {
     loading.value = false
   }
 }
 
+const { t } = useI18n()
+
 useSeoMeta({
-  title: '发布项目 - 小概率',
-  description: '发布你的创业项目，寻找技术合伙人'
+  title: t('project.create.seoTitle'),
+  description: t('project.create.seoDesc')
 })
 </script>

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/constants.dart';
 import '../../models/user.dart';
+import '../../widgets/common/brutalist_card.dart';
 
-/// 开发者卡片组件
+/// 开发者卡片组件 (Brutalist Style)
 class DeveloperCard extends StatelessWidget {
   final AppUser developer;
   final VoidCallback? onTap;
@@ -16,152 +16,122 @@ class DeveloperCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: AppColors.border, width: 1),
-      ),
+    return BrutalistCard(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 头像
-              ClipOval(
-                child: developer.avatarUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: developer.avatarUrl!,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(
-                          color: AppColors.border,
-                        ),
-                        errorWidget: (_, __, ___) => _defaultAvatar,
-                      )
-                    : _defaultAvatar,
-              ),
-              const SizedBox(width: 12),
-
-              // 信息
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 用户名和认证标识
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            developer.displayName,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (developer.isVerified == true) ...[
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.verified,
-                            size: 16,
-                            color: AppColors.primary,
-                          ),
-                        ],
-                      ],
-                    ),
-
-                    // 简介
-                    if (developer.bio != null && developer.bio!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+        child: Column(
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        developer.bio!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                          height: 1.4,
+                        developer.displayName.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          height: 1.0,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-
-                    // 技能标签
-                    if (developer.skills != null && developer.skills!.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: developer.skills!.take(4).map((skill) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(AppRadius.sm),
-                            ),
-                            child: Text(
-                              skill,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-
-                    // 经验年限
-                    if (developer.experience != null) ...[
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.work_outline,
-                            size: 14,
-                            color: AppColors.textLight,
+                      const SizedBox(height: 4),
+                      Container(
+                        color: Colors.black,
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        child: Text(
+                          developer.skills?.firstOrNull?.toUpperCase() ?? 'DEVELOPER',
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 12,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${developer.experience} 年经验',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textLight,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+                Text(
+                  '${developer.experience ?? 0} YRS',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+             // Bio
+             Text(
+               '"${developer.bio ?? ''}"',
+               style: const TextStyle(
+                 fontWeight: FontWeight.bold,
+                 color: AppColors.textSecondary,
+                 fontStyle: FontStyle.italic,
+               ),
+               maxLines: 3,
+               overflow: TextOverflow.ellipsis,
+             ),
+             
+             const SizedBox(height: 16),
+             
+             // Skills
+             if (developer.skills != null)
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: developer.skills!.take(4).map((skill) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: Text(
+                      skill.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  )).toList(),
+                ),
+
+             const SizedBox(height: 20),
+
+             // Unlock Button (Static visual)
+             Container(
+               width: double.infinity,
+               padding: const EdgeInsets.symmetric(vertical: 12),
+               decoration: BoxDecoration(
+                 color: AppColors.secondary,
+                 border: Border.all(color: Colors.black, width: 3),
+                 boxShadow: const [
+                   BoxShadow(
+                     color: Colors.black,
+                     offset: Offset(4, 4), // Static shadow
+                     blurRadius: 0,
+                   )
+                 ],
+               ),
+               alignment: Alignment.center,
+               child: const Text(
+                 'UNLOCK CONTACT (50P)',
+                 style: TextStyle(
+                   fontSize: 14,
+                   fontWeight: FontWeight.w900,
+                   color: AppColors.textPrimary,
+                   letterSpacing: 0.5,
+                 ),
+               ),
+             )
+          ],
         ),
       ),
     );
   }
-
-  Widget get _defaultAvatar => Container(
-        width: 56,
-        height: 56,
-        color: AppColors.border,
-        child: Icon(
-          Icons.person,
-          size: 28,
-          color: AppColors.textLight,
-        ),
-      );
 }

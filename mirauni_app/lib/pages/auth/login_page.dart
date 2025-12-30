@@ -7,8 +7,8 @@ import '../../services/auth_service.dart';
 import '../../services/wechat_service.dart';
 import '../../utils/validators.dart';
 import '../../utils/toast.dart';
-import '../../widgets/form/phone_input.dart';
-import '../../widgets/form/code_input.dart';
+import '../../widgets/common/brutalist_button.dart';
+import '../../widgets/form/brutalist_text_field.dart';
 import '../../widgets/common/loading.dart';
 
 /// 登录页面
@@ -196,233 +196,237 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.primary, // Yellow background
       body: LoadingOverlay(
         isLoading: _isLoading,
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 48),
-                // Logo 和标题
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [AppColors.primary, AppColors.primaryDark],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.flash_on,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        AppConstants.appName,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppConstants.appDescription,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 64),
-
-                // 表单
-                Text(
-                  '手机号登录',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // 手机号输入
-                PhoneInput(
-                  controller: _phoneController,
-                  errorText: _phoneError,
-                  enabled: !_isLoading,
-                  onChanged: (value) {
-                    if (_phoneError != null) {
-                      setState(() => _phoneError = null);
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // 验证码输入
-                CodeInput(
-                  controller: _codeController,
-                  errorText: _codeError,
-                  enabled: !_isLoading,
-                  countdown: _countdown,
-                  canSend: _isPhoneValid,
-                  onSendCode: _sendCode,
-                  onChanged: (value) {
-                    if (_codeError != null) {
-                      setState(() => _codeError = null);
-                    }
-                  },
-                ),
-                const SizedBox(height: 32),
-
-                // 登录按钮
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _canLogin ? _login : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
-                      disabledForegroundColor: Colors.white70,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      '登录',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // 协议提示
-                Center(
-                  child: Text.rich(
-                    TextSpan(
-                      text: '登录即表示同意',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textLight,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: '《用户协议》',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const TextSpan(text: '和'),
-                        TextSpan(
-                          text: '《隐私政策》',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                          ),
-                        ),
+          child: Stack(
+            children: [
+              // 关闭按钮 - 返回首页
+              Positioned(
+                top: 16,
+                left: 16,
+                child: GestureDetector(
+                  onTap: () => context.go('/'),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.black, width: 3),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black, offset: Offset(2, 2), blurRadius: 0)
                       ],
                     ),
+                    child: const Icon(Icons.close, color: Colors.black, size: 24),
                   ),
                 ),
-
-                const SizedBox(height: 48),
-
-                // 其他登录方式
-                Center(
+              ),
+              // 主内容
+              Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                // Logo/Header Area
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    border: Border.all(color: Colors.black, width: 3),
+                    boxShadow: const [
+                       BoxShadow(
+                         color: Colors.black,
+                         offset: Offset(4, 4),
+                         blurRadius: 0,
+                       )
+                    ],
+                  ),
+                  transform: Matrix4.rotationZ(-0.05), // Slight rotation
+                  child: const Text(
+                    'LOGIN.',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 64),
+
+                // Login Form Container
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.black, width: 3),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black,
+                        offset: Offset(8, 8),
+                        blurRadius: 0,
+                      )
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'ACCESS SYSTEM',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.black,
+                          decoration: TextDecoration.underline,
+                          decorationThickness: 3,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Phone Input
+                      BrutalistTextField(
+                        controller: _phoneController,
+                        label: 'Phone Number',
+                        placeholder: 'YOUR PHONE NO.',
+                        keyboardType: TextInputType.phone,
+                        errorText: _phoneError,
+                        enabled: !_isLoading,
+                        onChanged: (value) {
+                           if (_phoneError != null) setState(() => _phoneError = null);
+                        },
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Code Input Row
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Expanded(
-                            child: Divider(color: AppColors.border),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              '其他登录方式',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textLight,
-                              ),
+                            child: BrutalistTextField(
+                              controller: _codeController,
+                              label: 'Verification Code',
+                              placeholder: 'XXXXXX',
+                              keyboardType: TextInputType.number,
+                              errorText: _codeError,
+                              enabled: !_isLoading,
+                              onChanged: (value) {
+                                if (_codeError != null) setState(() => _codeError = null);
+                              },
                             ),
                           ),
-                          Expanded(
-                            child: Divider(color: AppColors.border),
+                          const SizedBox(width: 12),
+                          // Send Code Button
+                          SizedBox(
+                            width: 120,
+                            child: BrutalistButton(
+                               text: _countdown > 0 ? '${_countdown}S' : 'GET CODE',
+                               fontSize: 14,
+                               backgroundColor: _countdown > 0 ? Colors.grey[300] : AppColors.secondary,
+                               onPressed: (_countdown > 0 || !_isPhoneValid || _isLoading) 
+                                   ? null 
+                                   : _sendCode,
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
-                      // 微信登录按钮
-                      InkWell(
-                        onTap: _isLoading ? null : _loginWithWechat,
-                        borderRadius: BorderRadius.circular(30),
-                        child: Opacity(
-                          opacity: _isWechatInstalled ? 1.0 : 0.5,
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF07C160),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF07C160).withOpacity(0.3),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.chat_bubble,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '微信登录',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
+                      
+                      const SizedBox(height: 32),
+
+                      // Login Button
+                      BrutalistButton(
+                        text: 'ENTER SYSTEM',
+                        isFullWidth: true,
+                         backgroundColor: AppColors.primary,
+                        onPressed: _canLogin ? _login : null,
                       ),
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 32),
+
+                // Agreement
+                 Text.rich(
+                    TextSpan(
+                      text: 'AGREE TO ',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'TERMS',
+                          style: const TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                          // TODO: Add tap handler
+                        ),
+                        const TextSpan(text: ' & '),
+                        TextSpan(
+                          text: 'PRIVACY',
+                          style: const TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                           // TODO: Add tap handler
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                const SizedBox(height: 48),
+
+                // WeChat Login
+                if (_isWechatInstalled) ...[
+                   Column(
+                    children: [
+                      const Text(
+                        'OR CONNECT WITH',
+                         style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: _isLoading ? null : _loginWithWechat,
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF07C160),
+                            border: Border.all(color: Colors.black, width: 3),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black,
+                                offset: Offset(4, 4),
+                                blurRadius: 0,
+                              )
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.chat_bubble,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
         ),
-      ),
+      ],
+    ),
+  ),
+),
     );
   }
 }

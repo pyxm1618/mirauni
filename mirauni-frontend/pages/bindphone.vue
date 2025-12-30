@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-[80vh] flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-white border-2 border-indie-border shadow-brutal-lg p-8 transform rotate-1 hover:rotate-0 transition-transform duration-300">
-      <h1 class="text-3xl font-display font-black mb-4 text-center border-b-4 border-indie-accent inline-block mx-auto uppercase">BIND PHONE / 绑定手机</h1>
-      <p class="text-gray-500 text-center mb-8 font-bold">Please bind your phone to continue.</p>
+      <h1 class="text-3xl font-display font-black mb-4 text-center border-b-4 border-indie-accent inline-block mx-auto uppercase">{{ $t('auth.bind.title') }}</h1>
+      <p class="text-gray-500 text-center mb-8 font-bold">{{ $t('auth.bind.subtitle') }}</p>
       
       <!-- 微信用户信息 -->
       <div v-if="wxNickname || wxAvatar" class="flex items-center gap-4 mb-8 p-4 bg-gray-50 border-3 border-black shadow-brutal-sm">
@@ -16,7 +16,7 @@
         </div>
         <div>
           <p class="font-black text-lg">{{ wxNickname || 'WECHAT_USER' }}</p>
-          <p class="text-sm text-gray-500 font-bold uppercase">CONNECTED ACCOUNT</p>
+          <p class="text-sm text-gray-500 font-bold uppercase">{{ $t('auth.bind.connected') }}</p>
         </div>
       </div>
       
@@ -28,11 +28,11 @@
       <form @submit.prevent="handleSubmit" class="space-y-6">
         <!-- 手机号 -->
         <div>
-          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">PHONE NUMBER</label>
+          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.phoneLabel') }}</label>
           <input 
             v-model="phone"
             type="tel" 
-            placeholder="ENTER PHONE NUMBER"
+            :placeholder="$t('auth.phonePlaceholder')"
             class="w-full bg-gray-50 px-4 py-4 border-3 border-black font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
             maxlength="11"
           />
@@ -40,12 +40,12 @@
 
         <!-- 验证码 -->
         <div>
-          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">VERIFICATION CODE</label>
+          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.codeLabel') }}</label>
           <div class="flex gap-4">
             <input 
               v-model="code"
               type="text" 
-              placeholder="6-DIGIT CODE"
+              :placeholder="$t('auth.codePlaceholder')"
               class="flex-1 bg-gray-50 px-4 py-4 border-3 border-black font-bold text-lg tracking-widest focus:outline-none focus:shadow-brutal text-center"
               maxlength="6"
             />
@@ -55,7 +55,7 @@
               :disabled="isSending || countdown > 0 || phone.length !== 11"
               class="px-6 py-4 border-3 border-black bg-black text-white hover:bg-indie-primary hover:text-black font-black uppercase whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-brutal hover:shadow-brutal-hover transition-all"
             >
-              {{ countdown > 0 ? `${countdown}s` : (isSending ? 'SENDING...' : 'GET CODE') }}
+              {{ countdown > 0 ? `${countdown}${$t('auth.resend')}` : (isSending ? $t('auth.sending') : $t('auth.sendCode')) }}
             </button>
           </div>
         </div>
@@ -65,7 +65,7 @@
           :disabled="isSubmitting || phone.length !== 11 || code.length !== 6"
           class="w-full px-6 py-4 bg-indie-primary border-3 border-black shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-black text-xl uppercase disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ isSubmitting ? 'BINDING...' : 'CONFIRM BINDING' }}
+          {{ isSubmitting ? $t('auth.bind.binding') : $t('auth.bind.submit') }}
         </button>
       </form>
     </div>
@@ -80,6 +80,7 @@ const router = useRouter()
 const supabase = useSupabaseClient()
 const authStore = useAuthStore()
 const { sendSmsCode, bindPhone } = useAuth()
+const { t } = useI18n()
 
 // 从 URL 解析微信信息
 const wxDataStr = route.query.wx as string
@@ -111,14 +112,14 @@ let countdownTimer: NodeJS.Timeout | null = null
 // 检查必要参数
 onMounted(() => {
   if (!wxOpenid) {
-    error.value = '微信信息缺失，请重新登录'
+    error.value = t('auth.error.missingWechat')
   }
 })
 
 // 发送验证码
 async function sendCode() {
   if (phone.value.length !== 11) {
-    error.value = '请输入正确的手机号'
+    error.value = t('auth.error.phone')
     return
   }
 
@@ -129,7 +130,7 @@ async function sendCode() {
     await sendSmsCode(phone.value)
     startCountdown()
   } catch (e: any) {
-    error.value = e.data?.message || e.message || '发送验证码失败'
+    error.value = e.data?.message || e.message || t('auth.error.sendFailed')
   } finally {
     isSending.value = false
   }
@@ -138,7 +139,7 @@ async function sendCode() {
 // 绑定手机号
 async function handleSubmit() {
   if (!wxOpenid) {
-    error.value = '微信信息缺失'
+    error.value = t('auth.error.missingWechat')
     return
   }
 
@@ -156,13 +157,13 @@ async function handleSubmit() {
       })
 
       // 更新 store
-      authStore.setUser(response.user)
+      authStore.setUser(response.user as any)
 
       // 跳转
       await router.push('/')
     }
   } catch (e: any) {
-    error.value = e.data?.message || e.message || '绑定失败'
+    error.value = e.data?.message || e.message || t('auth.error.bindFailed')
   } finally {
     isSubmitting.value = false
   }
@@ -187,7 +188,7 @@ onUnmounted(() => {
 })
 
 useSeoMeta({
-  title: '绑定手机号 - 小概率',
+  title: t('auth.bind.seoTitle'),
   robots: 'noindex'
 })
 </script>

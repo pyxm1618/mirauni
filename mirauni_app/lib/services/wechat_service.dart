@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:fluwx/fluwx.dart';
 import '../config/env.dart';
@@ -173,9 +174,6 @@ class WechatService {
         url,
         title: title,
         description: description ?? '',
-        thumbnail: thumbnail != null 
-            ? WeChatImage.network(thumbnail) 
-            : null,
         scene: scene,
       );
 
@@ -215,9 +213,11 @@ class WechatService {
   /// 分享图片到微信
   /// 
   /// [imagePath] 图片路径（本地路径或网络 URL）
+  /// [imageBytes] 图片字节数据（可选，传此参数可避免网络下载）
   /// [scene] 分享场景
   Future<bool> shareImage({
-    required String imagePath,
+    String? imagePath,
+    Uint8List? imageBytes,
     WeChatScene scene = WeChatScene.session,
   }) async {
     final installed = await isWechatInstalled();
@@ -226,14 +226,24 @@ class WechatService {
     }
 
     try {
-      WeChatImage image;
-      if (imagePath.startsWith('http')) {
-        image = WeChatImage.network(imagePath);
+      // fluwx 5.x 要求 iOS 必须传 uint8List
+      // Android 可以用 localImagePath 或 uint8List
+      WeChatImageToShare imageToShare;
+      
+      if (imageBytes != null) {
+        imageToShare = WeChatImageToShare(uint8List: imageBytes);
+      } else if (imagePath != null && !imagePath.startsWith('http')) {
+        // 本地文件路径
+        imageToShare = WeChatImageToShare(localImagePath: imagePath);
       } else {
-        image = WeChatImage.file(imagePath);
+        // 网络图片暂不支持，需要先下载
+        throw Exception('网络图片分享请先下载为 bytes 再传入 imageBytes 参数');
       }
 
-      final model = WeChatShareImageModel(image, scene: scene);
+      final model = WeChatShareImageModel(
+        imageToShare,
+        scene: scene,
+      );
 
       return await _fluwx.share(model);
     } catch (e) {

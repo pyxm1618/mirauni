@@ -29,6 +29,7 @@ export function useAuth() {
      * 验证码登录
      */
     async function loginWithCode(phone: string, code: string) {
+        console.log('[useAuth] loginWithCode called. Fetching /api/auth/verify-code...')
         const response = await $fetch<{
             success: boolean
             user: any
@@ -39,8 +40,10 @@ export function useAuth() {
             } | null
         }>('/api/auth/verify-code', {
             method: 'POST',
-            body: { phone, code }
+            body: { phone, code },
+            timeout: 15000 // 15s timeout
         })
+        console.log('[useAuth] /api/auth/verify-code response:', response)
 
         if (response.success && response.session) {
             // 设置 Supabase session

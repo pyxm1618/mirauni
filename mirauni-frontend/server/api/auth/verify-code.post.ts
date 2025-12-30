@@ -32,24 +32,34 @@ export default defineEventHandler(async (event) => {
     const supabase = await serverSupabaseClient(event)
     const supabaseAdmin = serverSupabaseServiceRole(event)
 
-    // 1. 验证验证码
-    const { data: smsData, error: smsError } = await supabase
-        .from('sms_codes')
-        .select()
-        .eq('phone', phone)
-        .eq('code', code)
-        .gt('expires_at', new Date().toISOString())
-        .single()
+    // 1. 验证验证码（开发模式支持万能验证码 888888）
+    const isDevMasterCode = process.dev && code === '888888'
 
-    if (smsError || !smsData) {
-        throw createError({
-            statusCode: 400,
-            message: '验证码错误或已过期'
-        })
+    let smsData = null
+    if (!isDevMasterCode) {
+        const { data, error: smsError } = await supabase
+            .from('sms_codes')
+            .select()
+            .eq('phone', phone)
+            .eq('code', code)
+            .gt('expires_at', new Date().toISOString())
+            .single()
+
+        if (smsError || !data) {
+            throw createError({
+                statusCode: 400,
+                message: '验证码错误或已过期'
+            })
+        }
+        smsData = data
+    } else {
+        console.log(`[DEV] 使用万能验证码登录: ${phone}`)
     }
 
-    // 2. 删除已使用的验证码
-    await supabase.from('sms_codes').delete().eq('phone', phone)
+    // 2. 删除已使用的验证码（仅非万能验证码时）
+    if (!isDevMasterCode) {
+        await supabase.from('sms_codes').delete().eq('phone', phone)
+    }
 
     // 3. 查找现有用户
     let { data: existingUser } = await supabase
@@ -118,8 +128,8 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        // 创建 users 表记录
-        const { data: newUser, error: createUserError } = await supabase
+        // 创建 users 表记录（使用 admin 客户端绕过 RLS）
+        const { data: newUser, error: createUserError } = await supabaseAdmin
             .from('users')
             .insert({
                 id: signUpData.user.id,  // 使用 Auth 用户的 ID

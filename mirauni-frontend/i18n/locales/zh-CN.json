@@ -1,9 +1,11 @@
 {
     "common": {
+        "appName": "小概率",
         "login": "登录",
         "logout": "退出登录",
         "register": "注册",
         "submit": "提交",
+        "join": "立即加入",
         "cancel": "取消",
         "confirm": "确认",
         "save": "保存",
@@ -25,9 +27,27 @@
     },
     "home": {
         "title": "小概率 - 独立开发者找合伙人的第一站",
-        "subtitle": "帮助独立开发者发布项目、寻找技术合伙人",
+        "subtitle": "帮助独立开发者发布项目、寻找技术合伙人，找到靠谱的创业伙伴",
+        "badge": "更快交付",
+        "heroTitlePrefix": "找到你的",
+        "heroTitleSuffix": "技术合伙人",
+        "heroSubtitle": "独立开发者找合伙人的第一站。发布你的项目，找到志同道合的开发者，一起创造。",
         "startProject": "发布项目",
-        "findPartner": "寻找合伙人"
+        "findPartner": "浏览人才",
+        "features": {
+            "post": {
+                "title": "发布项目",
+                "desc": "有想法？发布你的项目，招募技术合伙人一起实现"
+            },
+            "find": {
+                "title": "找到伙伴",
+                "desc": "浏览开发者人才库，找到技能匹配的合作伙伴"
+            },
+            "chat": {
+                "title": "即时沟通",
+                "desc": "解锁联系方式后，通过站内信直接沟通"
+            }
+        }
     },
     "project": {
         "title": "项目标题",
@@ -37,25 +57,487 @@
         "budget": "预算",
         "skills": "技能要求",
         "apply": "申请合作",
-        "contact": "联系发起人"
+        "contact": "联系发起人",
+        "workModes": {
+            "remote": "远程办公",
+            "onsite": "坐班",
+            "hybrid": "混合办公"
+        },
+        "cooperationTypes": {
+            "equity": "股权合作",
+            "salary": "薪酬合作",
+            "revenue_share": "收益分成",
+            "volunteer": "纯兴趣参与"
+        },
+        "categories": {
+            "saas": "SaaS 工具",
+            "app": "移动应用",
+            "game": "游戏",
+            "ai": "AI / 人工智能",
+            "ecommerce": "电商",
+            "content": "内容/社区",
+            "hardware": "智能硬件",
+            "other": "其他"
+        },
+        "square": {
+            "title": "项目广场",
+            "subtitle": "创业项目招募",
+            "launch": "发布项目",
+            "search": "搜索项目...",
+            "category": "分类 / 全部分类",
+            "mode": "模式 / 工作模式",
+            "role": "角色 / 需求角色",
+            "loading": "加载中...",
+            "empty": "暂无符合条件的项目",
+            "emptyHint": "试着调整筛选条件，或者",
+            "launchFirst": "发布第一个项目",
+            "seoTitle": "创业项目招募 - 小概率",
+            "seoDesc": "浏览独立开发者的创业项目"
+        },
+        "create": {
+            "title": "发布新项目",
+            "basic": "基本信息",
+            "projectName": "项目名称 *",
+            "namePlaceholder": "起个响亮的名字",
+            "summary": "一句话简介 *",
+            "summaryPlaceholder": "描述核心价值 (10-50字)",
+            "category": "项目分类 *",
+            "selectCategory": "选择分类",
+            "cooperationType": "合作方式 *",
+            "workMode": "工作模式 *",
+            "roles": "招募角色 (多选) *",
+            "description": "详细介绍",
+            "publicVisible": "公开可见",
+            "descPlaceholder": "描述项目背景、痛点、解决方案...",
+            "demoUrl": "演示链接",
+            "submit": "发布项目",
+            "submitting": "发布中...",
+            "save": "保存修改",
+            "success": "发布成功",
+            "failed": "发布失败",
+            "seoTitle": "发布项目 - 小概率",
+            "seoDesc": "发布你的创业项目"
+        },
+        "edit": {
+            "title": "编辑项目",
+            "close": "下架项目",
+            "loading": "加载中...",
+            "notFound": "项目不存在",
+            "closeConfirm": "确定要下架该项目吗？下架后将不再显示在列表中，但数据会保留。",
+            "closed": "项目已下架",
+            "closeFailed": "操作失败",
+            "saveFailed": "保存失败",
+            "seoTitle": "编辑项目 - 小概率"
+        }
     },
     "developer": {
         "skills": "技能",
         "experience": "工作经验",
         "bio": "个人简介",
-        "contact": "联系方式"
+        "contact": "联系方式",
+        "square": {
+            "title": "发现开发者",
+            "titleEn": "Talent Hunt",
+            "find": "查找开发者:",
+            "search": "姓名或角色...",
+            "empty": "没有找到匹配的开发者",
+            "reset": "清除筛选",
+            "allSkills": "全部技能",
+            "seoTitle": "发现开发者 - 小概率",
+            "seoDesc": "寻找优秀的技术合伙人"
+        }
     },
     "auth": {
-        "phone": "手机号",
-        "code": "验证码",
-        "getCode": "获取验证码",
-        "loginWithPhone": "手机号登录",
-        "loginWithWechat": "微信登录"
+        "title": "登录 / 注册",
+        "phoneLabel": "手机号",
+        "phonePlaceholder": "请输入手机号",
+        "sendCode": "获取验证码",
+        "sending": "发送中",
+        "codeLabel": "验证码",
+        "codePlaceholder": "请输入6位验证码",
+        "codeSent": "验证码已发送至",
+        "resend": "秒后重发",
+        "resendBtn": "重新发送",
+        "loginBtn": "登录",
+        "loggingIn": "登录中...",
+        "back": "返回修改手机号",
+        "or": "或",
+        "wechatLogin": "微信登录",
+        "wechatLoading": "跳转中...",
+        "agreement": "登录即表示同意",
+        "userProtocol": "用户协议",
+        "and": "和",
+        "privacyPolicy": "隐私政策",
+        "error": {
+            "phone": "请输入正确的手机号",
+            "code": "请输入6位验证码",
+            "sendFailed": "发送验证码失败",
+            "loginFailed": "登录失败",
+            "bindFailed": "绑定失败",
+            "missingWechat": "微信信息缺失"
+        },
+        "bind": {
+            "title": "绑定手机号",
+            "subtitle": "请绑定手机号以继续",
+            "connected": "当前关联账号",
+            "submit": "确认绑定",
+            "binding": "绑定中...",
+            "seoTitle": "绑定手机号 - 小概率"
+        }
     },
     "footer": {
         "about": "关于我们",
         "terms": "服务条款",
         "privacy": "隐私政策",
-        "contact": "联系我们"
+        "contact": "联系我们",
+        "slogan": "独立开发者找合伙人的第一站",
+        "icp": "京ICP备2024069371号-6"
+    },
+    "me": {
+        "title": "个人中心",
+        "nav": {
+            "profile": "资料",
+            "projects": "我的项目",
+            "messages": "消息",
+            "recharge": "充值",
+            "logout": "退出登录"
+        },
+        "profile": {
+            "title": "编辑资料",
+            "credits": "积分",
+            "addFunds": "充值",
+            "avatar": "头像",
+            "change": "更换",
+            "upload": "上传新头像",
+            "uploading": "上传中...",
+            "avatarHint": "JPG, PNG, WEBP (最大 500KB)",
+            "username": "用户名",
+            "usernamePlaceholder": "唯一用户名",
+            "profession": "职业",
+            "professionPlaceholder": "例如：前端工程师",
+            "titleLabel": "当前头衔",
+            "titlePlaceholder": "例如：高级开发",
+            "bio": "个人简介",
+            "bioPlaceholder": "介绍一下你自己...",
+            "skills": "技能 (最多10项)",
+            "addSkill": "添加技能",
+            "exp": "工作年限",
+            "preference": "工作偏好",
+            "fulltime": "全职",
+            "parttime": "兼职 / 合同工",
+            "location": "所在地",
+            "locationPlaceholder": "例如：北京",
+            "contactInfo": "私密联系方式",
+            "visibleAfterUnlock": "解锁后可见",
+            "wechat": "微信号",
+            "wechatPlaceholder": "您的微信号",
+            "email": "邮箱",
+            "emailPlaceholder": "您的邮箱",
+            "save": "保存资料",
+            "saving": "保存中...",
+            "logoutConfirm": "确定要退出登录吗？",
+            "uploadSuccess": "头像上传成功",
+            "saveSuccess": "资料已保存"
+        },
+        "projects": {
+            "title": "我的项目",
+            "launch": "发布新项目",
+            "edit": "管理项目",
+            "view": "查看详情",
+            "status": {
+                "pending": "审核中",
+                "active": "招募中",
+                "closed": "已关闭",
+                "rejected": "未通过"
+            }
+        },
+        "recharge": {
+            "title": "充值中心",
+            "nav": {
+                "profile": "个人资料",
+                "projects": "我的项目",
+                "messages": "消息中心",
+                "recharge": "充值/RECHARGE"
+            },
+            "balance": "当前余额",
+            "lifetime": "累计解锁",
+            "package": "选择套餐",
+            "unlocks": "次解锁",
+            "perUnlock": "元/次",
+            "bonus": {
+                "title": "首充优惠",
+                "desc": "首充立享 8 折 + 加赠 30%！"
+            },
+            "pay": "微信支付",
+            "history": "充值/解锁记录",
+            "unlockedVia": "解锁自",
+            "sendMessage": "发送消息",
+            "packages": {
+                "basic": "基础包",
+                "standard": "标准包",
+                "premium": "高级包"
+            }
+        }
+    },
+    "messages": {
+        "title": "我的消息",
+        "loading": "加载消息中...",
+        "error": "加载消息失败",
+        "empty": "暂无消息",
+        "emptyHint": "开始与他人建立连接",
+        "findTalent": "发现人才",
+        "exploreProjects": "浏览项目",
+        "noContent": "暂无内容"
+    },
+    "skills": {
+        "vue": "Vue.js",
+        "react": "React",
+        "typescript": "TypeScript",
+        "flutter": "Flutter",
+        "swift": "Swift",
+        "kotlin": "Kotlin",
+        "nodejs": "Node.js",
+        "python": "Python",
+        "java": "Java",
+        "golang": "Go",
+        "rust": "Rust",
+        "mysql": "MySQL",
+        "postgresql": "PostgreSQL",
+        "mongodb": "MongoDB",
+        "redis": "Redis",
+        "docker": "Docker",
+        "kubernetes": "Kubernetes",
+        "aws": "AWS",
+        "ai": "AI/ML",
+        "figma": "Figma"
+    },
+    "roles": {
+        "frontend": "前端开发",
+        "backend": "后端开发",
+        "fullstack": "全栈开发",
+        "mobile": "移动端开发",
+        "design": "UI/UX 设计",
+        "product": "产品经理",
+        "operation": "运营",
+        "marketing": "市场推广"
+    },
+    "legal": {
+        "badge": "法律条款"
+    },
+    "about": {
+        "badge": "关于我们",
+        "title": "关于小概率",
+        "slogan": "独立开发者找合伙人的第一站。帮助独立开发者找到志同道合的合伙人，一起把想法变成产品。",
+        "whoWeAre": {
+            "title": "我们是谁",
+            "content": "小概率(mirauni)是一个致力于为独立开发者、创业者和创意人才提供连接的平台。我们相信，每一个伟大的产品背后，都有一个默契的团队。我们存在的意义，就是帮你找到那个「对」的人。"
+        },
+        "mission": {
+            "title": "我们的使命",
+            "content": "通过技术和社区的力量，降低创业组队的门槛，让每一个创意都能找到实现的路径。"
+        },
+        "vision": {
+            "title": "我们的愿景",
+            "content": "成为全球最活跃的独立开发者协作网络，见证无数小而美的产品在这里诞生。"
+        },
+        "problem": {
+            "title": "我们解决什么问题",
+            "p1": "许多独立开发者拥有出色的技术，却缺乏产品思维或运营能力；许多创业者拥有绝佳的点子，却找不到靠谱的技术合伙人。",
+            "p2": "传统的招聘平台效率低下，且难以筛选出具有「独立开发精神」的伙伴。小概率专注这一细分领域，提供更精准的匹配。"
+        },
+        "whyUs": {
+            "title": "为什么选择我们",
+            "feature1": {
+                "title": "专注垂直",
+                "desc": "只服务于独立开发者和早期创业团队，更懂你的需求。"
+            },
+            "feature2": {
+                "title": "真实可靠",
+                "desc": "严格的即人工审核机制，拒绝虚假信息和低质量内容。"
+            },
+            "feature3": {
+                "title": "全流程支持",
+                "desc": "打破信息差，直接沟通，快速建立信任与合作。"
+            }
+        },
+        "contact": {
+            "title": "联系我们",
+            "intro": "有任何问题或建议？随时联系我们。"
+        },
+        "seoTitle": "关于我们 - 小概率",
+        "seoDescription": "了解小概率团队并没有使命，我们如何帮助独立开发者寻找合伙人。"
+    },
+    "terms": {
+        "title": "服务条款",
+        "lastUpdated": "最后更新",
+        "intro": "在使用小概率（以下简称“本平台”）服务前，请认真阅读本协议。使用本平台服务即表示您同意遵守本协议。",
+        "section1": {
+            "title": "1. 服务内容",
+            "p1": "本平台主要提供项目信息发布、人才展示及沟通交流服务。",
+            "p2": "用户可在平台上发布项目需求、个人技能信息，并与其他用户进行沟通。",
+            "p3": "平台保留根据业务发展调整服务内容的权利。"
+        },
+        "section2": {
+            "title": "2. 账户注册",
+            "p1": "您需要注册账户才能使用平台的完整功能。",
+            "p2": "您应确保注册信息的真实性、准确性和完整性。",
+            "p3": "您有责任妥善保管您的账户账号及密码。",
+            "p4": "如发现账号被非法使用，应立即通知平台。"
+        },
+        "section3": {
+            "title": "3. 用户行为规范",
+            "intro": "用户在使用本平台时，应遵守法律法规及以下规定：",
+            "rule1": "不得发布违反国家法律法规的信息；",
+            "rule2": "不得发布虚假、诈骗、色情、暴力等有害信息；",
+            "rule3": "不得骚扰、辱骂其他用户；",
+            "rule4": "不得恶意采集平台数据；",
+            "rule5": "不得利用平台进行任何非法商业活动；",
+            "rule6": "不得侵犯他人的知识产权或隐私权。"
+        },
+        "section4": {
+            "title": "4. 付费服务",
+            "p1": "平台部分服务（如解锁联系方式）可能需要付费。",
+            "p2": "所有费用及支付方式将在相关页面予以明确公示。",
+            "p3": "除非法律规定或平台另有说明，已支付的费用不予退还。",
+            "p4": "平台有权根据市场情况调整收费标准。"
+        },
+        "section5": {
+            "title": "5. 内容发布",
+            "p1": "用户发布的内容（项目、个人简介等）必须真实合法。",
+            "p2": "用户保留其发布内容的知识产权，但授予平台展示、传播的权利。",
+            "p3": "平台有权对违规内容进行删除或屏蔽。"
+        },
+        "section6": {
+            "title": "6. 知识产权",
+            "p1": "平台本身的所有设计、代码、Logo等知识产权归平台所有。",
+            "p2": "未经许可，任何人不得因为商业目的复制或使用平台内容。"
+        },
+        "section7": {
+            "title": "7. 免责声明",
+            "p1": "平台不对用户发布信息的真实性做最终担保，请用户自行甄别。",
+            "p2": "因不可抗力或网络原因导致的服务中断，平台不承担责任。",
+            "p3": "用户间因合作产生的纠纷，由用户自行解决，平台不承担连带责任。"
+        },
+        "section8": {
+            "title": "8. 协议变更",
+            "p1": "平台有权修订本协议，并在平台公示。",
+            "p2": "继续使用服务视为接受修订后的协议。"
+        },
+        "section9": {
+            "title": "9. 争议解决",
+            "p1": "本协议适用中华人民共和国法律。",
+            "p2": "因本协议引起的纠纷，应友好协商解决；协商不成，可向平台所在地法院起诉。",
+            "contact": "联系邮箱：legal{'@'}mirauni.com"
+        },
+        "section10": {
+            "title": "10. 联系方式",
+            "p1": "如有法律相关问题，请通过本页面底部的联系方式联系我们。"
+        },
+        "seoTitle": "服务条款 - 小概率",
+        "seoDescription": "小概率平台服务条款与用户协议。"
+    },
+    "privacy": {
+        "title": "隐私政策",
+        "lastUpdated": "最后更新",
+        "intro": "我们非常重视您的隐私。本隐私政策说明了我们如何收集、使用和保护您的信息。",
+        "section1": {
+            "title": "1. 信息收集",
+            "intro": "我们可能收集以下类型的信息：",
+            "sub1": {
+                "title": "您主动提供的信息",
+                "item1": "注册信息（手机号、微信号等）；",
+                "item2": "个人资料（头像、技能、简介等）；",
+                "item3": "发布的内容（项目详情、文章等）。"
+            },
+            "sub2": {
+                "title": "我们自动收集的信息",
+                "item1": "设备信息（IP地址、浏览器类型等）；",
+                "item2": "使用日志（访问时间、点击记录等）；",
+                "item3": "Cookie数据。"
+            }
+        },
+        "section2": {
+            "title": "2. 信息使用",
+            "intro": "我们收集的信息主要用于：",
+            "use1": "提供、维护和改进我们的服务；",
+            "use2": "处理您的账户及交易；",
+            "use3": "向您推荐可能感兴趣的内容或合作伙伴；",
+            "use4": "发送服务通知或安全提示；",
+            "use5": "进行数据分析以优化用户体验。"
+        },
+        "section3": {
+            "title": "3. 信息存储与保护",
+            "p1": "我们会采取合理的技术措施保护您的信息安全，防止未经授权的访问或泄露。",
+            "p2": "您的信息存储在位于中国境内的安全服务器上。",
+            "p3": "尽管我们尽力保护，但互联网并非绝对安全，请您妥善保管账户信息。"
+        },
+        "section4": {
+            "title": "4. 信息共享",
+            "intro": "我们不会轻易与第三方共享您的个人信息，除非：",
+            "case1": "获得您的明确同意；",
+            "case2": "法律法规要求或政府机关指令；",
+            "case3": "为了保护平台或其他用户的合法权益；",
+            "case4": "在合并、收购等业务变更中转移。"
+        },
+        "section5": {
+            "title": "5. Cookie 使用",
+            "p1": "我们使用 Cookie 技术来识别您的身份，保存您的偏好设置。",
+            "p2": "您可以通过浏览器设置拒绝 Cookie，但这可能影响服务的使用。"
+        },
+        "section6": {
+            "title": "6. 用户权利",
+            "intro": "您对自己的个人信息拥有以下权利：",
+            "right1": "访问和查询您的信息；",
+            "right2": "更正不准确的信息；",
+            "right3": "删除您的信息（在不影响服务前提下）；",
+            "right4": "注销账户。",
+            "contact": "如需行使权利，请联系我们。"
+        },
+        "section7": {
+            "title": "7. 未成年人保护",
+            "p1": "本服务主要面向成年人。若您是未成年人，请在监护人指导下使用。"
+        },
+        "section8": {
+            "title": "8. 政策更新",
+            "p1": "我们可能会适时更新本隐私政策，更新后的政策将在平台公示。"
+        },
+        "section9": {
+            "title": "9. 联系我们",
+            "p1": "如对隐私政策有疑问，请联系我们。"
+        },
+        "seoTitle": "隐私政策 - 小概率",
+        "seoDescription": "小概率隐私保护政策说明。"
+    },
+    "contact": {
+        "badge": "联系",
+        "title": "联系我们",
+        "subtitle": "我们也想听听您的声音",
+        "business": {
+            "title": "商务合作",
+            "desc": "寻求合作、投资或建立伙伴关系？"
+        },
+        "feedback": {
+            "title": "用户反馈",
+            "desc": "遇到问题或有功能建议？让我们知道。"
+        },
+        "media": {
+            "title": "媒体咨询",
+            "desc": "媒体采访或新闻资料索取。"
+        },
+        "social": {
+            "title": "关注我们",
+            "desc": "在社交媒体上关注我们，获取最新动态。",
+            "wechat": "微信公众号",
+            "wechatId": "ID",
+            "jike": "即刻",
+            "jikeId": "ID"
+        },
+        "workHours": {
+            "title": "工作时间",
+            "time": "周一至周五 10:00 - 18:00 (UTC+8)",
+            "note": "通常会在 24 小时内回复邮件。"
+        },
+        "seoTitle": "联系我们 - 小概率",
+        "seoDescription": "联系小概率团队，获取支持或商务合作。"
     }
 }

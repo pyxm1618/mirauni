@@ -5,7 +5,6 @@ import '../../config/constants.dart';
 import '../../providers/project_provider.dart';
 import '../../widgets/project/project_card.dart';
 import '../../widgets/common/loading.dart';
-import '../../widgets/common/empty_state.dart';
 import '../../widgets/common/error_view.dart';
 
 /// 项目列表页面
@@ -18,19 +17,20 @@ class ProjectListPage extends ConsumerStatefulWidget {
 
 class _ProjectListPageState extends ConsumerState<ProjectListPage> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
   String? _selectedCategory;
   bool _isLoadingMore = false;
 
   // 分类选项
   static const _categories = [
-    {'value': null, 'label': '全部'},
-    {'value': 'app', 'label': 'App'},
-    {'value': 'web', 'label': '网站'},
-    {'value': 'mini_program', 'label': '小程序'},
-    {'value': 'saas', 'label': 'SaaS'},
+    {'value': null, 'label': 'ALL'}, // Brutalist: Uppercase
+    {'value': 'app', 'label': 'APP'},
+    {'value': 'web', 'label': 'WEB'},
+    {'value': 'mini_program', 'label': 'MP'},
+    {'value': 'saas', 'label': 'SAAS'},
     {'value': 'ai', 'label': 'AI'},
-    {'value': 'game', 'label': '游戏'},
-    {'value': 'other', 'label': '其他'},
+    {'value': 'game', 'label': 'GAME'},
+    {'value': 'other', 'label': 'OTHER'},
   ];
 
   @override
@@ -42,6 +42,7 @@ class _ProjectListPageState extends ConsumerState<ProjectListPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -75,103 +76,163 @@ class _ProjectListPageState extends ConsumerState<ProjectListPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          '找项目',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              // TODO: 搜索功能
-            },
-            icon: Icon(
-              Icons.search,
-              color: AppColors.textPrimary,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header & Filter Area
+            Container(
+              padding: const EdgeInsets.all(20),
+               decoration: const BoxDecoration(
+                color: AppColors.background,
+                border: Border(bottom: BorderSide(color: Colors.black, width: 4)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                   const Text(
+                    'PROJECTS SQUARE',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      height: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Search Bar
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black, width: 3),
+                             boxShadow: const [
+                               BoxShadow(
+                                 color: Colors.black,
+                                 offset: Offset(4, 4),
+                                 blurRadius: 0,
+                               )
+                             ]
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                             style: const TextStyle(
+                               fontWeight: FontWeight.bold,
+                               fontSize: 14,
+                             ),
+                             decoration: const InputDecoration(
+                               hintText: 'SEARCH_PROJECTS...',
+                               hintStyle: TextStyle(
+                                 color: AppColors.textLight,
+                                 fontWeight: FontWeight.bold,
+                               ),
+                               border: InputBorder.none,
+                               contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                               isDense: true,
+                             ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Categories
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _categories.map((cat) {
+                        final isSelected = cat['value'] == _selectedCategory;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: InkWell(
+                            onTap: () => _onCategoryChanged(cat['value'] as String?),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.black : Colors.white,
+                                border: Border.all(color: Colors.black, width: 3),
+                                boxShadow: !isSelected ? const [
+                                   BoxShadow(color: Colors.black, offset: Offset(2, 2), blurRadius: 0)
+                                ] : null,
+                              ),
+                              transform: !isSelected ? null : Matrix4.translationValues(2, 2, 0),
+                              child: Text(
+                                cat['label'] as String,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // 分类筛选
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.only(bottom: 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: _categories.map((cat) {
-                  final isSelected = cat['value'] == _selectedCategory;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(cat['label'] as String),
-                      selected: isSelected,
-                      onSelected: (_) =>
-                          _onCategoryChanged(cat['value'] as String?),
-                      selectedColor: AppColors.primary,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textSecondary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
+
+            // Project List
+            Expanded(
+              child: projectsAsync.when(
+                data: (projects) {
+                  if (projects.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                             Container(
+                               padding: const EdgeInsets.all(16),
+                               decoration: BoxDecoration(
+                                 color: Colors.white,
+                                 border: Border.all(color: Colors.black, width: 3),
+                                 boxShadow: const [BoxShadow(color: Colors.black, offset: Offset(4, 4))],
+                               ),
+                               child: const Text('NO_RESULTS_FOUND', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                             ),
+                        ],
                       ),
-                      backgroundColor: AppColors.background,
-                      side: BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.full),
-                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: _onRefresh,
+                    color: Colors.black,
+                    backgroundColor: AppColors.primary,
+                    child: ListView.separated(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(20),
+                      itemCount: projects.length,
+                      cacheExtent: 500, // Preload content
+                      separatorBuilder: (_, __) => const SizedBox(height: 20),
+                      itemBuilder: (context, index) {
+                        final project = projects[index];
+                        // Wrap ProjectCard or Replace it. 
+                        // For now we will update ProjectCard separately to be brutalist, 
+                        // so here we just use it, or we could inline the brutalist design here.
+                        // Let's modify ProjectCard in the next step to be brutalist.
+                        return ProjectCard(
+                          project: project,
+                          onTap: () => context.push('/project/${project.id}'),
+                        );
+                      },
                     ),
                   );
-                }).toList(),
+                },
+                loading: () => const AppLoading(),
+                error: (error, stack) => ErrorView(
+                  message: error.toString(),
+                  onRetry: () => ref.invalidate(projectListProvider),
+                ),
               ),
             ),
-          ),
-
-          // 项目列表
-          Expanded(
-            child: projectsAsync.when(
-              data: (projects) {
-                if (projects.isEmpty) {
-                  return EmptyState(
-                    title: '暂无项目',
-                    description: '当前分类下还没有项目',
-                    icon: Icons.folder_open,
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: _onRefresh,
-                  color: AppColors.primary,
-                  child: ListView.separated(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: projects.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final project = projects[index];
-                      return ProjectCard(
-                        project: project,
-                        onTap: () => context.push('/project/${project.id}'),
-                      );
-                    },
-                  ),
-                );
-              },
-              loading: () => const AppLoading(),
-              error: (error, stack) => ErrorView(
-                message: error.toString(),
-                onRetry: () => ref.invalidate(projectListProvider),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

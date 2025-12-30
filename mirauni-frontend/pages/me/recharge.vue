@@ -1,22 +1,22 @@
 <template>
   <div class="container mx-auto px-4 py-12">
-    <h1 class="text-5xl font-black font-display mb-12 uppercase">RECHARGE</h1>
+    <h1 class="text-5xl font-black font-display mb-12 uppercase">{{ $t('me.recharge.title') }}</h1>
 
     <div class="grid lg:grid-cols-4 gap-8">
       <!-- 侧边栏 -->
       <aside class="lg:col-span-1">
         <nav class="bg-white border-3 border-black shadow-brutal sticky top-8">
           <NuxtLink to="/me" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
-            PROFILE
+            {{ $t('me.recharge.nav.profile') }}
           </NuxtLink>
           <NuxtLink to="/me/projects" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
-             MY PROJECTS
+             {{ $t('me.recharge.nav.projects') }}
           </NuxtLink>
            <NuxtLink to="/me/messages" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
-            MESSAGES
+            {{ $t('me.recharge.nav.messages') }}
           </NuxtLink>
           <NuxtLink to="/me/recharge" class="block px-6 py-4 font-black uppercase bg-indie-primary border-black hover:bg-indie-accent transition-colors">
-            RECHARGE / 充值
+            {{ $t('me.recharge.nav.recharge') }}
           </NuxtLink>
         </nav>
       </aside>
@@ -27,11 +27,11 @@
         <div class="bg-white border-3 border-black shadow-brutal p-8 mb-12 relative overflow-hidden">
           <div class="relative z-10 flex items-center justify-between">
             <div>
-              <p class="text-gray-500 font-bold uppercase mb-2">CURRENT BALANCE</p>
-              <p class="text-6xl font-black">5 <span class="text-2xl font-bold text-gray-400">CREDITS</span></p>
+              <p class="text-gray-500 font-bold uppercase mb-2">{{ $t('me.recharge.balance') }}</p>
+              <p class="text-6xl font-black">5 <span class="text-2xl font-bold text-gray-400">{{ $t('me.recharge.credits') }}</span></p>
             </div>
             <div class="text-right">
-              <div class="text-sm font-bold uppercase bg-black text-white px-3 py-1 inline-block mb-1 transform rotate-2">LIFETIME UNLOCKS</div>
+              <div class="text-sm font-bold uppercase bg-black text-white px-3 py-1 inline-block mb-1 transform rotate-2">{{ $t('me.recharge.lifetime') }}</div>
               <p class="text-4xl font-black">12</p>
             </div>
           </div>
@@ -41,7 +41,7 @@
         </div>
 
         <!-- 套餐选择 -->
-        <h2 class="text-3xl font-black mb-8 uppercase border-l-8 border-indie-secondary pl-4">SELECT PACKAGE</h2>
+        <h2 class="text-3xl font-black mb-8 uppercase border-l-8 border-indie-secondary pl-4">{{ $t('me.recharge.package') }}</h2>
         <div class="grid md:grid-cols-3 gap-6 mb-12">
           <div 
             v-for="pkg in packages" 
@@ -58,8 +58,8 @@
               ¥{{ pkg.price }}
             </div>
             <div class="border-t-2 border-dashed mb-4" :class="selectedPackage === pkg.id ? 'border-gray-700' : 'border-gray-300'"></div>
-            <p class="font-bold mb-2 uppercase">{{ pkg.credits }} UNLOCKS</p>
-            <p class="text-sm font-mono opacity-70">{{ pkg.perCredit }} CNY / UNLOCK</p>
+            <p class="font-bold mb-2 uppercase">{{ pkg.credits }} {{ $t('me.recharge.unlocks') }}</p>
+            <p class="text-sm font-mono opacity-70">{{ pkg.perCredit }} {{ $t('me.recharge.perUnlock') }}</p>
           </div>
         </div>
 
@@ -69,20 +69,20 @@
                 <UIcon name="i-heroicons-gift-solid" class="w-10 h-10" />
             </div>
             <div>
-              <p class="font-black text-xl uppercase mb-1">FIRST TOP-UP BONUS</p>
-              <p class="font-bold">GET 20% OFF + 30% EXTRA CREDITS ON YOUR FIRST PURCHASE!</p>
+              <p class="font-black text-xl uppercase mb-1">{{ $t('me.recharge.bonus.title') }}</p>
+              <p class="font-bold">{{ $t('me.recharge.bonus.desc') }}</p>
             </div>
         </div>
 
         <!-- 支付按钮 -->
         <button class="w-full md:w-auto px-12 py-5 bg-[#07C160] text-white border-3 border-black shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-black text-2xl uppercase flex items-center justify-center gap-3">
           <UIcon name="i-ri-wechat-pay-fill" class="w-8 h-8" />
-          WECHAT PAY ¥{{ selectedPackageInfo?.price || 0 }}
+          {{ $t('me.recharge.pay') }} ¥{{ selectedPackageInfo?.price || 0 }}
         </button>
 
         <!-- 解锁记录 -->
         <div class="mt-20">
-          <h2 class="text-3xl font-black mb-8 uppercase border-l-8 border-black pl-4">HISTORY</h2>
+          <h2 class="text-3xl font-black mb-8 uppercase border-l-8 border-black pl-4">{{ $t('me.recharge.history') }}</h2>
           <div class="bg-white border-3 border-black shadow-brutal">
             <div v-for="i in 5" :key="i" class="p-6 border-b-3 border-black last:border-b-0 flex items-center justify-between group hover:bg-gray-50 transition-colors">
               <div class="flex items-center gap-4">
@@ -91,12 +91,12 @@
                 </div>
                 <div>
                   <p class="font-black uppercase text-lg">USER_NICKNAME</p>
-                  <p class="text-sm font-bold text-gray-500 uppercase">UNLOCKED VIA "PROJECT NAME"</p>
+                  <p class="text-sm font-bold text-gray-500 uppercase">{{ $t('me.recharge.unlockedVia') }} "PROJECT NAME"</p>
                 </div>
               </div>
               <div class="text-right">
                 <p class="text-sm font-bold text-gray-400 mb-1 font-mono">2024-12-25</p>
-                <NuxtLink to="#" class="text-sm font-black uppercase text-black border-b-2 border-black hover:bg-black hover:text-white transition-colors">SEND MESSAGE</NuxtLink>
+                <NuxtLink to="#" class="text-sm font-black uppercase text-black border-b-2 border-black hover:bg-black hover:text-white transition-colors">{{ $t('me.recharge.sendMessage') }}</NuxtLink>
               </div>
             </div>
           </div>
@@ -107,24 +107,26 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 definePageMeta({
   middleware: 'auth'
 })
 
-const packages = [
-  { id: 'basic', name: '基础包', price: 30, credits: 10, perCredit: '3.0' },
-  { id: 'standard', name: '标准包', price: 50, credits: 30, perCredit: '1.7' },
-  { id: 'premium', name: '高级包', price: 100, credits: 100, perCredit: '1.0' }
-]
+const packages = computed(() => [
+  { id: 'basic', name: t('me.recharge.packages.basic'), price: 30, credits: 10, perCredit: '3.0' },
+  { id: 'standard', name: t('me.recharge.packages.standard'), price: 50, credits: 30, perCredit: '1.7' },
+  { id: 'premium', name: t('me.recharge.packages.premium'), price: 100, credits: 100, perCredit: '1.0' }
+])
 
 const selectedPackage = ref('standard')
 
 const selectedPackageInfo = computed(() => 
-  packages.find(p => p.id === selectedPackage.value)
+  packages.value.find((p: any) => p.id === selectedPackage.value)
 )
 
 useSeoMeta({
-  title: '充值 - 小概率',
+  title: t('me.recharge.title') + ' - 小概率', // Or translated Brand
   robots: 'noindex'
 })
 </script>

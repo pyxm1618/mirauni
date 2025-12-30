@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/supabase/supabase_client.dart';
 import '../core/storage/local_cache.dart';
@@ -52,7 +53,7 @@ final projectFilterProvider = StateProvider<ProjectFilter>((ref) {
   return const ProjectFilter();
 });
 
-/// 项目列表 Provider（带缓存）
+/// 项目列表 Provider（带缓存 - 优先返回缓存）
 final projectListProvider = FutureProvider.family<List<Project>, ProjectFilter>(
   (ref, filter) async {
     final cache = await LocalCache.getInstance();
@@ -63,19 +64,35 @@ final projectListProvider = FutureProvider.family<List<Project>, ProjectFilter>(
     
     // 仅对首页（offset=0）进行缓存
     if (filter.offset == 0) {
-      // 尝试读取缓存
+      // 尝试读取缓存（即使过期也返回，实现快速显示）
       final cachedData = cache.getStale<List<dynamic>>(cacheKey);
       if (cachedData != null) {
+        final cachedProjects = cachedData.map((e) => Project.fromJson(e as Map<String, dynamic>)).toList();
+        
         // 如果缓存未过期，直接返回
         if (!cache.isExpired(cacheKey)) {
-          return cachedData.map((e) => Project.fromJson(e as Map<String, dynamic>)).toList();
+          return cachedProjects;
         }
-        // 如果缓存过期，后台刷新（先返回旧数据）
-        // 这里简化处理：过期时仍然请求网络
+        
+        // 缓存过期：后台刷新（不阻塞返回）
+        // 使用 Future.microtask 确保先返回缓存数据
+        Future.microtask(() async {
+          try {
+            final freshData = await _fetchProjects(filter);
+            await cache.set(cacheKey, freshData.map((e) => e.toJson()).toList());
+            // 刷新 Provider 以更新 UI（可选，取决于 UX 需求）
+            // ref.invalidateSelf(); // 取消注释可自动刷新
+          } catch (e) {
+            debugPrint('后台刷新项目列表失败: $e');
+          }
+        });
+        
+        // 立即返回缓存的数据
+        return cachedProjects;
       }
     }
     
-    // 请求网络数据
+    // 没有缓存时，请求网络数据
     final result = await _fetchProjects(filter);
     
     // 缓存首页数据
