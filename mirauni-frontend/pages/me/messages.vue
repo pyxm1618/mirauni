@@ -15,9 +15,12 @@
           <NuxtLink to="/me/messages" class="block px-6 py-4 border-b-3 border-black font-black uppercase bg-indie-primary hover:bg-indie-accent transition-colors">
             {{ $t('me.nav.messages') }}
           </NuxtLink>
-          <NuxtLink to="/me/recharge" class="block px-6 py-4 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
+          <NuxtLink to="/me/recharge" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
             {{ $t('me.nav.recharge') }}
           </NuxtLink>
+          <button @click="handleLogout" class="w-full text-left px-6 py-4 bg-red-100 font-black uppercase hover:bg-red-600 hover:text-white transition-colors">
+            {{ $t('me.nav.logout') }}
+          </button>
         </nav>
       </aside>
 
@@ -87,6 +90,15 @@
 definePageMeta({
   middleware: 'auth'
 })
+
+const { logout } = useAuth()
+const { t } = useI18n()
+
+async function handleLogout() {
+  if (confirm(t('me.profile.logoutConfirm'))) {
+    await logout()
+  }
+}
 
 interface Message {
   content: string

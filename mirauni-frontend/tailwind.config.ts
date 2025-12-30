@@ -30,6 +30,8 @@ export default {
                     accent: '#f472b6',
                     text: '#222222',
                     border: '#000000',
+                    dark: '#18181b',
+                    success: '#22c55e',
                 }
             },
             boxShadow: {

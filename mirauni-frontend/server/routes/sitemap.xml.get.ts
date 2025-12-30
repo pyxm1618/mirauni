@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     // 并行获取所有数据
     const [projectsRes, developersRes, articlesRes] = await Promise.all([
         supabase.from('projects').select('id, updated_at').eq('status', 'active'),
-        supabase.from('users').select('username, updated_at').not('username', 'is', null),
+        supabase.from('users').select('id, updated_at').not('username', 'is', null),
         supabase.from('articles').select('slug, updated_at').eq('status', 'published')
     ])
 
@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
 
         // 开发者主页
         ...developers.map(d => ({
-            loc: `${siteUrl}/developers/${d.username}`,
+            loc: `${siteUrl}/developers/${d.id}`,
             lastmod: d.updated_at?.split('T')[0],
             priority: '0.6',
             changefreq: 'weekly'

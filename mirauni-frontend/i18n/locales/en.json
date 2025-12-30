@@ -23,6 +23,7 @@
         "developers": "Developers",
         "academy": "Academy",
         "messages": "Messages",
+        "finance": "Capital",
         "profile": "Profile"
     },
     "home": {
@@ -128,6 +129,22 @@
             "closeFailed": "Operation Failed",
             "saveFailed": "Save Failed",
             "seoTitle": "Edit Project - Mirauni"
+        },
+        "unlock": {
+            "title": "UNLOCK CONTACT",
+            "cost": "Service Cost",
+            "balance": "Your Balance",
+            "credit": "CREDIT",
+            "credits": "CREDITS",
+            "insufficient": "INSUFFICIENT FUNDS",
+            "confirm": "CONFIRM UNLOCK",
+            "processing": "PROCESSING...",
+            "recharge": "RECHARGE CREDITS",
+            "cancel": "CANCEL",
+            "lockedContent": "LOCKED CONTENT",
+            "unlockToView": "UNLOCK TO VIEW",
+            "contactOwner": "CONTACT OWNER",
+            "unlockContact": "UNLOCK CONTACT"
         }
     },
     "developer": {
@@ -248,17 +265,17 @@
                 "pending": "Pending",
                 "active": "Recruiting",
                 "closed": "Closed",
-                "rejected": "Rejected"
-            }
+                "rejected": "Rejected",
+                "recruiting": "Recruiting"
+            },
+            "views": "Views",
+            "posted": "Posted on",
+            "close": "Close Project",
+            "delete": "Delete Project",
+            "open": "Open Applications"
         },
         "recharge": {
             "title": "Recharge Center",
-            "nav": {
-                "profile": "Profile",
-                "projects": "My Projects",
-                "messages": "Messages",
-                "recharge": "Recharge"
-            },
             "balance": "Current Balance",
             "lifetime": "Lifetime Unlocks",
             "package": "Select Package",
@@ -319,7 +336,11 @@
         "design": "UI/UX Designer",
         "product": "Product Manager",
         "operation": "Operations",
-        "marketing": "Marketing"
+        "marketing": "Marketing",
+        "database": "Database Expert",
+        "devops": "DevOps",
+        "cloud": "Cloud Architect",
+        "ai": "AI/Machine Learning"
     },
     "legal": {
         "badge": "Legal"
@@ -539,5 +560,66 @@
         },
         "seoTitle": "Contact Us - Mirauni",
         "seoDescription": "Contact Mirauni for support."
+    },
+    "finance": {
+        "seo": {
+            "title": "Capital & Incubation - Mirauni",
+            "desc": "Connecting supporters and founders for mutual growth."
+        },
+        "hero": {
+            "title": "Capital Flowing to",
+            "highlight": "True Value Creators",
+            "subtitle": "Mirauni joins forces with top funds and DAOs to provide flexible funding for indie developers. No bureaucracy, just growth.",
+            "investorBtn": "I am an Investor",
+            "founderBtn": "Apply for Funding"
+        },
+        "investor": {
+            "title": "Investor / Incubator",
+            "desc": "Access premium deal flow and participate in the next unicorn.",
+            "action": "Join Network",
+            "f1": "Premium Deal Flow: Priority access to curated high-potential projects",
+            "f2": "Flexible Participation: Multiple support models within legal frameworks",
+            "f3": "Professional Assessment: Tech, business, and legal due diligence",
+            "f4": "Value Growth Plan: Professional team assisting project valuation",
+            "f5": "Top Innovation Network: Connect with industry leaders"
+        },
+        "founder": {
+            "title": "Founder / Developer",
+            "desc": "From idea to launch, Mirauni accelerates your growth lifecycle.",
+            "action": "Submit BP",
+            "f1": "Dream Team Building: Smart matching of co-founders",
+            "f2": "Tech Strategy Support: Expert architecture and dev guidance",
+            "f3": "Resource Accelerator: Platform resources + strategic retrieval",
+            "f4": "Business Empowerment: Marketing, channels, and KA docking",
+            "f5": "Growth Accelerator: Mentorship, network, and roadmap planning"
+        },
+        "models": {
+            "equity": {
+                "title": "Equity Financing",
+                "desc": "Connect with top angels and VCs for Pre-Seed to Series A funding."
+            },
+            "rbf": {
+                "title": "Revenue Share",
+                "desc": "Non-dilutive funding based on future revenue, perfect for cash-flow businesses."
+            },
+            "grant": {
+                "title": "Web3 Grants",
+                "desc": "For open source and public goods, apply for grants from ecosystem foundations."
+            }
+        },
+        "growth": {
+            "title": "Future Growth Plan",
+            "subtitle": "Platform profits dedicated to project growth & incubation"
+        },
+        "legal": {
+            "title": "Legal Compliance",
+            "p1": "Model 1: Direct Investment - Mirauni uses own funds to invest in premium projects.",
+            "p2": "Model 2: Supporter Matching - We match qualified supporters with projects within legal frameworks.",
+            "disclaimer": "Specific implementation subject to project status and local regulations. Please refer to latest announcements."
+        },
+        "modal": {
+            "investor": "Welcome to the Investor Circle!\n\nPlease email mirauni{'@'}163.com with your story to unlock priority access.",
+            "founder": "Please send your Business Plan (BP) to:\n\nmirauni{'@'}163.com\n\nWe will fast-track your application immediately!"
+        }
     }
 }

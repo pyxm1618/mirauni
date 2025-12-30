@@ -15,7 +15,15 @@
         "loading": "加载中...",
         "noData": "暂无数据",
         "viewMore": "查看更多",
-        "back": "返回"
+        "back": "返回",
+        "errors": {
+            "network": "网络好像开小差了，检查一下连接？",
+            "server": "服务器出了点小状况，正在抢修中",
+            "unknown": "发生了一个未知的错误，请稍后重试",
+            "not_found": "这个页面好像去火星了，找不到啦",
+            "unauthorized": "您需要登录才能继续操作哦",
+            "forbidden": "您暂时没有权限执行这个操作"
+        }
     },
     "nav": {
         "home": "首页",
@@ -23,6 +31,7 @@
         "developers": "开发者",
         "academy": "学院",
         "messages": "消息",
+        "finance": "资本",
         "profile": "我的"
     },
     "home": {
@@ -128,6 +137,22 @@
             "closeFailed": "操作失败",
             "saveFailed": "保存失败",
             "seoTitle": "编辑项目 - 小概率"
+        },
+        "unlock": {
+            "title": "解锁联系方式",
+            "cost": "服务费用",
+            "balance": "当前余额",
+            "credit": "积分",
+            "credits": "积分",
+            "insufficient": "余额不足",
+            "confirm": "确认解锁",
+            "processing": "处理中...",
+            "recharge": "去充值",
+            "cancel": "取消",
+            "lockedContent": "内容已锁定",
+            "unlockToView": "解锁查看详情",
+            "contactOwner": "联系发起人",
+            "unlockContact": "解锁联系方式"
         }
     },
     "developer": {
@@ -169,12 +194,12 @@
         "and": "和",
         "privacyPolicy": "隐私政策",
         "error": {
-            "phone": "请输入正确的手机号",
-            "code": "请输入6位验证码",
-            "sendFailed": "发送验证码失败",
-            "loginFailed": "登录失败",
-            "bindFailed": "绑定失败",
-            "missingWechat": "微信信息缺失"
+            "phone": "手机号码写得不太对，再检查一下？",
+            "code": "验证码是6位数字哦",
+            "sendFailed": "短信发送失败了，稍微等一下再试？",
+            "loginFailed": "登录出现了一点小问题，请重试",
+            "bindFailed": "绑定没成功，请重试一下",
+            "missingWechat": "微信授权信息好像丢了，尝试重新扫码？"
         },
         "bind": {
             "title": "绑定手机号",
@@ -248,17 +273,17 @@
                 "pending": "审核中",
                 "active": "招募中",
                 "closed": "已关闭",
-                "rejected": "未通过"
-            }
+                "rejected": "未通过",
+                "recruiting": "招募中"
+            },
+            "views": "浏览",
+            "posted": "发布于",
+            "close": "关闭项目",
+            "delete": "删除项目",
+            "open": "开放申请"
         },
         "recharge": {
             "title": "充值中心",
-            "nav": {
-                "profile": "个人资料",
-                "projects": "我的项目",
-                "messages": "消息中心",
-                "recharge": "充值/RECHARGE"
-            },
             "balance": "当前余额",
             "lifetime": "累计解锁",
             "package": "选择套餐",
@@ -319,7 +344,11 @@
         "design": "UI/UX 设计",
         "product": "产品经理",
         "operation": "运营",
-        "marketing": "市场推广"
+        "marketing": "市场推广",
+        "database": "数据库专家",
+        "devops": "DevOps",
+        "cloud": "云计算架构师",
+        "ai": "AI/机器学习"
     },
     "legal": {
         "badge": "法律条款"
@@ -539,5 +568,66 @@
         },
         "seoTitle": "联系我们 - 小概率",
         "seoDescription": "联系小概率团队，获取支持或商务合作。"
+    },
+    "finance": {
+        "seo": {
+            "title": "资本与孵化 - 小概率",
+            "desc": "为支持者和创业者搭建最有价值的连接桥梁"
+        },
+        "hero": {
+            "title": "让资本流向",
+            "highlight": "真正的价值创造者",
+            "subtitle": "Mirauni 联合一线基金与 DAO 组织，为独立开发者提供灵活的资金支持。无繁琐流程，专注产品增长。",
+            "investorBtn": "我是投资人",
+            "founderBtn": "申请融资"
+        },
+        "investor": {
+            "title": "投资人 / 孵化器",
+            "desc": "获得优质项目池和参与机会，共同培育下一个独角兽。",
+            "action": "加入投资网络",
+            "f1": "优质项目池：优先接触平台精选的高潜力项目",
+            "f2": "灵活参与机制：根据法律框架提供多种支持方式",
+            "f3": "专业评估支持：技术、商业、法务全方位评估服务",
+            "f4": "价值成长计划：专业团队协助项目价值提升",
+            "f5": "顶级创新网络：与行业领袖、创新者深度交流"
+        },
+        "founder": {
+            "title": "创业者 / 开发者",
+            "desc": "从想法到成功落地，小概率为创业者提供全生命周期的成长加速。",
+            "action": "提交商业计划书",
+            "f1": "梦幻团队构建：智能匹配技术互补的核心创始团队",
+            "f2": "技术战略支持：资深专家提供架构设计和开发指导",
+            "f3": "资源加速器：平台资源注入+战略支持对接",
+            "f4": "商业资源赋能：市场推广、渠道合作、大客户对接",
+            "f5": "成长加速器：导师辅导、资源网络、发展路径规划"
+        },
+        "models": {
+            "equity": {
+                "title": "股权融资",
+                "desc": "连接顶级天使投资人和 VC，提供 Pre-Seed 到 A 轮资金支持。"
+            },
+            "rbf": {
+                "title": "收入分成",
+                "desc": "不稀释股权，基于未来收入分成的灵活融资模式，适合现金流业务。"
+            },
+            "grant": {
+                "title": "Web3 Grants",
+                "desc": "面向开源项目和公共物品，申请来自各大生态基金会的无偿捐赠。"
+            }
+        },
+        "growth": {
+            "title": "未来成长计划",
+            "subtitle": "平台利润将用于支持项目成长与孵化"
+        },
+        "legal": {
+            "title": "法律合规说明",
+            "p1": "模式一：平台直接投资 - 小概率平台使用自有资金直接投资优质项目，提供启动资金和资源支持。",
+            "p2": "模式二：支持者匹配 - 在法律允许范围内，平台为合格支持者匹配项目机会，支持者以个人身份与项目方签订投资协议。",
+            "disclaimer": "具体实施方案将根据项目情况和法律法规要求进行调整，请以平台最新公告为准。"
+        },
+        "modal": {
+            "investor": "欢迎加入投资圈！\n\n请发送邮件至 mirauni{'@'}163.com 分享您的故事，解锁早期项目优先通道。",
+            "founder": "请将商业计划书 (BP) 发送至：\n\nmirauni{'@'}163.com\n\n我们将即刻为您进入项目专属对接通道！"
+        }
     }
 }

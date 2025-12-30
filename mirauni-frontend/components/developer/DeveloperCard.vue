@@ -4,7 +4,7 @@
     <div class="absolute inset-0 bg-black translate-x-3 translate-y-3"></div>
     
     <!-- Card Content -->
-    <div class="relative bg-white border-3 border-black p-6 h-full flex flex-col transition-transform group-hover:-translate-y-1 group-hover:-translate-x-1" @click="navigateTo(`/developers/${developer.username}`)">
+    <div class="relative bg-white border-3 border-black p-6 h-full flex flex-col transition-transform group-hover:-translate-y-1 group-hover:-translate-x-1" @click="navigateTo(`/developers/${developer.id}`)">
         <!-- Header -->
         <div class="flex justify-between items-start mb-4 border-b-3 border-black pb-4">
             <div>

@@ -1,0 +1,91 @@
+export default defineEventHandler(async (event) => {
+    const body = await readBody(event)
+    const { plan, user_id } = body
+
+    // 开发模式下，如果没有配置 Supabase，直接返回成功
+    const supabaseUrl = process.env.SUPABASE_URL
+    if (!supabaseUrl || supabaseUrl === 'your-supabase-url') {
+        console.log('[Mock] Wizard save - no Supabase configured')
+        return {
+            success: true,
+            goalId: 'mock-goal-' + Date.now(),
+            message: 'Mock save successful (Supabase not configured)'
+        }
+    }
+
+    // 正式环境 - 使用 Supabase
+    try {
+        const { serverSupabaseClient } = await import('#supabase/server')
+        const client = await serverSupabaseClient(event)
+
+        // 动态计算目标年份
+        const now = new Date()
+        const targetYear = now.getMonth() >= 9 ? now.getFullYear() + 1 : now.getFullYear()
+
+        // 1. Create Goal
+        const { data: goalData, error: goalError } = await client
+            .from('goals')
+            .insert({
+                user_id: user_id,
+                year: targetYear,
+                income_target: plan.incomeGoal,
+                status: 'active',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .select()
+            .single()
+
+        if (goalError) {
+            throw createError({ statusCode: 500, message: goalError.message })
+        }
+
+        const goalId = goalData.id
+
+        // 2. Create Paths
+        const pathsToInsert = plan.paths.map((p: any, index: number) => ({
+            goal_id: goalId,
+            user_id: user_id,
+            name: p.name,
+            category: p.category || 'other',
+            income_target: (p.incomeMin + p.incomeMax) / 2,
+            sort_order: index,
+            status: 'active',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        }))
+
+        const { data: pathsData, error: pathsError } = await client
+            .from('paths')
+            .insert(pathsToInsert)
+            .select()
+
+        if (pathsError) {
+            throw createError({ statusCode: 500, message: pathsError.message })
+        }
+
+        // 3. Create default projects and tasks for each path
+        for (const path of pathsData) {
+            const { data: projectData } = await client.from('projects').insert({
+                path_id: path.id,
+                user_id: user_id,
+                name: `启动项目: ${path.name}`,
+                status: 'todo',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            }).select().single()
+
+            if (projectData) {
+                await client.from('tasks').insert([
+                    { project_id: projectData.id, user_id, name: '调研与计划', status: 'todo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                    { project_id: projectData.id, user_id, name: '执行第一步', status: 'todo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+                ])
+            }
+        }
+
+        return { success: true, goalId }
+    } catch (e: any) {
+        console.error('[Wizard Save Error]', e)
+        throw createError({ statusCode: 500, message: e.message || 'Save failed' })
+    }
+})

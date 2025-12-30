@@ -7,17 +7,20 @@
       <aside class="lg:col-span-1">
         <nav class="bg-white border-3 border-black shadow-brutal sticky top-8">
           <NuxtLink to="/me" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
-            {{ $t('me.recharge.nav.profile') }}
+            {{ $t('me.nav.profile') }}
           </NuxtLink>
           <NuxtLink to="/me/projects" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
-             {{ $t('me.recharge.nav.projects') }}
+             {{ $t('me.nav.projects') }}
           </NuxtLink>
            <NuxtLink to="/me/messages" class="block px-6 py-4 border-b-3 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
-            {{ $t('me.recharge.nav.messages') }}
+            {{ $t('me.nav.messages') }}
           </NuxtLink>
           <NuxtLink to="/me/recharge" class="block px-6 py-4 font-black uppercase bg-indie-primary border-black hover:bg-indie-accent transition-colors">
-            {{ $t('me.recharge.nav.recharge') }}
+            {{ $t('me.nav.recharge') }}
           </NuxtLink>
+          <button @click="handleLogout" class="w-full text-left px-6 py-4 bg-red-100 font-black uppercase hover:bg-red-600 hover:text-white transition-colors">
+            {{ $t('me.nav.logout') }}
+          </button>
         </nav>
       </aside>
 
@@ -46,18 +49,18 @@
           <div 
             v-for="pkg in packages" 
             :key="pkg.id"
-            class="bg-white border-3 border-black shadow-brutal p-6 cursor-pointer transition-all relative group"
-            :class="selectedPackage === pkg.id ? 'bg-black text-white translate-x-[2px] translate-y-[2px] shadow-none' : 'hover:shadow-brutal-hover hover:-translate-y-1'"
+            class="border-3 border-black shadow-brutal p-6 cursor-pointer transition-all relative group"
+            :class="selectedPackage === pkg.id ? 'bg-indie-primary text-black translate-x-[2px] translate-y-[2px] shadow-none' : 'bg-white hover:shadow-brutal-hover hover:-translate-y-1'"
             @click="selectedPackage = pkg.id"
           >
-            <div v-if="selectedPackage === pkg.id" class="absolute top-2 right-2 text-indie-primary">
+            <div v-if="selectedPackage === pkg.id" class="absolute top-2 right-2 text-black">
                 <UIcon name="i-heroicons-check-circle-solid" class="w-8 h-8" />
             </div>
             <h3 class="text-xl font-black mb-4 uppercase tracking-wide">{{ pkg.name }}</h3>
             <div class="text-4xl font-black mb-4 font-display">
               ¥{{ pkg.price }}
             </div>
-            <div class="border-t-2 border-dashed mb-4" :class="selectedPackage === pkg.id ? 'border-gray-700' : 'border-gray-300'"></div>
+            <div class="border-t-2 border-dashed mb-4" :class="selectedPackage === pkg.id ? 'border-black' : 'border-gray-300'"></div>
             <p class="font-bold mb-2 uppercase">{{ pkg.credits }} {{ $t('me.recharge.unlocks') }}</p>
             <p class="text-sm font-mono opacity-70">{{ pkg.perCredit }} {{ $t('me.recharge.perUnlock') }}</p>
           </div>
@@ -108,10 +111,17 @@
 
 <script setup lang="ts">
 const { t } = useI18n()
+const { logout } = useAuth()
 
 definePageMeta({
   middleware: 'auth'
 })
+
+async function handleLogout() {
+  if (confirm(t('me.profile.logoutConfirm'))) {
+    await logout()
+  }
+}
 
 const packages = computed(() => [
   { id: 'basic', name: t('me.recharge.packages.basic'), price: 30, credits: 10, perCredit: '3.0' },

@@ -392,6 +392,12 @@ async function handleLogout() {
 function showMessage(msg: string, type: 'success' | 'error' = 'success') {
   message.value = msg
   messageType.value = type
+  
+  // Scroll to top to show error message
+  if (type === 'error') {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  
   if (type === 'success') {
     setTimeout(() => {
       message.value = ''

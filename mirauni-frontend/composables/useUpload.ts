@@ -1,9 +1,12 @@
 /**
  * 图片上传 composable
  */
+import { useAuthStore } from '~/stores/auth'
+
 export function useUpload() {
     const supabase = useSupabaseClient()
-    const user = useSupabaseUser()
+    const authStore = useAuthStore()
+    const user = computed(() => authStore.user)
 
     /**
      * 压缩图片

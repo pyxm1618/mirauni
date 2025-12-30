@@ -10,7 +10,6 @@ export const usernameSchema = z
     .string()
     .min(2, '用户名至少2个字符')
     .max(20, '用户名最多20个字符')
-    .regex(/^[a-zA-Z0-9_]+$/, '用户名只能包含字母、数字和下划线')
 
 export const userProfileSchema = z.object({
     username: usernameSchema.optional(),
