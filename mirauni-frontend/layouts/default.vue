@@ -18,6 +18,7 @@
           <nav class="hidden md:flex items-center gap-8">
             <NuxtLink to="/projects" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">{{ $t('nav.projects') }}</NuxtLink>
             <NuxtLink to="/developers" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">{{ $t('nav.developers') }}</NuxtLink>
+            <NuxtLink to="https://plan.mirauni.com" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase text-indie-text">{{ $t('nav.plan') }}</NuxtLink>
             <NuxtLink to="/finance" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">{{ $t('nav.finance') }}</NuxtLink>
             <NuxtLink to="/academy" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">{{ $t('nav.academy') }}</NuxtLink>
           </nav>
@@ -72,6 +73,10 @@
       <NuxtLink to="/projects" class="flex flex-col items-center gap-1 px-4 py-2">
         <span class="text-xl">📁</span>
         <span class="text-xs">{{ $t('nav.projects') }}</span>
+      </NuxtLink>
+      <NuxtLink to="https://plan.mirauni.com" class="flex flex-col items-center gap-1 px-4 py-2 text-indie-text">
+        <span class="text-xl">🎯</span>
+        <span class="text-xs">{{ $t('nav.plan') }}</span>
       </NuxtLink>
       <NuxtLink to="/developers" class="flex flex-col items-center gap-1 px-4 py-2">
         <span class="text-xl">👥</span>

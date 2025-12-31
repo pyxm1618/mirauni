@@ -128,6 +128,28 @@
 const route = useRoute()
 const id = route.params.id as string
 
+// UUID Regex
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+// 如果 ID 不是标准 UUID，说明可能是旧版 URL (使用用户名)
+if (!uuidRegex.test(id)) {
+  // 尝试通过用户名查找 ID
+  try {
+    const { data: lookup } = await useFetch(`/api/developers/lookup/${id}`)
+    if (lookup.value?.id) {
+      // 找到 ID，进行 301 永久重定向
+      await navigateTo(`/developers/${lookup.value.id}`, { 
+        redirectCode: 301,
+        external: true // 强制外部跳转以确保 URL 变化被搜索引擎识别
+      })
+    } else {
+      throw createError({ statusCode: 404, message: '用户不存在' })
+    }
+  } catch (e) {
+    throw createError({ statusCode: 404, message: '用户不存在' })
+  }
+}
+
 const { data: res, pending } = await useFetch<any>(`/api/developers/${id}/public`)
 const developer = computed(() => res.value?.data)
 
