@@ -124,7 +124,7 @@ const { unreadCount, fetchUnreadCount } = useMessages()
 
 // 根据环境设置钱途 URL
 const isDev = import.meta.dev
-const planBaseUrl = isDev ? 'http://localhost:3002' : 'https://plan.mirauni.com'
+const planBaseUrl = isDev ? 'http://localhost:3001' : 'https://plan.mirauni.com'
 
 // SSO: 如果已登录，将 access_token 传递给钱途
 const ssoToken = ref('')

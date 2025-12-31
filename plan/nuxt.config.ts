@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
+  devServer: {
+    port: 3001 // 固定端口，用于 SSO
+  },
   modules: [
     '@nuxt/ui',
     '@pinia/nuxt',
