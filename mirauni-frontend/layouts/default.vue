@@ -126,21 +126,23 @@ const { unreadCount, fetchUnreadCount } = useMessages()
 const isDev = import.meta.dev
 const planBaseUrl = isDev ? 'http://localhost:3001' : 'https://plan.mirauni.com'
 
-// SSO: 如果已登录，将 access_token 传递给钱途
-const ssoToken = ref('')
+// SSO: 如果已登录，将 access_token 和 refresh_token 传递给钱途
+const ssoAccessToken = ref('')
+const ssoRefreshToken = ref('')
 
 onMounted(async () => {
     if (user.value) {
         const { data } = await supabase.auth.getSession()
         if (data.session?.access_token) {
-            ssoToken.value = data.session.access_token
+            ssoAccessToken.value = data.session.access_token
+            ssoRefreshToken.value = data.session.refresh_token || ''
         }
     }
 })
 
 const planUrl = computed(() => {
-    if (ssoToken.value) {
-        return `${planBaseUrl}?sso_token=${encodeURIComponent(ssoToken.value)}`
+    if (ssoAccessToken.value && ssoRefreshToken.value) {
+        return `${planBaseUrl}?sso_access=${encodeURIComponent(ssoAccessToken.value)}&sso_refresh=${encodeURIComponent(ssoRefreshToken.value)}`
     }
     return planBaseUrl
 })
