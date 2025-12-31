@@ -18,7 +18,7 @@
           <nav class="hidden md:flex items-center gap-8">
             <NuxtLink to="/projects" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">{{ $t('nav.projects') }}</NuxtLink>
             <NuxtLink to="/developers" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">{{ $t('nav.developers') }}</NuxtLink>
-            <NuxtLink :to="planUrl" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase text-indie-text">{{ $t('nav.plan') }}</NuxtLink>
+            <a @click="navigateToPlan" href="#" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase text-indie-text cursor-pointer">{{ $t('nav.plan') }}</a>
             <NuxtLink to="/finance" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">{{ $t('nav.finance') }}</NuxtLink>
             <NuxtLink to="/academy" class="font-bold tracking-wide hover:text-indie-secondary transition-colors uppercase">{{ $t('nav.academy') }}</NuxtLink>
           </nav>
@@ -74,10 +74,10 @@
         <span class="text-xl">📁</span>
         <span class="text-xs">{{ $t('nav.projects') }}</span>
       </NuxtLink>
-      <NuxtLink :to="planUrl" class="flex flex-col items-center gap-1 px-4 py-2 text-indie-text">
+      <a @click="navigateToPlan" href="#" class="flex flex-col items-center gap-1 px-4 py-2 text-indie-text cursor-pointer">
         <span class="text-xl">🎯</span>
         <span class="text-xs">{{ $t('nav.plan') }}</span>
-      </NuxtLink>
+      </a>
       <NuxtLink to="/developers" class="flex flex-col items-center gap-1 px-4 py-2">
         <span class="text-xl">👥</span>
         <span class="text-xs">{{ $t('nav.developers') }}</span>
@@ -126,26 +126,29 @@ const { unreadCount, fetchUnreadCount } = useMessages()
 const isDev = import.meta.dev
 const planBaseUrl = isDev ? 'http://localhost:3001' : 'https://plan.mirauni.com'
 
-// SSO: 如果已登录，将 access_token 和 refresh_token 传递给钱途
-const ssoAccessToken = ref('')
-const ssoRefreshToken = ref('')
-
-onMounted(async () => {
+// SSO: 点击钱途链接时动态获取 token 并跳转
+async function navigateToPlan(e: Event) {
+    e.preventDefault()
+    
+    let url = planBaseUrl
+    
     if (user.value) {
-        const { data } = await supabase.auth.getSession()
-        if (data.session?.access_token) {
-            ssoAccessToken.value = data.session.access_token
-            ssoRefreshToken.value = data.session.refresh_token || ''
+        try {
+            const { data } = await supabase.auth.getSession()
+            if (data.session?.access_token && data.session?.refresh_token) {
+                const params = new URLSearchParams({
+                    sso_access: data.session.access_token,
+                    sso_refresh: data.session.refresh_token
+                })
+                url = `${planBaseUrl}?${params.toString()}`
+            }
+        } catch (e) {
+            console.error('[SSO] Error getting session:', e)
         }
     }
-})
-
-const planUrl = computed(() => {
-    if (ssoAccessToken.value && ssoRefreshToken.value) {
-        return `${planBaseUrl}?sso_access=${encodeURIComponent(ssoAccessToken.value)}&sso_refresh=${encodeURIComponent(ssoRefreshToken.value)}`
-    }
-    return planBaseUrl
-})
+    
+    window.location.href = url
+}
 
 onMounted(() => {
   if (user.value) {
