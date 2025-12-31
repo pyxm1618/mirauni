@@ -41,8 +41,25 @@ const isValid = computed(() => {
   return goal > 0 && goal < 100000 // Reasonable limits
 })
 
+const config = useRuntimeConfig()
+const isDev = import.meta.dev
+
 function next() {
   if (!isValid.value) return
+  
+  // Lazy Login Check
+  const user = useSupabaseUser()
+  if (!user.value) {
+     const loginUrl = isDev ? 'http://localhost:3000/login' : 'https://mirauni.com/login'
+     // We want to return to this page but maybe better to prompt user? 
+     // For now per request, redirect to login.
+     // Ideally we retain the input value. Store persistence handled separately or re-input.
+     store.setIncomeGoal(Number(incomeGoal.value))
+     
+     const returnUrl = window.location.href
+     window.location.href = `${loginUrl}?redirect=${encodeURIComponent(returnUrl)}`
+     return
+  }
   
   store.setIncomeGoal(Number(incomeGoal.value))
   store.currentStep = 2 // Manually sync step for stepper
@@ -50,18 +67,7 @@ function next() {
 }
 
 // On mount reset step if accessed directly
-// On mount reset step if accessed directly
 onMounted(() => {
     store.currentStep = 1
-    
-    // Double check login state
-    const user = useSupabaseUser()
-    const isDev = import.meta.dev
-    
-    if (!user.value) {
-        const loginUrl = isDev ? 'http://localhost:3000/login' : 'https://mirauni.com/login'
-        const returnUrl = window.location.href
-        window.location.href = `${loginUrl}?redirect=${encodeURIComponent(returnUrl)}`
-    }
 })
 </script>

@@ -21,15 +21,15 @@
         </NuxtLink>
       </nav>
 
-      <div class="p-4 border-t-3 border-black bg-gray-50">
+      <div class="p-4 border-t-3 border-black bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" @click="handleProfileClick">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full border-2 border-black bg-gray-300 overflow-hidden">
              <!-- Avatar Placeholder -->
              <img v-if="userInfo?.avatarUrl" :src="userInfo.avatarUrl" class="w-full h-full object-cover" />
           </div>
           <div class="flex-1 min-w-0">
-            <p class="font-bold truncate">{{ userInfo?.nickname || 'Guest' }}</p>
-            <p class="text-xs text-gray-500 truncate">Free Plan</p>
+            <p class="font-bold truncate">{{ userInfo?.nickname || 'Login to Save' }}</p>
+            <p class="text-xs text-gray-500 truncate">{{ userInfo ? 'Free Plan' : 'Guest' }}</p>
           </div>
         </div>
       </div>
@@ -52,6 +52,15 @@
 
 <script setup lang="ts">
 const { userInfo } = useUser()
+
+function handleProfileClick() {
+    if (!userInfo.value) {
+        const isDev = import.meta.dev
+        const loginUrl = isDev ? 'http://localhost:3000/login' : 'https://mirauni.com/login'
+        const returnUrl = window.location.href
+        window.location.href = `${loginUrl}?redirect=${encodeURIComponent(returnUrl)}`
+    }
+}
 </script>
 
 <style>
