@@ -119,11 +119,31 @@
 
 <script setup lang="ts">
 const user = useSupabaseUser()
+const supabase = useSupabaseClient()
 const { unreadCount, fetchUnreadCount } = useMessages()
 
 // 根据环境设置钱途 URL
 const isDev = import.meta.dev
-const planUrl = isDev ? 'http://localhost:3001' : 'https://plan.mirauni.com'
+const planBaseUrl = isDev ? 'http://localhost:3002' : 'https://plan.mirauni.com'
+
+// SSO: 如果已登录，将 access_token 传递给钱途
+const ssoToken = ref('')
+
+onMounted(async () => {
+    if (user.value) {
+        const { data } = await supabase.auth.getSession()
+        if (data.session?.access_token) {
+            ssoToken.value = data.session.access_token
+        }
+    }
+})
+
+const planUrl = computed(() => {
+    if (ssoToken.value) {
+        return `${planBaseUrl}?sso_token=${encodeURIComponent(ssoToken.value)}`
+    }
+    return planBaseUrl
+})
 
 onMounted(() => {
   if (user.value) {
