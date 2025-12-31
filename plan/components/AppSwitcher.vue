@@ -14,17 +14,17 @@
              For now, we rely on Nuxt UI config. -->
         <h3 class="font-bold mb-3 px-1">MIRAUNI UNIVERSE</h3>
         <div class="grid grid-cols-3 gap-2">
-          <a href="https://mirauni.com" class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-100 transition-colors group">
+          <a :href="mainUrl" class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-100 transition-colors group">
             <div class="w-10 h-10 bg-black text-white rounded-md flex items-center justify-center font-bold text-xs group-hover:scale-110 transition-transform">Main</div>
             <span class="text-xs mt-1 font-medium">主站</span>
           </a>
-          <a href="https://dev.mirauni.com" class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-100 transition-colors group">
+          <a :href="`${mainUrl}/developers`" class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-100 transition-colors group">
             <div class="w-10 h-10 bg-blue-500 text-white rounded-md flex items-center justify-center group-hover:scale-110 transition-transform">
-               <UIcon name="i-lucide-code" class="w-5 h-5" />
+               <UIcon name="i-lucide-users" class="w-5 h-5" />
             </div>
             <span class="text-xs mt-1 font-medium">开发者</span>
           </a>
-          <a href="https://plan.mirauni.com" class="flex flex-col items-center p-2 rounded-lg bg-toon-100 border-2 border-black">
+          <a :href="planUrl" class="flex flex-col items-center p-2 rounded-lg bg-toon-100 border-2 border-black">
             <div class="w-10 h-10 bg-toon-500 text-white rounded-md flex items-center justify-center">
                <UIcon name="i-lucide-rocket" class="w-5 h-5" />
             </div>
@@ -38,5 +38,9 @@
 </template>
 
 <script setup lang="ts">
-// App Switcher logic
+const config = useRuntimeConfig()
+const isDev = import.meta.dev
+
+const mainUrl = isDev ? 'http://localhost:3000' : 'https://mirauni.com'
+const planUrl = isDev ? 'http://localhost:3001' : 'https://plan.mirauni.com'
 </script>

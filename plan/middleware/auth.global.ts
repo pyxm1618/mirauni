@@ -1,20 +1,41 @@
 export default defineNuxtRouteMiddleware((to, from) => {
     const user = useSupabaseUser()
 
-    // Public routes that don't require auth (if any)
-    // For now, everything seems to require auth or at least we check it.
-    // Docs say: "本项目不提供登录页，未登录直接跳转主站登录"
+    // Public routes that don't require auth
+    // Add any public paths here if needed, e.g., '/about'
+    const publicRoutes: string[] = []
+    if (publicRoutes.includes(to.path)) {
+        return
+    }
+
+    // Protect wizard routes explicitly
+    if (to.path.startsWith('/wizard') && !user.value) {
+        // Redirection logic
+        const isDev = import.meta.dev
+        const loginUrl = isDev ? 'http://localhost:3000/login' : 'https://mirauni.com/login'
+
+        // Construct the full return URL
+        const returnUrl = isDev
+            ? `http://localhost:3001${to.fullPath}`
+            : `https://plan.mirauni.com${to.fullPath}`
+
+        return navigateTo(`${loginUrl}?redirect=${encodeURIComponent(returnUrl)}`, { external: true })
+    }
 
     if (!user.value) {
-        // If running on localhost, we might want to bypass or show a message
-        if (process.dev) {
-            console.warn('User not logged in. In production, this would redirect to main site.')
-            // For dev, we might stay here if we want to test UI without auth, 
-            // but strictly following requirement:
-            // return navigateTo('https://mirauni.com/login', { external: true })
-        }
+        // Redirection logic
+        const isDev = import.meta.dev
+        const loginUrl = isDev ? 'http://localhost:3000/login' : 'https://mirauni.com/login'
 
-        // In production, sync with main site
-        // return navigateTo('https://mirauni.com/login?redirect=' + encodeURIComponent(to.fullPath), { external: true })
+        // Redirect to main site login with return URL
+        // We use window.location.href for external redirect in client-side navigation context
+        // But in middleware, navigateTo with external: true is the Nuxt way
+
+        // Construct the full return URL
+        const returnUrl = isDev
+            ? `http://localhost:3001${to.fullPath}`
+            : `https://plan.mirauni.com${to.fullPath}`
+
+        return navigateTo(`${loginUrl}?redirect=${encodeURIComponent(returnUrl)}`, { external: true })
     }
 })

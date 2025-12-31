@@ -2,9 +2,14 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { plan, user_id } = body
 
-    // 开发模式下，如果没有配置 Supabase，直接返回成功
+    // 正式环境 - 使用 Supabase
+    const { serverSupabaseUser, serverSupabaseClient } = await import('#supabase/server')
+    const user = await serverSupabaseUser(event)
+    const client = await serverSupabaseClient(event)
+
+    // 开发模式下，如果没有配置 Supabase 且没有用户登录（模拟模式），直接返回成功
     const supabaseUrl = process.env.SUPABASE_URL
-    if (!supabaseUrl || supabaseUrl === 'your-supabase-url') {
+    if ((!supabaseUrl || supabaseUrl === 'your-supabase-url') && !user) {
         console.log('[Mock] Wizard save - no Supabase configured')
         return {
             success: true,
@@ -13,11 +18,14 @@ export default defineEventHandler(async (event) => {
         }
     }
 
-    // 正式环境 - 使用 Supabase
-    try {
-        const { serverSupabaseClient } = await import('#supabase/server')
-        const client = await serverSupabaseClient(event)
+    if (!user) {
+        throw createError({ statusCode: 401, message: 'Unauthorized' })
+    }
 
+    // Security: Use authenticated user ID
+    const userId = user.id
+
+    try {
         // 动态计算目标年份
         const now = new Date()
         const targetYear = now.getMonth() >= 9 ? now.getFullYear() + 1 : now.getFullYear()
@@ -26,7 +34,7 @@ export default defineEventHandler(async (event) => {
         const { data: goalData, error: goalError } = await client
             .from('goals')
             .insert({
-                user_id: user_id,
+                user_id: userId,
                 year: targetYear,
                 income_target: plan.incomeGoal,
                 status: 'active',
@@ -45,7 +53,7 @@ export default defineEventHandler(async (event) => {
         // 2. Create Paths
         const pathsToInsert = plan.paths.map((p: any, index: number) => ({
             goal_id: goalId,
-            user_id: user_id,
+            user_id: userId,
             name: p.name,
             category: p.category || 'other',
             income_target: (p.incomeMin + p.incomeMax) / 2,
@@ -68,7 +76,7 @@ export default defineEventHandler(async (event) => {
         for (const path of pathsData) {
             const { data: projectData } = await client.from('projects').insert({
                 path_id: path.id,
-                user_id: user_id,
+                user_id: userId,
                 name: `启动项目: ${path.name}`,
                 status: 'todo',
                 created_at: new Date().toISOString(),
@@ -77,8 +85,8 @@ export default defineEventHandler(async (event) => {
 
             if (projectData) {
                 await client.from('tasks').insert([
-                    { project_id: projectData.id, user_id, name: '调研与计划', status: 'todo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-                    { project_id: projectData.id, user_id, name: '执行第一步', status: 'todo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+                    { project_id: projectData.id, user_id: userId, name: '调研与计划', status: 'todo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                    { project_id: projectData.id, user_id: userId, name: '执行第一步', status: 'todo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
                 ])
             }
         }

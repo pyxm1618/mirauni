@@ -50,7 +50,18 @@ function next() {
 }
 
 // On mount reset step if accessed directly
+// On mount reset step if accessed directly
 onMounted(() => {
     store.currentStep = 1
+    
+    // Double check login state
+    const user = useSupabaseUser()
+    const isDev = import.meta.dev
+    
+    if (!user.value) {
+        const loginUrl = isDev ? 'http://localhost:3000/login' : 'https://mirauni.com/login'
+        const returnUrl = window.location.href
+        window.location.href = `${loginUrl}?redirect=${encodeURIComponent(returnUrl)}`
+    }
 })
 </script>
