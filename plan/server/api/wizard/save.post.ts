@@ -22,6 +22,21 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 401, message: 'Unauthorized' })
     }
 
+    // Validate required fields
+    if (!plan || plan.incomeGoal === null || plan.incomeGoal === undefined) {
+        throw createError({
+            statusCode: 400,
+            message: '收入目标不能为空。请返回第一步填写收入目标。'
+        })
+    }
+
+    if (!plan.paths || plan.paths.length === 0) {
+        throw createError({
+            statusCode: 400,
+            message: '请至少添加一个赚钱路径'
+        })
+    }
+
     // Security: Use authenticated user ID
     const userId = user.id
 
