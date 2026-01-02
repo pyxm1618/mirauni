@@ -8,9 +8,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         return
     }
 
-    // 2. 针对首页 / 的特殊处理
+    // 2. 首页 / 对所有用户公开（落地页）
     if (to.path === '/') {
-        // ... (existing logic)
+        return
     }
 
     // 3. 处理其他受保护路径

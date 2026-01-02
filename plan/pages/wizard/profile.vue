@@ -228,5 +228,21 @@ function back() {
 
 onMounted(() => {
     store.currentStep = 2
+    
+    // 从 localStorage 恢复登录前保存的目标金额
+    const pendingTarget = localStorage.getItem('pendingIncomeTarget')
+    if (pendingTarget && !store.incomeGoal) {
+        store.incomeGoal = Number(pendingTarget)
+        
+        // 同时设置默认截止日期
+        const now = new Date()
+        const month = now.getMonth()
+        const year = now.getFullYear()
+        const targetYear = month >= 9 ? year + 1 : year
+        store.setDeadline(`${targetYear}-12-31`)
+        
+        // 清除 localStorage
+        localStorage.removeItem('pendingIncomeTarget')
+    }
 })
 </script>

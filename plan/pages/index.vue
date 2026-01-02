@@ -146,7 +146,26 @@ const targetYear = computed(() => {
 
 import { useWizardStore } from '~/stores/wizard'
 
+const user = useSupabaseUser()
+const runtimeConfig = useRuntimeConfig()
+
 function startPlan() {
+  // 检查登录状态
+  if (!user.value) {
+    // 未登录，跳转到主站登录页
+    const isDev = import.meta.dev
+    const mainSiteBase = isDev ? 'http://localhost:3000' : 'https://mirauni.com'
+    const planSiteBase = isDev ? 'http://localhost:3001' : 'https://plan.mirauni.com'
+    
+    // 将目标金额存储到 localStorage，登录后恢复
+    localStorage.setItem('pendingIncomeTarget', String(incomeTarget.value))
+    
+    const redirectUrl = encodeURIComponent(`${planSiteBase}/wizard/profile`)
+    const loginUrl = `${mainSiteBase}/login?redirect=${redirectUrl}&from=plan`
+    window.location.href = loginUrl
+    return
+  }
+
   const store = useWizardStore()
   
   // 设置目标金额
