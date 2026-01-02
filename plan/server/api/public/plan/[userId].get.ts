@@ -3,6 +3,8 @@ import { serverSupabaseServiceRole } from '#supabase/server'
 export default defineEventHandler(async (event) => {
     const userId = getRouterParam(event, 'userId')
 
+    console.log('[公开契约API] 收到请求，userId:', userId)
+
     // 使用 Service Role 绕过 RLS，允许未登录用户查看公开契约信息
     const client = serverSupabaseServiceRole(event)
 
@@ -14,7 +16,10 @@ export default defineEventHandler(async (event) => {
         .eq('status', 'active')
         .single()
 
+    console.log('[公开契约API] 查询结果:', { goal, error })
+
     if (error || !goal) {
+        console.error('[公开契约API] 未找到规划:', { userId, error: error?.message })
         throw createError({ statusCode: 404, message: 'Plan not found' })
     }
 
