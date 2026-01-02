@@ -1,73 +1,180 @@
 <template>
   <div class="flex flex-col items-center justify-center space-y-12 py-8">
-    <div class="text-center space-y-4">
-      <h2 class="text-3xl md:text-4xl font-black">2025年目标收入是什么？</h2>
-      <p class="text-gray-500 font-medium text-lg">大胆填，AI 帮你拆解怎么赚到这么多钱</p>
+    <!-- Loading State -->
+    <div v-if="loading" class="text-center">
+      <div class="animate-spin w-8 h-8 border-4 border-black border-t-transparent rounded-full mx-auto mb-4"></div>
+      <p class="text-gray-500">检查规划状态...</p>
     </div>
 
-    <div class="relative w-full max-w-sm">
-      <input
-        v-model="incomeGoal"
-        type="number"
-        class="w-full text-center text-6xl font-black border-b-4 border-black bg-transparent focus:outline-none focus:border-toon-500 placeholder-gray-200 py-4 font-mono transition-colors"
-        placeholder="100"
-        autofocus
-      />
-      <span class="absolute right-0 bottom-6 text-2xl font-bold text-gray-400">万元/年</span>
+    <!-- Has Existing Plan -->
+    <div v-else-if="existingGoal" class="w-full max-w-lg space-y-8">
+      <div class="text-center space-y-4">
+        <h2 class="text-3xl md:text-4xl font-black">您已有规划</h2>
+        <p class="text-gray-500 font-medium text-lg">{{ existingGoal.year }}年目标：{{ formatGoal(existingGoal.income_target) }}万元</p>
+      </div>
+
+      <!-- Summary Card -->
+      <div class="bg-yellow-50 border-4 border-black rounded-2xl p-6 shadow-hard">
+        <div class="grid grid-cols-3 gap-4 text-center mb-6">
+          <div>
+            <div class="text-3xl font-black">{{ existingGoal.pathCount || 0 }}</div>
+            <div class="text-sm text-gray-500">条路径</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black">{{ existingGoal.projectCount || 0 }}</div>
+            <div class="text-sm text-gray-500">个项目</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black">{{ existingGoal.taskCount || 0 }}</div>
+            <div class="text-sm text-gray-500">个任务</div>
+          </div>
+        </div>
+        <div class="text-center text-sm text-gray-400">
+          创建于 {{ formatDate(existingGoal.created_at) }}
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="space-y-4">
+        <UButton 
+          block 
+          size="xl" 
+          color="black" 
+          @click="goToDashboard"
+          class="font-bold"
+        >
+          📊 查看我的规划
+        </UButton>
+        
+        <UButton 
+          block 
+          size="xl" 
+          variant="outline" 
+          color="black"
+          @click="editPlan"
+          class="font-bold"
+        >
+          ✏️ 修改调整
+        </UButton>
+        
+        <UButton 
+          block 
+          size="xl" 
+          variant="ghost" 
+          color="red"
+          @click="confirmRestart"
+          class="font-bold"
+        >
+          🔄 放弃旧规划，重新开始
+        </UButton>
+      </div>
     </div>
 
-    <UButton
-      @click="next"
-      :disabled="!isValid"
-      size="xl"
-      class="px-16 py-3 text-xl font-bold"
-      color="black"
-    >
-      下一步
-    </UButton>
+    <!-- Restart Confirmation Modal -->
+    <UModal v-model="showRestartModal">
+      <div class="p-6 space-y-4">
+        <h3 class="text-xl font-black text-center">⚠️ 确认重新开始？</h3>
+        <p class="text-gray-600 text-center">
+          这将会<span class="text-red-600 font-bold">清除您当前的规划</span>，意味着现在的<b>日历任务、执行看板、进度统计</b>都会被清零。此操作不可撤销。
+        </p>
+        <div class="flex gap-4 pt-4">
+          <UButton block variant="ghost" color="gray" @click="showRestartModal = false">
+            取消
+          </UButton>
+          <UButton block color="red" :loading="restarting" @click="doRestart">
+            确认重新开始
+          </UButton>
+        </div>
+      </div>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useWizardStore } from '~/stores/wizard'
 
+definePageMeta({
+    layout: 'blank'
+})
+
 const store = useWizardStore()
 const router = useRouter()
+const toast = useToast()
 
-const incomeGoal = ref(store.incomeGoal || '')
+const loading = ref(true)
+const existingGoal = ref<any>(null)
+const showRestartModal = ref(false)
+const restarting = ref(false)
 
-const isValid = computed(() => {
-  const goal = Number(incomeGoal.value)
-  return goal > 0 && goal < 100000 // Reasonable limits
+// 检查是否有已存在的规划
+onMounted(async () => {
+  store.currentStep = 1
+  
+  try {
+    const data = await $fetch('/api/goals/active') as any
+    if (data && data.id) {
+      existingGoal.value = data
+      loading.value = false
+    } else {
+      // 没有已存在规划，重定向到着陆页
+      router.replace('/')
+    }
+  } catch (e) {
+    // 没有已存在规划或发生错误，重定向到着陆页
+    router.replace('/')
+  }
 })
 
-const config = useRuntimeConfig()
-const isDev = import.meta.dev
-
-function next() {
-  if (!isValid.value) return
-  
-  // Lazy Login Check
-  const user = useSupabaseUser()
-  if (!user.value) {
-     const loginUrl = isDev ? 'http://localhost:3000/login' : 'https://mirauni.com/login'
-     // We want to return to this page but maybe better to prompt user? 
-     // For now per request, redirect to login.
-     // Ideally we retain the input value. Store persistence handled separately or re-input.
-     store.setIncomeGoal(Number(incomeGoal.value))
-     
-     const returnUrl = window.location.href
-     window.location.href = `${loginUrl}?redirect=${encodeURIComponent(returnUrl)}`
-     return
-  }
-  
-  store.setIncomeGoal(Number(incomeGoal.value))
-  store.currentStep = 2 // Manually sync step for stepper
-  router.push('/wizard/profile')
+function formatGoal(target: number) {
+  return (target / 10000).toFixed(0)
 }
 
-// On mount reset step if accessed directly
-onMounted(() => {
-    store.currentStep = 1
-})
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('zh-CN')
+}
+
+function goToDashboard() {
+  router.push('/dashboard')
+}
+
+function editPlan() {
+  router.push('/dashboard/projects')
+}
+
+function confirmRestart() {
+  showRestartModal.value = true
+}
+
+async function doRestart() {
+  restarting.value = true
+  try {
+    await $fetch('/api/goals/archive', { method: 'POST' })
+    store.$reset()
+    existingGoal.value = null
+    showRestartModal.value = false
+    
+    toast.add({
+      title: '已清除旧规划',
+      description: '现在可以开始新的规划',
+      color: 'green'
+    })
+    
+    // 清除后重定向到着陆页开始新规划
+    router.push('/')
+  } catch (e: any) {
+    toast.add({
+      title: '操作失败',
+      description: e.message,
+      color: 'red'
+    })
+  } finally {
+    restarting.value = false
+  }
+}
 </script>
+
+<style scoped>
+.shadow-hard {
+  box-shadow: 8px 8px 0px 0px #000;
+}
+</style>

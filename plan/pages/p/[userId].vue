@@ -27,7 +27,7 @@
             <div v-if="!signed">
                 <p class="text-gray-600 font-medium mb-4">
                     {{ planData.nickname }} 邀请你成为监督人<br/>
-                    <span class="text-xs text-gray-400">见证 TA 的 2025 搞钱之路</span>
+                    <span class="text-xs text-gray-400">见证 TA 的 2026 搞钱之路</span>
                 </p>
                 <UButton 
                     size="xl" 
@@ -106,11 +106,15 @@ async function fetchPlan() {
     }
 }
 
+const toast = useToast()
+
 async function sign() {
     if (!user.value) {
-        // Redirect to login if not logged in (Mock alert for now)
-        alert('请先登录/注册 Mirauni 账号才能签署')
-        // navigateTo('/login?redirect=...')
+        toast.add({
+            title: '请先登录',
+            description: '登录或注册 Mirauni 账号后才能签署契约',
+            color: 'red'
+        })
         return
     }
 
@@ -121,8 +125,28 @@ async function sign() {
             body: { userId: route.params.userId }
         })
         signed.value = true
+        toast.add({
+            title: '🎉 签署成功',
+            description: '你已成为监督人！',
+            color: 'green'
+        })
     } catch (e: any) {
-        alert(e.message)
+        // Friendly error message for "Self Supervision"
+        const msg = e.data?.message || e.message
+        if (msg && msg.includes('不能做自己的监督人')) {
+             toast.add({
+                title: '无法签署',
+                description: '不能做自己的监督人哦，快去邀请好友来签吧！',
+                icon: 'i-lucide-alert-circle',
+                color: 'orange'
+            })
+        } else {
+             toast.add({
+                title: '签署失败', // Generic error
+                description: msg || '请重试',
+                color: 'red'
+            })
+        }
     } finally {
         signing.value = false
     }
@@ -138,9 +162,16 @@ async function sendInteraction(type: 'like' | 'nudge') {
             }
         })
         const msg = type === 'like' ? '鼓励送达！' : '催更成功！'
-        alert(msg)
+        toast.add({
+            title: msg,
+            color: 'green'
+        })
     } catch (e: any) {
-        alert(e.message)
+         toast.add({
+            title: '发送失败',
+            description: e.message,
+            color: 'red'
+        })
     }
 }
 

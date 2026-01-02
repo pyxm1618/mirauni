@@ -19,7 +19,7 @@
             于 <span class="font-bold">{{ date }}</span> 立下誓言。
         </p>
         <p>
-            将在 2025 年全力以赴，达成 
+            将在 2026 年全力以赴，达成 
             <span class="text-3xl font-black mx-1">{{ goal }}<span class="text-sm">万</span></span>
             的搞钱目标。
         </p>

@@ -34,7 +34,7 @@
             </UButton>
         </div>
         <p class="text-xs text-gray-400 text-center">
-            把链接发给微信好友，让他确认签字即可生效。
+            把链接发给微信好友，让他确认即可生效。
         </p>
     </div>
   </div>

@@ -55,6 +55,10 @@
 <script setup lang="ts">
 import { useWizardStore } from '~/stores/wizard'
 
+definePageMeta({
+    layout: 'blank'
+})
+
 const store = useWizardStore()
 const router = useRouter()
 

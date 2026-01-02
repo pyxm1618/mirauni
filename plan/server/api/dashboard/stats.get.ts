@@ -2,35 +2,62 @@ import { serverSupabaseClient } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient(event)
-    // Get user from session or header (simplified for MVP, assuming middleware handles auth check or we get user from session)
-    // For proper RLS, we should rely on supabase.auth.getUser() but here we might trust the client context or just query.
-    // Ideally:
     const { data: { user } } = await client.auth.getUser()
     if (!user) {
-        // Return mock for dev if no user
+        // No user: return zeros instead of mock data to prevent confusion
         return {
-            totalGoal: 100,
+            totalGoal: 0,
             currentIncome: 0,
             progress: 0,
-            daysLeft: 180,
-            totalTasks: 12,
-            completedTasks: 3
+            daysLeft: 0,
+            totalTasks: 0,
+            completedTasks: 0
         }
     }
 
     const userId = user.id
 
-    // 1. Get Goal
-    const { data: goal } = await client.from('goals').select('*').eq('user_id', userId).eq('status', 'active').single()
+    // 1. Get Goal (use order + limit to ensure deterministic result if multiple active goals exist)
+    const { data: goals } = await client
+        .from('goals')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
 
-    // 2. Mock Income Tracking (We don't have income tracking table yet, maybe sum completed tasks value? For now 0)
-    const currentIncome = 0
+    const goal = goals?.[0] || null
+
+    // 2. Get Income from income table (sum all income for this goal/user)
+    let currentIncome = 0
+    if (goal) {
+        const { data: incomeData } = await client
+            .from('income')
+            .select('amount')
+            .eq('user_id', userId)
+            .eq('goal_id', goal.id)
+
+        if (incomeData && incomeData.length > 0) {
+            currentIncome = incomeData.reduce((sum, r) => sum + Number(r.amount || 0), 0)
+        }
+    }
 
     // 3. Get Task Stats
-    const { count: totalTasks } = await client.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', userId)
-    const { count: completedTasks } = await client.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'done')
+    // 3. Get Task Stats (Filter by active projects to respect archived plans)
+    const { count: totalTasks } = await client
+        .from('tasks')
+        .select('*, projects!inner(*)', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('projects.is_active', true)
 
-    const totalGoal = goal?.income_target || 0
+    const { count: completedTasks } = await client
+        .from('tasks')
+        .select('*, projects!inner(*)', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'done')
+        .eq('projects.is_active', true)
+
+    const totalGoal = Number(goal?.income_target || 0)
     const progress = totalGoal > 0 ? (currentIncome / totalGoal) * 100 : 0
 
     // Simple day calc
@@ -41,7 +68,7 @@ export default defineEventHandler(async (event) => {
     return {
         totalGoal,
         currentIncome,
-        progress: Math.min(progress, 100).toFixed(1),
+        progress: Math.min(progress, 100), // Return number, not string
         daysLeft,
         totalTasks: totalTasks || 0,
         completedTasks: completedTasks || 0

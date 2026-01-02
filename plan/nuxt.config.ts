@@ -9,9 +9,32 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@pinia/nuxt',
     '@nuxtjs/supabase',
+    '@nuxtjs/i18n'
   ],
+  i18n: {
+    locales: [
+      { code: 'zh', name: '中文', file: 'zh-CN.json' },
+      { code: 'en', name: 'English', file: 'en.json' }
+    ],
+    defaultLocale: 'zh',
+    lazy: true,
+    langDir: 'locales',
+    strategy: 'prefix_except_default',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_locale',
+      fallbackLocale: 'zh'
+    }
+  },
   supabase: {
     redirect: false, // We handle redirection manually in middleware
+  },
+  runtimeConfig: {
+    wechatAppId: '', // NUXT_WECHAT_APP_ID
+    wechatAppSecret: '', // NUXT_WECHAT_APP_SECRET
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3001'
+    }
   },
   ui: {
     global: true,

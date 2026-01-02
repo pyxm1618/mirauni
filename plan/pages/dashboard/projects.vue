@@ -12,7 +12,7 @@
     <div v-else class="space-y-8">
         <div v-for="path in paths" :key="path.id" class="space-y-4">
              <div class="flex items-center gap-2 border-b-2 border-gray-100 pb-2">
-                <UBadge color="black" size="lg">{{ path.category }}</UBadge>
+                <UBadge color="black" size="lg">{{ translateCategory(path.category) }}</UBadge>
                 <h2 class="text-2xl font-bold">{{ path.name }}</h2>
              </div>
              
@@ -21,6 +21,7 @@
                     v-for="project in path.projects" 
                     :key="project.id"
                     class="bg-white border-3 border-black rounded-xl p-5 shadow-hard hover:shadow-hard-lg transition-transform cursor-pointer"
+                    @click="openProject(project)"
                  >
                     <div class="flex justify-between items-start mb-3">
                         <h3 class="font-bold text-lg">{{ project.name }}</h3>
@@ -45,37 +46,70 @@
              <UButton to="/wizard" variant="soft" class="mt-4">开始规划</UButton>
         </div>
     </div>
+
+    <!-- Detail Modal -->
+    <ProjectDetailModal 
+        v-if="selectedProject"
+        v-model="showProjectModal"
+        :project="selectedProject"
+        @refresh="fetchProjects"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import ProjectDetailModal from '~/components/dashboard/ProjectDetailModal.vue'
+
 definePageMeta({
-    // Auth is handled globally by auth.global.ts
+    layout: 'default'
 })
 
 const paths = ref<any[]>([])
 const loading = ref(true)
+const showProjectModal = ref(false)
+const selectedProject = ref<any>(null)
+
+function translateCategory(cat: string) {
+    const map: Record<string, string> = {
+        'product': '产品型',
+        'content': '内容型',
+        'service': '服务型',
+        'other': '其他'
+    }
+    return map[cat] || cat
+}
+
+function openProject(project: any) {
+    selectedProject.value = project
+    showProjectModal.value = true
+}
 
 async function fetchProjects() {
     loading.value = true
     try {
         // Fetch Paths with nested Projects and Tasks
-        // Supabase nested query
+        // Strict filtering: Only paths belonging to ACTIVE goals
         const client = useSupabaseClient()
         const { data } = await client
             .from('paths')
             .select(`
                 *,
+                goals!inner(status),
                 projects (
                     *,
                     tasks (
-                        name, status, id
+                        name, status, id, original_estimate, planned_date
                     )
                 )
             `)
-            .eq('status', 'active')
+            .eq('goals.status', 'active') // Only active goals
+            .eq('projects.is_active', true) // Only active projects (milestones)
             .order('sort_order')
             
+        // Filter out paths that might have empty projects if the inner join behaves loosely on nested arrays
+        // But with Supabase, the .eq on nested resource filters the parent rows usually if !inner is used.
+        // For nested arrays (projects), the .eq('projects.is_active', true) filters the returned array content.
+        
         if (data) paths.value = data
     } catch (e) {
         console.error(e)

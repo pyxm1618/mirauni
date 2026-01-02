@@ -1,74 +1,135 @@
 import { defineStore } from 'pinia'
+import { ref, reactive } from 'vue'
 
 export type ProfileData = {
-    background: string
-    weeklyHours: string
+    background: string[]
+    weeklyHours: number
+    workDays: number[]  // 0=Sun, 1=Mon, ..., 6=Sat
     constraints: string[]
+}
+
+export type Path = {
+    id: string
+    name: string
+    type: 'product' | 'content' | 'service' | 'other'
+    description?: string
+    weight: number // 0-100
+    dailyHours?: number // Calculated from weight
+    formula: {
+        type: string
+        config: Record<string, number>
+        calculatedIncome: number
+    }
+    startDate?: string
+    durationWeeks?: number
+}
+
+export type ConversationMessage = {
+    role: 'user' | 'ai'
+    content: string
 }
 
 export type WizardState = {
     currentStep: number
     incomeGoal: number | null
+    deadline: string | null
     profile: ProfileData
     openQuestion: string
-    conversationHistory: { role: 'user' | 'ai', content: string }[]
-    // Future:  conversationHistory: { role: 'user' | 'ai', content: string }[]
-    paths: any[]
+    conversationHistory: ConversationMessage[]
+    paths: Path[]
     generatedPlan: any
 }
 
-export const useWizardStore = defineStore('wizard', {
-    state: (): WizardState => ({
-        currentStep: 1,
-        incomeGoal: null,
-        profile: {
-            background: '',
-            weeklyHours: '',
-            constraints: []
-        },
-        openQuestion: '',
-        conversationHistory: [],
-        paths: [],
-        generatedPlan: null
-    }),
+/**
+ * Wizard Store - using Composition API style for better TypeScript support
+ */
+export const useWizardStore = defineStore('wizard', () => {
+    // State
+    const currentStep = ref(1)
+    const incomeGoal = ref<number | null>(null)
+    const deadline = ref<string | null>(null)
+    const profile = reactive<ProfileData>({
+        background: [],
+        weeklyHours: 20,
+        workDays: [1, 2, 3, 4, 5],
+        constraints: []
+    })
+    const openQuestion = ref('')
+    const conversationHistory = ref<ConversationMessage[]>([])
+    const paths = ref<Path[]>([])
+    const generatedPlan = ref<any>(null)
 
-    actions: {
-        setPaths(paths: any[]) {
-            this.paths = paths
-        },
+    // Actions
+    function setPaths(newPaths: Path[]) {
+        paths.value = newPaths
+    }
 
-        setGeneratedPlan(plan: any) {
-            this.generatedPlan = plan
-        },
+    function setDeadline(date: string) {
+        deadline.value = date
+    }
 
-        addMessage(role: 'user' | 'ai', content: string) {
-            this.conversationHistory.push({ role, content })
-        },
+    function setGeneratedPlan(plan: any) {
+        generatedPlan.value = plan
+    }
 
-        setIncomeGoal(goal: number) {
-            this.incomeGoal = goal
-        },
+    function addMessage(role: 'user' | 'ai', content: string) {
+        conversationHistory.value.push({ role, content })
+    }
 
-        updateProfile(data: Partial<ProfileData>) {
-            this.profile = { ...this.profile, ...data }
-        },
+    function setIncomeGoal(goal: number) {
+        incomeGoal.value = goal
+    }
 
-        setOpenQuestion(answer: string) {
-            this.openQuestion = answer
-        },
+    function updateProfile(data: Partial<ProfileData>) {
+        Object.assign(profile, data)
+    }
 
-        nextStep() {
-            // Basic client-side navigation logic to be handled by pages router usually, 
-            // but store can track "furthest reached step"
-            this.currentStep++
-        },
+    function setOpenQuestion(answer: string) {
+        openQuestion.value = answer
+    }
 
-        prevStep() {
-            if (this.currentStep > 1) this.currentStep--
-        }
-    },
+    function nextStep() {
+        currentStep.value++
+    }
 
-    persist: true // Requires @pinia-plugin-persistedstate if we want auto-persistence, otherwise we rely on in-memory for MVP or add logic later. 
-    // Note: standard @pinia/nuxt doesn't include persistence by default without config. 
-    // For now we will stick to basic in-memory or manual localStorage if needed.
+    function prevStep() {
+        if (currentStep.value > 1) currentStep.value--
+    }
+
+    function $reset() {
+        currentStep.value = 1
+        incomeGoal.value = null
+        deadline.value = null
+        profile.background = []
+        profile.weeklyHours = 20
+        profile.workDays = [1, 2, 3, 4, 5]
+        profile.constraints = []
+        openQuestion.value = ''
+        conversationHistory.value = []
+        paths.value = []
+        generatedPlan.value = null
+    }
+
+    return {
+        // State
+        currentStep,
+        incomeGoal,
+        deadline,
+        profile,
+        openQuestion,
+        conversationHistory,
+        paths,
+        generatedPlan,
+        // Actions
+        setPaths,
+        setDeadline,
+        setGeneratedPlan,
+        addMessage,
+        setIncomeGoal,
+        updateProfile,
+        setOpenQuestion,
+        nextStep,
+        prevStep,
+        $reset
+    }
 })

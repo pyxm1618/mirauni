@@ -1,70 +1,99 @@
 <template>
-  <div class="min-h-screen bg-toon-50 flex font-sans text-gray-900">
-    <!-- Sidebar -->
-    <aside class="w-64 border-r-3 border-black bg-white flex-shrink-0 flex flex-col fixed h-full z-20">
-      <div class="h-16 border-b-3 border-black flex items-center px-4 bg-toon-500 text-white">
-        <span class="text-xl font-bold tracking-tight">钱途 MoneyPath</span>
-      </div>
-      
-      <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-        <NuxtLink to="/" class="flex items-center gap-3 px-4 py-3 rounded-lg border-2 border-transparent hover:border-black hover:bg-toon-100 transition-all font-bold">
-          <UIcon name="i-lucide-rocket" class="w-5 h-5" />
-          <span>开始规划</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-lg border-2 border-transparent hover:border-black hover:bg-toon-100 transition-all font-bold">
-          <UIcon name="i-lucide-layout-dashboard" class="w-5 h-5" />
-          <span>执行看板</span>
-        </NuxtLink>
-        <NuxtLink to="/calendar" class="flex items-center gap-3 px-4 py-3 rounded-lg border-2 border-transparent hover:border-black hover:bg-toon-100 transition-all font-bold">
-          <UIcon name="i-lucide-calendar" class="w-5 h-5" />
-          <span>日历视图</span>
-        </NuxtLink>
-      </nav>
-
-      <div class="p-4 border-t-3 border-black bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" @click="handleProfileClick">
+  <div class="min-h-screen bg-toon-50 flex flex-col font-sans text-gray-900">
+    <!-- Top Bar -->
+    <header class="h-16 border-b-3 border-black bg-white sticky top-0 z-30 flex-shrink-0">
+      <div class="w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 h-full flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full border-2 border-black bg-gray-300 overflow-hidden">
-             <!-- Avatar Placeholder -->
-             <img v-if="userInfo?.avatarUrl" :src="userInfo.avatarUrl" class="w-full h-full object-cover" />
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="font-bold truncate">{{ userInfo?.nickname || 'Login to Save' }}</p>
-            <p class="text-xs text-gray-500 truncate">{{ userInfo ? 'Free Plan' : 'Guest' }}</p>
-          </div>
+          <!-- Logo / Title -->
+          <NuxtLink to="/" class="flex items-center gap-2 group">
+              <div class="w-8 h-8 bg-black text-white rounded flex items-center justify-center font-black text-lg group-hover:rotate-12 transition-transform">M</div>
+              <span class="text-xl font-bold tracking-tight">钱途 MoneyPath</span>
+          </NuxtLink>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <!-- User Profile / Login -->
+          <ClientOnly>
+              <UDropdown 
+                v-if="user" 
+                :items="items" 
+                :popper="{ placement: 'bottom-end', offsetDistance: 12 }"
+                :ui="{
+                  width: 'w-56',
+                  background: 'bg-white',
+                  ring: 'ring-3 ring-black',
+                  shadow: 'shadow-[6px_6px_0px_0px_#000]',
+                  rounded: 'rounded-xl',
+                  padding: 'p-2',
+                  item: {
+                    padding: 'px-3 py-3',
+                    base: 'font-bold transition-colors',
+                    active: 'bg-black text-white',
+                    inactive: 'text-black',
+                    icon: {
+                      base: 'flex-shrink-0 h-5 w-5',
+                      active: 'text-white',
+                      inactive: 'text-black'
+                    }
+                  },
+                  divide: 'divide-y-3 divide-gray-100'
+                }"
+              >
+                  <div class="flex items-center gap-3 cursor-pointer group">
+                      <div class="text-right hidden sm:block">
+                          <p class="font-bold text-sm leading-tight group-hover:underline">{{ user.user_metadata?.nickname || 'User' }}</p>
+                          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">LEVEL 1</p>
+                      </div>
+                      <div class="w-9 h-9 rounded-full border-2 border-black bg-gray-200 overflow-hidden group-hover:scale-110 transition-transform shadow-[2px_2px_0px_0px_#000]">
+                          <img v-if="user.user_metadata?.avatar_url" :src="user.user_metadata.avatar_url" class="w-full h-full object-cover" />
+                          <div v-else class="w-full h-full flex items-center justify-center font-black text-gray-400">?</div>
+                      </div>
+                  </div>
+              </UDropdown>
+              <div v-else>
+                  <UButton to="/login" color="black" variant="solid" size="sm" class="font-bold px-4">登录</UButton>
+              </div>
+          </ClientOnly>
         </div>
       </div>
-    </aside>
+    </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 ml-64 flex flex-col min-h-screen relative z-10">
-      <!-- Top Bar -->
-      <header class="h-16 border-b-3 border-black bg-white flex items-center justify-end px-6 sticky top-0 z-30">
-         <AppSwitcher />
-      </header>
-
-      <!-- Page Content -->
-      <div class="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto w-full">
-        <slot />
-      </div>
+    <!-- Main Content (Full Width) -->
+    <main class="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+      <slot />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-const { userInfo } = useUser()
+const { user } = useUser() // Assuming useUser exposes clear/logout
+const client = useSupabaseClient()
 
-function handleProfileClick() {
-    if (!userInfo.value) {
-        const isDev = import.meta.dev
-        const loginUrl = isDev ? 'http://localhost:3000/login' : 'https://mirauni.com/login'
-        const returnUrl = window.location.href
-        window.location.href = `${loginUrl}?redirect=${encodeURIComponent(returnUrl)}`
+const items = [
+  [{
+    label: '个人档案',
+    icon: 'i-lucide-user',
+    click: () => navigateTo('/wizard/profile')
+  }],
+  [{
+    label: '规划设置',
+    icon: 'i-lucide-settings',
+    click: () => navigateTo('/dashboard/settings')
+  }],
+  [{
+    label: '退出登录',
+    icon: 'i-lucide-log-out',
+    click: async () => {
+        await client.auth.signOut()
+        // Force reload or navigate to home
+        window.location.href = '/'
     }
-}
+  }]
+]
 </script>
 
 <style>
-/* Global scrollbar styling for a rough look */
+/* Global scrollbar styling */
 ::-webkit-scrollbar {
   width: 12px;
 }

@@ -61,9 +61,20 @@ export default defineEventHandler(async (event) => {
 
         if (existingUser) {
             console.log('[微信登录] 老用户登录流程，user_id:', existingUser.id)
-            // 用户已存在，直接登录
-            const email = `${existingUser.phone}@phone.mirauni.com`
-            const password = `mirauni_${existingUser.phone}_secure_pwd`
+
+            // 根据用户是否有手机号，使用不同的登录凭证
+            let email: string
+            let password: string
+
+            if (existingUser.phone) {
+                // 手机号用户
+                email = `${existingUser.phone}@phone.mirauni.com`
+                password = `mirauni_${existingUser.phone}_secure_pwd`
+            } else {
+                // 纯微信用户（临时方案创建的用户）
+                email = `wx_${tokenData.openid}@wechat.mirauni.com`
+                password = `mirauni_wx_${tokenData.openid}_secure`
+            }
 
             const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
                 email,
@@ -97,23 +108,71 @@ export default defineEventHandler(async (event) => {
             return sendRedirect(event, '/')
         }
 
-        // 4. 新用户，需要绑定手机号
-        console.log('[微信登录] 新用户，准备跳转到绑定手机号页面')
+        // 4. 新用户，临时跳过手机绑定（短信审核期间的临时方案）
+        // TODO: 短信审核通过后，恢复跳转到绑定手机号页面
+        console.log('[微信登录] 新用户，临时直接创建账号（跳过手机绑定）')
         console.log('[微信登录] OpenID:', tokenData.openid)
         console.log('[微信登录] 用户信息:', wxUserInfo.nickname)
 
-        // 将微信信息临时存储（或通过 URL 参数传递）
-        const wxData = encodeURIComponent(JSON.stringify({
-            openid: tokenData.openid,
-            unionid: tokenData.unionid || wxUserInfo.unionid,
-            nickname: wxUserInfo.nickname,
-            avatar: wxUserInfo.headimgurl
-        }))
+        // 使用 openid 生成账号凭证
+        const newUserEmail = `wx_${tokenData.openid}@wechat.mirauni.com`
+        const newUserPassword = `mirauni_wx_${tokenData.openid}_secure`
 
-        const bindphoneUrl = `/bindphone?wx=${wxData}`
-        console.log('[微信登录] 跳转 URL:', bindphoneUrl.substring(0, 100) + '...')
+        // 4.1 创建 Supabase Auth 用户
+        const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+            email: newUserEmail,
+            password: newUserPassword,
+            email_confirm: true,
+            user_metadata: {
+                wechat_openid: tokenData.openid,
+                nickname: wxUserInfo.nickname,
+                avatar_url: wxUserInfo.headimgurl
+            }
+        })
 
-        return sendRedirect(event, bindphoneUrl)
+        if (signUpError) {
+            console.error('[微信登录] 创建用户失败:', signUpError)
+            throw new Error('创建账号失败')
+        }
+
+        console.log('[微信登录] Auth 用户创建成功:', signUpData.user.id)
+
+        // 4.2 在 users 表创建记录
+        const { error: insertError } = await supabaseAdmin
+            .from('users')
+            .insert({
+                id: signUpData.user.id,
+                wechat_openid: tokenData.openid,
+                wechat_unionid: tokenData.unionid || wxUserInfo.unionid,
+                username: wxUserInfo.nickname || `wx_${tokenData.openid.substring(0, 8)}`,
+                avatar_url: wxUserInfo.headimgurl,
+                // phone 留空，后续可补绑定
+            })
+
+        if (insertError) {
+            console.error('[微信登录] 创建用户记录失败:', insertError)
+            // 不影响登录，继续执行
+        }
+
+        // 4.3 登录新用户
+        const { data: newSignInData, error: newSignInError } = await supabaseAdmin.auth.signInWithPassword({
+            email: newUserEmail,
+            password: newUserPassword
+        })
+
+        if (newSignInError || !newSignInData.session) {
+            console.error('[微信登录] 新用户登录失败:', newSignInError)
+            throw new Error('登录失败')
+        }
+
+        // 设置 session
+        await supabase.auth.setSession({
+            access_token: newSignInData.session.access_token,
+            refresh_token: newSignInData.session.refresh_token
+        })
+
+        console.log('[微信登录] 新用户创建并登录成功')
+        return sendRedirect(event, '/')
 
     } catch (error: any) {
         console.error('[微信登录] 异常捕获:', error)

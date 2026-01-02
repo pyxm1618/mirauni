@@ -66,6 +66,10 @@
 import ChatBubble from '~/components/wizard/ChatBubble.vue'
 import { useWizardStore } from '~/stores/wizard'
 
+definePageMeta({
+    layout: 'blank'
+})
+
 const store = useWizardStore()
 const router = useRouter()
 const input = ref('')
