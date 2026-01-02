@@ -55,8 +55,24 @@ export function useAuth() {
             // 更新 store
             authStore.setUser(response.user)
 
-            // 跳转
+            // 跳转逻辑
             const redirect = route.query.redirect as string
+            const fromPlan = route.query.from === 'plan'
+
+            if (fromPlan && redirect) {
+                // 来自钱途的登录请求，跳转回钱途并携带 SSO tokens
+                try {
+                    const targetUrl = new URL(decodeURIComponent(redirect))
+                    targetUrl.searchParams.set('sso_access', response.session.access_token)
+                    targetUrl.searchParams.set('sso_refresh', response.session.refresh_token)
+                    window.location.href = targetUrl.toString()
+                    return response
+                } catch (e) {
+                    console.error('[useAuth] Invalid redirect URL:', e)
+                }
+            }
+
+            // 默认跳转
             await router.push(redirect || '/')
 
             return response

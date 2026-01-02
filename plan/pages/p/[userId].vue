@@ -110,11 +110,13 @@ const toast = useToast()
 
 async function sign() {
     if (!user.value) {
-        toast.add({
-            title: '请先登录',
-            description: '登录或注册 Mirauni 账号后才能签署契约',
-            color: 'red'
-        })
+        // 跳转主站登录，登录后回到当前页
+        const currentUrl = encodeURIComponent(window.location.href)
+        const isDev = window.location.hostname === 'localhost'
+        const mainSiteLogin = isDev 
+          ? `http://localhost:3000/login?redirect=${currentUrl}&from=plan`
+          : `https://mirauni.com/login?redirect=${currentUrl}&from=plan`
+        window.location.href = mainSiteLogin
         return
     }
 
