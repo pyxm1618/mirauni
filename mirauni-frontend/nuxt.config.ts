@@ -31,7 +31,13 @@ export default defineNuxtConfig({
   },
 
   supabase: {
-    redirect: false
+    redirect: false,
+    cookieOptions: {
+      domain: process.env.NODE_ENV === 'production' ? '.mirauni.com' : undefined,
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production'
+    }
   },
 
   runtimeConfig: {

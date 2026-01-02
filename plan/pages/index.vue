@@ -149,7 +149,7 @@ import { useWizardStore } from '~/stores/wizard'
 const user = useSupabaseUser()
 const runtimeConfig = useRuntimeConfig()
 
-function startPlan() {
+async function startPlan() {
   // 检查登录状态
   if (!user.value) {
     // 未登录，跳转到主站登录页
@@ -164,6 +164,18 @@ function startPlan() {
     const loginUrl = `${mainSiteBase}/login?redirect=${redirectUrl}&from=plan`
     window.location.href = loginUrl
     return
+  }
+
+  // 检查用户是否已有规划 (防止死循环)
+  try {
+    const stats = await $fetch('/api/dashboard/stats')
+    // 如果已有总目标(Total Goal)，说明已完成规划，直接去 Dashboard
+    if (stats && stats.totalGoal > 0) {
+      return navigateTo('/dashboard')
+    }
+  } catch (e) {
+    console.error('Failed to check plan status:', e)
+    // 忽略错误，继续进入 Wizard
   }
 
   const store = useWizardStore()

@@ -28,6 +28,12 @@ export default defineNuxtConfig({
   },
   supabase: {
     redirect: false, // We handle redirection manually in middleware
+    cookieOptions: {
+      domain: process.env.NODE_ENV === 'production' ? '.mirauni.com' : undefined,
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production'
+    }
   },
   runtimeConfig: {
     wechatAppId: '', // NUXT_WECHAT_APP_ID
