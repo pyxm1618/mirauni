@@ -11,14 +11,16 @@ export default defineEventHandler(async (event) => {
     try {
         // 优先使用 Service Role 绕过 RLS
         const adminClient = serverSupabaseServiceRole(event)
+        console.log('[公开契约API] Service Role 客户端已创建')
 
-        // 获取用户的活跃目标
+        // 获取用户的活跃目标（取最新的一条，避免多条记录时 .single() 报错）
         const { data, error } = await adminClient
             .from('goals')
             .select('income_target, created_at')
             .eq('user_id', userId)
             .eq('status', 'active')
-            .single()
+            .order('created_at', { ascending: false })
+            .limit(1)
 
         console.log('[公开契约API] Service Role 查询结果:', { data, error: error?.message })
 
@@ -26,7 +28,12 @@ export default defineEventHandler(async (event) => {
             throw error
         }
 
-        goal = data
+        // 取第一条记录
+        goal = data && data.length > 0 ? data[0] : null
+
+        if (!goal) {
+            throw new Error('No active goal found')
+        }
 
         // 尝试从 auth.users 获取用户信息
         try {
@@ -49,18 +56,19 @@ export default defineEventHandler(async (event) => {
                 .select('income_target, created_at')
                 .eq('user_id', userId)
                 .eq('status', 'active')
-                .single()
+                .order('created_at', { ascending: false })
+                .limit(1)
 
             console.log('[公开契约API] 普通客户端查询结果:', { data, error: error?.message })
 
-            if (error || !data) {
+            if (error || !data || data.length === 0) {
                 throw createError({
                     statusCode: 404,
                     message: 'Plan not found'
                 })
             }
 
-            goal = data
+            goal = data[0]
         } catch (clientError: any) {
             console.error('[公开契约API] 备用查询也失败:', clientError.message)
             throw createError({
