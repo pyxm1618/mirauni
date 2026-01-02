@@ -10,6 +10,10 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const headers = getHeaders(event)
 
+    // 获取 redirect 参数（从钱途等子站跳转过来时会携带）
+    const redirect = query.redirect as string
+    const from = query.from as string
+
     // 检查微信配置
     if (!config.wechatAppId) {
         throw createError({
@@ -22,8 +26,11 @@ export default defineEventHandler(async (event) => {
     const baseUrl = config.public.siteUrl || 'https://mirauni.com'
     const redirectUri = `${baseUrl}/api/auth/wechat/callback`
 
-    // 生成 state（用于防止 CSRF）
-    const state = Math.random().toString(36).slice(2, 12)
+    // 生成 state（用于防止 CSRF，同时携带 redirect 信息）
+    const randomPart = Math.random().toString(36).slice(2, 12)
+    // 如果有 redirect 参数，将其编码到 state 中
+    const stateData = redirect ? { r: randomPart, redirect, from } : { r: randomPart }
+    const state = Buffer.from(JSON.stringify(stateData)).toString('base64url')
 
     // 判断登录类型
     const userAgent = headers['user-agent'] || ''

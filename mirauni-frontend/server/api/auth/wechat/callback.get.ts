@@ -21,6 +21,21 @@ export default defineEventHandler(async (event) => {
         return sendRedirect(event, '/login?error=微信授权失败')
     }
 
+    // 从 state 中解析 redirect 参数
+    let redirectUrl = '/'
+    let fromPlan = false
+    if (state && typeof state === 'string') {
+        try {
+            const stateData = JSON.parse(Buffer.from(state, 'base64url').toString())
+            if (stateData.redirect) {
+                redirectUrl = decodeURIComponent(stateData.redirect)
+                fromPlan = stateData.from === 'plan'
+            }
+        } catch (e) {
+            console.log('[微信登录] state 解析失败，使用默认跳转')
+        }
+    }
+
     const config = useRuntimeConfig()
 
     // 开发环境且未配置微信，模拟登录
@@ -103,9 +118,21 @@ export default defineEventHandler(async (event) => {
                     access_token: signInData.session.access_token,
                     refresh_token: signInData.session.refresh_token
                 })
+
+                // 如果来自钱途，携带 SSO tokens 跳转回去
+                if (fromPlan && redirectUrl !== '/') {
+                    try {
+                        const targetUrl = new URL(redirectUrl)
+                        targetUrl.searchParams.set('sso_access', signInData.session.access_token)
+                        targetUrl.searchParams.set('sso_refresh', signInData.session.refresh_token)
+                        return sendRedirect(event, targetUrl.toString())
+                    } catch (e) {
+                        console.error('[微信登录] redirect URL 解析失败:', e)
+                    }
+                }
             }
 
-            return sendRedirect(event, '/')
+            return sendRedirect(event, redirectUrl)
         }
 
         // 4. 新用户，临时跳过手机绑定（短信审核期间的临时方案）
@@ -172,7 +199,20 @@ export default defineEventHandler(async (event) => {
         })
 
         console.log('[微信登录] 新用户创建并登录成功')
-        return sendRedirect(event, '/')
+
+        // 如果来自钱途，携带 SSO tokens 跳转回去
+        if (fromPlan && redirectUrl !== '/') {
+            try {
+                const targetUrl = new URL(redirectUrl)
+                targetUrl.searchParams.set('sso_access', newSignInData.session.access_token)
+                targetUrl.searchParams.set('sso_refresh', newSignInData.session.refresh_token)
+                return sendRedirect(event, targetUrl.toString())
+            } catch (e) {
+                console.error('[微信登录] redirect URL 解析失败:', e)
+            }
+        }
+
+        return sendRedirect(event, redirectUrl)
 
     } catch (error: any) {
         console.error('[微信登录] 异常捕获:', error)

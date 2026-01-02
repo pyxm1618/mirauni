@@ -85,7 +85,21 @@ export function useAuth() {
      * 获取微信登录 URL
      */
     async function getWechatLoginUrl() {
-        const response = await $fetch<{ url: string }>('/api/auth/wechat/url')
+        // 构建查询参数，携带 redirect 信息
+        const params = new URLSearchParams()
+        const redirect = route.query.redirect as string
+        const from = route.query.from as string
+
+        if (redirect) {
+            params.set('redirect', redirect)
+        }
+        if (from) {
+            params.set('from', from)
+        }
+
+        const queryString = params.toString()
+        const url = queryString ? `/api/auth/wechat/url?${queryString}` : '/api/auth/wechat/url'
+        const response = await $fetch<{ url: string }>(url)
         return response.url
     }
 
