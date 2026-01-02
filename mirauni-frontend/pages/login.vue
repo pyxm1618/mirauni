@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-[80vh] flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white border-2 border-indie-border shadow-brutal-lg p-8 transform rotate-1 hover:rotate-0 transition-transform duration-300">
+    <div class="w-full max-w-md bg-white border-2 border-indie-border shadow-brutal-lg p-8">
       <h1 class="text-4xl font-display font-black mb-8 border-b-4 border-indie-accent pb-2 inline-block">{{ $t('auth.title') }}</h1>
       
       <!-- 错误提示 -->
@@ -8,78 +8,80 @@
         {{ error }}
       </div>
 
-      <!-- 手机号登录 -->
-      <div v-if="!showCodeInput" class="space-y-4">
-        <div>
-          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.phoneLabel') }}</label>
-          <input 
-            v-model="phone"
-            type="tel" 
-            :placeholder="$t('auth.phonePlaceholder')"
-            class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
-            maxlength="11"
-            @keyup.enter="sendCode"
-          />
-        </div>
-        <button 
-          @click="sendCode"
-          :disabled="isSending || phone.length !== 11"
-          class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {{ isSending ? $t('auth.sending') : $t('auth.sendCode') }}
-        </button>
-      </div>
-
-      <!-- 验证码输入 -->
-      <div v-else class="space-y-4">
-        <div>
-          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.codeLabel') }}</label>
-          <input 
-            v-model="code"
-            type="text" 
-            :placeholder="$t('auth.codePlaceholder')"
-            class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg text-center tracking-widest focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all"
-            maxlength="6"
-            @keyup.enter="login"
-          />
-          <div class="flex justify-between items-center mt-2">
-            <p class="text-sm text-gray-500">{{ $t('auth.codeSent') }} {{ phone }}</p>
-            <button 
-              v-if="countdown > 0"
-              disabled
-              class="text-sm text-gray-400"
-            >
-              {{ countdown }}{{ $t('auth.resend') }}
-            </button>
-            <button 
-              v-else
-              @click="sendCode"
-              class="text-sm text-indie-text hover:underline"
-            >
-              {{ $t('auth.resendBtn') }}
-            </button>
+      <!-- 手机号登录 & 验证码 (暂时隐藏) -->
+      <div v-if="false">
+        <div v-if="!showCodeInput" class="space-y-4">
+          <div>
+            <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.phoneLabel') }}</label>
+            <input 
+              v-model="phone"
+              type="tel" 
+              :placeholder="$t('auth.phonePlaceholder')"
+              class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
+              maxlength="11"
+              @keyup.enter="sendCode"
+            />
           </div>
+          <button 
+            @click="sendCode"
+            :disabled="isSending || phone.length !== 11"
+            class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ isSending ? $t('auth.sending') : $t('auth.sendCode') }}
+          </button>
         </div>
-        <button 
-          @click="login"
-          :disabled="isLoggingIn || code.length !== 6"
-          class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {{ isLoggingIn ? $t('auth.loggingIn') : $t('auth.loginBtn') }}
-        </button>
-        <button 
-          @click="goBack"
-          class="w-full text-sm text-gray-500 hover:text-gray-700"
-        >
-          {{ $t('auth.back') }}
-        </button>
-      </div>
 
-      <!-- 分隔线 -->
-      <div class="flex items-center gap-4 my-6">
-        <div class="flex-1 h-px bg-gray-300"></div>
-        <span class="text-gray-400 text-sm">{{ $t('auth.or') }}</span>
-        <div class="flex-1 h-px bg-gray-300"></div>
+        <!-- 验证码输入 -->
+        <div v-else class="space-y-4">
+          <div>
+            <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.codeLabel') }}</label>
+            <input 
+              v-model="code"
+              type="text" 
+              :placeholder="$t('auth.codePlaceholder')"
+              class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg text-center tracking-widest focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all"
+              maxlength="6"
+              @keyup.enter="login"
+            />
+            <div class="flex justify-between items-center mt-2">
+              <p class="text-sm text-gray-500">{{ $t('auth.codeSent') }} {{ phone }}</p>
+              <button 
+                v-if="countdown > 0"
+                disabled
+                class="text-sm text-gray-400"
+              >
+                {{ countdown }}{{ $t('auth.resend') }}
+              </button>
+              <button 
+                v-else
+                @click="sendCode"
+                class="text-sm text-indie-text hover:underline"
+              >
+                {{ $t('auth.resendBtn') }}
+              </button>
+            </div>
+          </div>
+          <button 
+            @click="login"
+            :disabled="isLoggingIn || code.length !== 6"
+            class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ isLoggingIn ? $t('auth.loggingIn') : $t('auth.loginBtn') }}
+          </button>
+          <button 
+            @click="goBack"
+            class="w-full text-sm text-gray-500 hover:text-gray-700"
+          >
+            {{ $t('auth.back') }}
+          </button>
+        </div>
+
+        <!-- 分隔线 -->
+        <div class="flex items-center gap-4 my-6">
+          <div class="flex-1 h-px bg-gray-300"></div>
+          <span class="text-gray-400 text-sm">{{ $t('auth.or') }}</span>
+          <div class="flex-1 h-px bg-gray-300"></div>
+        </div>
       </div>
 
       <!-- 微信登录 -->
