@@ -18,11 +18,25 @@
         />
         <span class="text-xl font-bold text-gray-400">小时/天</span>
       </div>
-      <p class="text-sm text-gray-500">建议从每天 2-4 小时开始，保持可持续性。</p>
+      <p class="text-sm text-gray-500">
+        基于你设定的每周 {{ store.profile.weeklyHours }} 小时工作时间推算。
+      </p>
     </div>
 
     <!-- 2. Path Selection & Weight Allocation -->
     <div class="space-y-4">
+      <!-- Tip Alert -->
+      <UAlert 
+        icon="i-lucide-lightbulb"
+        color="yellow"
+        variant="subtle"
+        title="建议组合 3 个路径"
+        description="分散风险可以提高达成目标的概率。例如：1个核心主业 + 1个增长型副业 + 1个被动收入。"
+        :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'gray', variant: 'link', padded: false }"
+        @close="closeAlert"
+        v-if="showAlert"
+      />
+
       <h3 class="font-black text-xl flex justify-between items-center">
           <span>路径组合</span>
           <button @click="openCustomModal" class="text-sm font-bold text-gray-500 hover:text-black flex items-center gap-1">
@@ -153,7 +167,12 @@ const router = useRouter()
 const dailyHours = ref(store.profile.weeklyHours ? Math.round(store.profile.weeklyHours / 5) : 4)
 const displayedPaths = ref<any[]>([])
 const showCustomModal = ref(false)
+const showAlert = ref(true)
 const customForm = reactive({ name: '', type: 'other' })
+
+function closeAlert() {
+    showAlert.value = false
+}
 
 // --- Recommendation Logic ---
 // Dictionary: Background Key -> Recommended Path IDs
@@ -256,6 +275,7 @@ function toggleSelection(path: any) {
     rebalanceWeights()
   } else {
     path.weight = 0
+    rebalanceWeights()
   }
 }
 

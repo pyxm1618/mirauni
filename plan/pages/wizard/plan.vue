@@ -155,10 +155,8 @@ const loading = ref(true)
 const saving = ref(false)
 const pathsWithTasks = ref<any[]>([])
 const todayStr = new Date().toISOString().split('T')[0]
-// Default start date: Tomorrow (to give user prep time) or Today if they want
-const tomorrow = new Date()
-tomorrow.setDate(tomorrow.getDate() + 1)
-const startDate = ref(tomorrow.toISOString().split('T')[0])
+// Default start date: Today (Immediate Action)
+const startDate = ref(todayStr)
 
 const hasOverload = computed(() => pathsWithTasks.value.some(p => p.utilization > 100))
 

@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-8">
     <div class="text-center mb-8">
-      <h2 class="text-2xl md:text-3xl font-black">你是谁？时间怎么用？</h2>
+      <h2 class="text-2xl md:text-3xl font-black">定制你的搞钱人设</h2>
       <p class="text-gray-500 font-medium">帮助系统为你安排合理的每日任务</p>
     </div>
 

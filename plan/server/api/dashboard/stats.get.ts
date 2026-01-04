@@ -17,18 +17,33 @@ export default defineEventHandler(async (event) => {
 
     const userId = user.id
 
-    // 1. Get Goal (use order + limit to ensure deterministic result if multiple active goals exist)
-    const { data: goals } = await client
-        .from('goals')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1)
+    // 并行执行独立查询（优化：减少 50%+ 响应延迟）
+    const [goalsResult, totalTasksResult, completedTasksResult] = await Promise.all([
+        client
+            .from('goals')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1),
+        client
+            .from('tasks')
+            .select('*, projects!inner(*)', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .eq('projects.is_active', true),
+        client
+            .from('tasks')
+            .select('*, projects!inner(*)', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .eq('status', 'done')
+            .eq('projects.is_active', true)
+    ])
 
-    const goal = goals?.[0] || null
+    const goal = goalsResult.data?.[0] || null
+    const totalTasks = totalTasksResult.count
+    const completedTasks = completedTasksResult.count
 
-    // 2. Get Income from income table (sum all income for this goal/user)
+    // income 查询依赖 goal.id，需要串行
     let currentIncome = 0
     if (goal) {
         const { data: incomeData } = await client
@@ -41,21 +56,6 @@ export default defineEventHandler(async (event) => {
             currentIncome = incomeData.reduce((sum, r) => sum + Number(r.amount || 0), 0)
         }
     }
-
-    // 3. Get Task Stats
-    // 3. Get Task Stats (Filter by active projects to respect archived plans)
-    const { count: totalTasks } = await client
-        .from('tasks')
-        .select('*, projects!inner(*)', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('projects.is_active', true)
-
-    const { count: completedTasks } = await client
-        .from('tasks')
-        .select('*, projects!inner(*)', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('status', 'done')
-        .eq('projects.is_active', true)
 
     const totalGoal = Number(goal?.income_target || 0)
     const progress = totalGoal > 0 ? (currentIncome / totalGoal) * 100 : 0

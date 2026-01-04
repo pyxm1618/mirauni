@@ -29,64 +29,86 @@
 
     <!-- Path Config Cards -->
     <div class="space-y-6">
-      <div v-for="(path, idx) in store.paths" :key="path.id" class="bg-white border-3 border-black rounded-2xl overflow-hidden shadow-hard">
+      <div v-for="(path, idx) in store.paths" :key="path.id" class="bg-white border-3 border-black rounded-2xl overflow-hidden shadow-hard transition-all hover:shadow-hard-lg">
         <!-- Header -->
         <div class="bg-gray-50 p-4 border-b-2 border-gray-100 flex justify-between items-center">
           <div class="flex items-center gap-3">
              <span class="bg-black text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">{{ idx + 1 }}</span>
              <h3 class="font-black text-lg">{{ path.name }}</h3>
           </div>
-          <div class="text-sm font-bold text-gray-500">
-            权重: {{ path.weight }}%
+          <div class="flex flex-col items-end">
+            <span class="text-xs font-bold text-gray-400">目标贡献 ({{ path.weight }}%)</span>
+            <span class="font-mono font-bold text-gray-600">¥ {{ formatNumber((store.incomeGoal || 0) * 10000 * (path.weight / 100)) }}</span>
           </div>
         </div>
 
         <!-- Formula Body -->
-        <div class="p-6 space-y-6">
+        <div class="p-6 space-y-6 relative">
           
-          <!-- Product / SaaS Formula -->
-          <div v-if="path.type === 'product'" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-             <div class="space-y-1">
-               <label class="text-xs font-bold text-gray-500 uppercase">预计年销量 (单)</label>
-               <input v-model.number="path.formula.config.units" type="number" class="w-full border-b-2 border-gray-300 focus:border-black outline-none text-xl font-mono font-bold py-1" placeholder="1000" />
-             </div>
-             <div class="flex items-center justify-center pb-2 text-gray-400 font-bold">×</div>
-             <div class="space-y-1">
-               <label class="text-xs font-bold text-gray-500 uppercase">客单价 (元)</label>
-               <input v-model.number="path.formula.config.price" type="number" class="w-full border-b-2 border-gray-300 focus:border-black outline-none text-xl font-mono font-bold py-1" placeholder="249" />
-             </div>
-          </div>
+          <!-- Auto Fill Button -->
+          <button 
+             @click="autoFill(path)"
+             class="absolute top-4 right-4 text-xs font-bold text-black border border-black px-2 py-1 rounded hover:bg-black hover:text-white transition-colors flex items-center gap-1"
+             title="根据目标自动计算建议值"
+          >
+             <UIcon name="i-lucide-wand-2" /> 自动推演
+          </button>
 
-          <!-- Content / Ads Formula -->
-          <div v-else-if="path.type === 'content'" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-             <div class="space-y-1">
-               <label class="text-xs font-bold text-gray-500 uppercase">年接单/广告数</label>
-               <input v-model.number="path.formula.config.units" type="number" class="w-full border-b-2 border-gray-300 focus:border-black outline-none text-xl font-mono font-bold py-1" placeholder="50" />
+          <!-- Formula Inputs -->
+          <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center pt-4">
+             
+             <!-- Left Input -->
+             <div class="space-y-2 bg-gray-50 p-3 rounded-xl border-2 border-transparent focus-within:border-black transition-colors">
+               <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                  <UIcon name="i-lucide-shopping-cart" class="w-3 h-3" />
+                  {{ path.type === 'product' ? '年销量 (单)' : path.type === 'content' ? '接单/广告数' : '计费时长/项目数' }}
+               </label>
+               <input 
+                  v-model.number="path.formula.config.units" 
+                  type="number" 
+                  class="w-full bg-transparent outline-none text-2xl font-mono font-bold no-spinner" 
+                  placeholder="0" 
+               />
              </div>
-             <div class="flex items-center justify-center pb-2 text-gray-400 font-bold">×</div>
-             <div class="space-y-1">
-               <label class="text-xs font-bold text-gray-500 uppercase">平均单价 (元)</label>
-               <input v-model.number="path.formula.config.price" type="number" class="w-full border-b-2 border-gray-300 focus:border-black outline-none text-xl font-mono font-bold py-1" placeholder="500" />
-             </div>
-          </div>
 
-          <!-- Service / Hourly Formula -->
-          <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-             <div class="space-y-1">
-               <label class="text-xs font-bold text-gray-500 uppercase">年计费小时/项目</label>
-               <input v-model.number="path.formula.config.units" type="number" class="w-full border-b-2 border-gray-300 focus:border-black outline-none text-xl font-mono font-bold py-1" placeholder="100" />
+             <div class="flex items-center justify-center text-gray-300 font-black text-2xl">×</div>
+
+             <!-- Right Input -->
+             <div class="space-y-2 bg-gray-50 p-3 rounded-xl border-2 border-transparent focus-within:border-black transition-colors">
+               <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                  <UIcon name="i-lucide-tag" class="w-3 h-3" />
+                  {{ path.type === 'product' ? '客单价 (元)' : path.type === 'content' ? '平均单价' : '时薪/单价' }}
+               </label>
+               <input 
+                  v-model.number="path.formula.config.price" 
+                  type="number" 
+                  class="w-full bg-transparent outline-none text-2xl font-mono font-bold no-spinner" 
+                  placeholder="0" 
+               />
              </div>
-             <div class="flex items-center justify-center pb-2 text-gray-400 font-bold">×</div>
-             <div class="space-y-1">
-               <label class="text-xs font-bold text-gray-500 uppercase">时薪/单价 (元)</label>
-               <input v-model.number="path.formula.config.price" type="number" class="w-full border-b-2 border-gray-300 focus:border-black outline-none text-xl font-mono font-bold py-1" placeholder="300" />
-             </div>
+
           </div>
 
           <!-- Result Row -->
-          <div class="flex justify-between items-center pt-4 border-t border-gray-100 bg-gray-50 -mx-6 -mb-6 px-6 py-4 mt-4">
-             <span class="text-sm font-bold text-gray-500">预计贡献:</span>
-             <span class="text-xl font-mono font-black">¥ {{ formatNumber(calculatePathIncome(path)) }}</span>
+          <div class="flex justify-between items-center pt-4 border-t border-gray-100 mt-4">
+             <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-gray-500">预计年收入:</span>
+                <span 
+                    class="text-2xl font-mono font-black"
+                    :class="calculatePathIncome(path) >= ((store.incomeGoal || 0) * 10000 * (path.weight / 100)) ? 'text-green-600' : 'text-gray-900'"
+                >
+                    ¥ {{ formatNumber(calculatePathIncome(path)) }}
+                </span>
+             </div>
+             <!-- Diff Indicator -->
+             <div class="text-xs font-bold">
+                <span v-if="calculatePathIncome(path) < ((store.incomeGoal || 0) * 10000 * (path.weight / 100))" class="text-red-500 bg-red-50 px-2 py-1 rounded">
+                   还差 {{ formatNumber(((store.incomeGoal || 0) * 10000 * (path.weight / 100)) - calculatePathIncome(path)) }}
+                </span>
+                <span v-else class="text-green-600 bg-green-50 px-2 py-1 rounded flex items-center gap-1">
+                   <UIcon name="i-lucide-check" /> 达标
+                </span>
+             </div>
           </div>
 
         </div>
@@ -165,6 +187,20 @@ function formatIncome(wan: number) {
 
 function formatNumber(num: number) {
   return num.toLocaleString()
+}
+
+function autoFill(path: any) {
+  const target = (store.incomeGoal || 0) * 10000 * (path.weight / 100)
+  
+  // Set default price based on type if 0
+  if (!path.formula.config.price || path.formula.config.price === 0) {
+    if (path.type === 'product') path.formula.config.price = 200 // Low entry
+    else if (path.type === 'content') path.formula.config.price = 500 // Ad/Article
+    else path.formula.config.price = 300 // Hourly
+  }
+
+  // Calculate units
+  path.formula.config.units = Math.ceil(target / path.formula.config.price)
 }
 
 async function next() {

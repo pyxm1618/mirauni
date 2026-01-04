@@ -10,12 +10,13 @@
   >
     <!-- Radio/Checkbox Indicator -->
     <div 
-      class="w-6 h-6 rounded-full border-3 flex items-center justify-center bg-white flex-shrink-0 mt-0.5"
+      class="w-6 h-6 border-3 flex items-center justify-center bg-white flex-shrink-0 mt-0.5 transition-all"
       :class="[
-        isSelected ? 'border-black' : 'border-gray-300'
+        isSelected ? 'border-black' : 'border-gray-300',
+        multiple ? 'rounded-lg' : 'rounded-full'
       ]"
     >
-      <div v-if="isSelected" class="w-2.5 h-2.5 bg-black rounded-full" />
+      <div v-if="isSelected" class="bg-black" :class="multiple ? 'w-3 h-3 rounded-sm' : 'w-2.5 h-2.5 rounded-full'" />
     </div>
 
     <!-- Content -->

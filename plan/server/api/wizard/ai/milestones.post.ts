@@ -2,7 +2,7 @@ import { createZhipuClient } from '~/server/utils/zhipu'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
-    const { paths, deadline, goal } = body
+    const { paths, deadline, goal, profile } = body
 
     // Validate inputs
     if (!paths || !Array.isArray(paths) || paths.length === 0) {
@@ -12,18 +12,30 @@ export default defineEventHandler(async (event) => {
     try {
         const client = createZhipuClient()
         
+        const backgroundStr = profile ? `User Background: ${profile.background.join(', ')}. Weekly Hours: ${profile.weeklyHours}.` : ''
+
         const systemPrompt = `
-You are an expert Project Manager. Break down the user's Money Making Paths into Milestones (Level 3).
+You are an expert Project Manager & Career Coach. 
+Your task is to break down the user's Money Making Paths into Milestones (Level 3).
 The Goal is to earn ${goal} Wan CNY by ${deadline}.
+${backgroundStr}
 
 Input Paths:
-${JSON.stringify(paths.map((p: any) => ({ name: p.name, type: p.type, weight: p.weight })), null, 2)}
+${JSON.stringify(paths.map((p: any) => ({ 
+    name: p.name, 
+    type: p.type, 
+    weight: p.weight,
+    formula: p.formula.config // Include formula details (price, units) for context
+})), null, 2)}
 
 Requirements:
 1. Return a JSON object ONLY. No markdown, no explanations.
 2. Structure: { "paths": [ { "path_index": 0, "milestones": [ { "name": "...", "weeks": 4, "criteria": "..." } ] } ] }
 3. Each path should have 3-5 milestones covering the timeline.
-4. "weeks" is the duration. "criteria" is the success metric.
+4. **CRITICAL**: The content MUST be specific to the path name and user background. Avoid generic terms like "Phase 1". 
+   - Good: "Release MVP of AI Avatar Generator"
+   - Bad: "Release Product"
+5. The "criteria" must include specific numbers based on the user's goal formula (e.g., "Sell 50 units", "Get 1000 visitors") if possible.
         `
 
         // Try AI generation

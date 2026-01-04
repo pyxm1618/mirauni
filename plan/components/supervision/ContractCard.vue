@@ -20,7 +20,7 @@
         </p>
         <p>
             将在 2026 年全力以赴，达成 
-            <span class="text-3xl font-black mx-1">{{ goal }}<span class="text-sm">万</span></span>
+            <span class="text-3xl font-black mx-1">{{ (Number(goal) * 10000).toLocaleString() }}<span class="text-sm">元</span></span>
             的搞钱目标。
         </p>
         <p>
@@ -48,10 +48,10 @@
         </div>
         
         <!-- Stamp -->
-        <div class="absolute -right-4 -bottom-4 opacity-80 rotate-12 pointer-events-none">
+        <div class="absolute -right-4 -bottom-4 opacity-10 rotate-12 pointer-events-none grayscale">
             <div class="w-24 h-24 border-4 border-red-600 rounded-full flex items-center justify-center text-red-600 font-black text-xl rotate-[-20deg]">
                 <div class="border-2 border-red-600 rounded-full w-20 h-20 flex items-center justify-center text-center leading-none">
-                    仅供<br/>搞钱<br/>参考
+                    仅供<br/>参考
                 </div>
             </div>
         </div>

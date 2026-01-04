@@ -17,18 +17,18 @@ export default defineEventHandler(async (event) => {
     }
 
     // Insert interaction
-    // Assuming 'interactions' table exists
-    const { error } = await client.from('interactions').insert({
-        target_user_id: targetUserId,
+    // 'supervision_interactions' table
+    const { error } = await client.from('supervision_interactions').insert({
+        receiver_id: targetUserId,
         sender_id: user.id,
         type: type, // 'like' | 'nudge'
-        created_at: Date.now()
+        created_at: new Date().toISOString()
     })
 
     if (error) {
         console.error('Interaction DB Error:', error.message)
         // Mock success for MVP
-        return { success: true, mock: true }
+        throw createError({ statusCode: 500, message: '发送失败，请稍后重试' })
     }
 
     return { success: true }

@@ -10,8 +10,13 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
                         <div class="text-sm font-black uppercase tracking-widest bg-black text-white inline-block px-3 py-1 mb-2 transform -rotate-2 border-2 border-transparent">{{ $t('dashboard.sections.goal_card_label') }}</div>
-                        <div class="text-6xl md:text-8xl font-black tracking-tighter leading-none mb-1 whitespace-nowrap">
-                            {{ formatNumber(stats.totalGoal) }}<span class="text-4xl font-bold ml-1">元</span>
+                        <!-- 骨架屏：加载中且无缓存 -->
+                        <div v-if="statsLoading" class="animate-pulse">
+                            <div class="h-16 md:h-24 w-48 bg-black/20 rounded-xl mb-2"></div>
+                        </div>
+                        <!-- 真实数据 -->
+                        <div v-else class="text-6xl md:text-8xl font-black tracking-tighter leading-none mb-1 whitespace-nowrap">
+                            {{ formatNumber(stats?.totalGoal || 0) }}<span class="text-4xl font-bold ml-1">元</span>
                         </div>
                     </div>
                      <div class="text-right hidden md:block">
@@ -34,19 +39,31 @@
                     </div>
                 </div>
                 
-                <div class="text-xl font-bold opacity-80 border-l-4 border-black pl-4 mb-8">
-                    {{ $t('dashboard.sections.distance_goal') }} <span class="font-black text-2xl">{{ formatNumber(stats.totalGoal - stats.currentIncome) }}</span>{{ $t('dashboard.sections.distance_goal_suffix') }}
+                <!-- 距离目标 -->
+                <div v-if="statsLoading" class="animate-pulse mb-8">
+                    <div class="h-6 w-64 bg-black/20 rounded-lg"></div>
+                </div>
+                <div v-else class="text-xl font-bold opacity-80 border-l-4 border-black pl-4 mb-8">
+                    {{ $t('dashboard.sections.distance_goal') }} <span class="font-black text-2xl">{{ formatNumber((stats?.totalGoal || 0) - (stats?.currentIncome || 0)) }}</span>{{ $t('dashboard.sections.distance_goal_suffix') }}
                 </div>
             </div>
             
-            <div class="relative z-10 w-full bg-white border-3 border-black rounded-xl p-4 shadow-sm">
+            <!-- 进度条区域 -->
+            <div v-if="statsLoading" class="relative z-10 w-full bg-white/50 border-3 border-black/30 rounded-xl p-4 shadow-sm animate-pulse">
+                <div class="flex justify-between mb-2">
+                    <div class="h-3 w-24 bg-gray-300 rounded"></div>
+                    <div class="h-3 w-20 bg-gray-300 rounded"></div>
+                </div>
+                <div class="h-8 bg-gray-200 border-2 border-black/30 rounded-lg"></div>
+            </div>
+            <div v-else class="relative z-10 w-full bg-white border-3 border-black rounded-xl p-4 shadow-sm">
                  <div class="flex justify-between text-xs font-black mb-2 uppercase tracking-wide">
-                    <span>{{ $t('dashboard.sections.progress') }}: {{ Number(stats.progress || 0).toFixed(2) }}%</span>
-                    <span>{{ $t('dashboard.sections.collected') }}: {{ formatNumber(stats.currentIncome) }}</span>
+                    <span>{{ $t('dashboard.sections.progress') }}: {{ Number(stats?.progress || 0).toFixed(2) }}%</span>
+                    <span>{{ $t('dashboard.sections.collected') }}: {{ formatNumber(stats?.currentIncome || 0) }}</span>
                  </div>
                  <div class="h-8 bg-gray-200 border-2 border-black rounded-lg overflow-hidden relative">
-                    <div class="h-full bg-black relative flex items-center justify-end px-2" :style="{ width: `${Math.min(Number(stats.progress || 0), 100)}%` }">
-                        <span class="text-white text-[10px] font-bold" v-if="Number(stats.progress || 0) > 5">{{ Math.floor(Number(stats.progress || 0)) }}%</span>
+                    <div class="h-full bg-black relative flex items-center justify-end px-2" :style="{ width: `${Math.min(Number(stats?.progress || 0), 100)}%` }">
+                        <span class="text-white text-[10px] font-bold" v-if="Number(stats?.progress || 0) > 5">{{ Math.floor(Number(stats?.progress || 0)) }}%</span>
                     </div>
                     <!-- Stripes pattern overlay -->
                     <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, #000 0, #000 10px, transparent 10px, transparent 20px);"></div>
@@ -95,6 +112,23 @@
                              {{ $t('dashboard.sections.streak_prefix') }} <span class="text-black bg-yellow-400 px-1 border border-black text-xs font-black rounded mx-1">{{ supervisionData.checkinStreak || 0 }}</span> {{ $t('dashboard.sections.streak_suffix') }}
                          </div>
                          <div class="text-[10px] text-gray-400 mt-1">{{ $t('dashboard.sections.dont_break_chain') }}</div>
+                     </div>
+
+                     <!-- Interaction Notifications -->
+                     <div v-if="supervisionData.interactions?.length" class="w-full px-4 animate-fade-in-up">
+                        <div class="bg-white/80 backdrop-blur-sm border-2 border-black rounded-xl p-2 text-xs font-bold text-left space-y-1.5 shadow-sm">
+                            <div v-for="action in supervisionData.interactions.slice(0, 2)" :key="action.id" class="flex items-center gap-2 truncate">
+                                <span class="bg-yellow-400 border border-black rounded p-0.5 text-[10px] w-5 h-5 flex items-center justify-center shrink-0">
+                                    {{ action.type === 'like' ? '👍' : '⏰' }}
+                                </span>
+                                <div class="truncate">
+                                    <span class="mr-1">{{ action.sender_nickname }}</span>
+                                    <span class="text-gray-500 font-normal">
+                                        {{ action.type === 'like' ? '给你的搞钱计划点赞了' : '正在催你搞钱！' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                      </div>
                  </div>
 
@@ -233,6 +267,7 @@ import TaskItem from '~/components/task/TaskItem.vue'
 import TaskDetailModal from '~/components/task/TaskDetailModal.vue'
 import QuickTaskModal from '~/components/task/QuickTaskModal.vue'
 import IncomeModal from '~/components/task/IncomeModal.vue'
+import { useDashboardStore, type DashboardStats, type SupervisionData } from '~/stores/dashboard'
 
 definePageMeta({
     layout: 'default'
@@ -240,23 +275,13 @@ definePageMeta({
 
 const { t } = useI18n()
 
-// Data Logic
-const stats = ref({
-    totalGoal: 0,
-    currentIncome: 0,
-    progress: 0,
-    daysLeft: 0,
-    totalTasks: 0,
-    completedTasks: 0
-})
+// Dashboard Store for SWR caching
+const dashboardStore = useDashboardStore()
 
-const tasks = ref<any[]>([])
-const supervisionData = ref<{
-    supervisors: any[],
-    interactions: any[],
-    alertLevel: string,
-    checkinStreak: number
-}>({
+// Data Logic - 初始值优先从缓存读取（SWR 模式核心）
+const stats = ref<DashboardStats | null>(dashboardStore.cachedStats)
+const tasks = ref<any[]>(dashboardStore.cachedTasks || [])
+const supervisionData = ref<SupervisionData>(dashboardStore.cachedSupervision || {
     supervisors: [],
     interactions: [],
     alertLevel: 'normal',
@@ -277,12 +302,21 @@ const { data: dashboardData, pending: isLoading, refresh } = useAsyncData('dashb
     }
 }, { server: false, lazy: true })
 
-// Sync data seamlessly
+// 骨架屏显示条件：正在加载 且 没有缓存数据（必须在 isLoading 定义之后）
+const statsLoading = computed(() => isLoading.value && stats.value === null)
+
+// Sync data seamlessly + update cache for SWR
 watch(dashboardData, (newData) => {
     if (newData) {
-        if (newData.stats) stats.value = newData.stats as any
-        if (newData.tasks) tasks.value = newData.tasks as any
-        if (newData.supervision) supervisionData.value = newData.supervision as any
+        if (newData.stats) stats.value = newData.stats as DashboardStats
+        if (newData.tasks) tasks.value = newData.tasks as any[]
+        if (newData.supervision) supervisionData.value = newData.supervision as SupervisionData
+        // 更新缓存，下次访问可直接使用
+        dashboardStore.updateCache({
+            stats: newData.stats as DashboardStats,
+            supervision: newData.supervision as SupervisionData,
+            tasks: newData.tasks as any[]
+        })
     }
 }, { immediate: true })
 
@@ -367,7 +401,7 @@ function selectDateTab(tab: 'today' | 'tomorrow' | 'week') {
 
 // ...
 
-// Force refresh on mount to ensure fresh data after Wizard redirect
+// 确保从 Wizard 跳转过来时强制刷新最新数据（覆盖 SWR 缓存）
 onMounted(() => {
     refresh()
 })
@@ -522,5 +556,12 @@ async function deleteTask(task: any) {
 .stroke-text {
     -webkit-text-stroke: 1px black;
     color: transparent;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
 }
 </style>

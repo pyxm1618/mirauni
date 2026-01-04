@@ -13,17 +13,20 @@ export default defineEventHandler(async (event) => {
         
         const systemPrompt = `
 You are an expert Project Manager. Break down the Milestone (L3) into actionable Tasks (L4).
-Path: ${path.name} (${path.type})
-Milestone: ${milestone.name}
+Path Context: ${path.name} (${path.type})
+Milestone: "${milestone.name}"
 Duration: ${milestone.weeks} weeks.
-Context Criteria: ${milestone.criteria}
+Success Criteria: "${milestone.criteria}"
 
 Requirements:
 1. Return a JSON object with "tasks" array.
 2. Each task: { "name": "...", "hours": 2, "type": "core" | "support", "sort_order": 1 }
 3. Tasks should be granular (2-8 hours each).
-4. Focus on ESSENTIAL tasks to achieve the criteria. Do NOT overload the plan. 
-5. If the duration is long (>4 weeks), prioritize the tasks for the first month but include key long-term tasks.
+4. **CRITICAL**: The tasks MUST be derived directly from the Milestone Name and Criteria. 
+   - If the milestone is "Market Research", do NOT generate coding tasks.
+   - If the milestone is "Write Code", do NOT generate marketing tasks.
+   - Respect the user's custom definition of the milestone.
+5. Focus on ESSENTIAL tasks.
 6. "type": "core" for essential tasks, "support" for admin/learning/setup.
         `
 

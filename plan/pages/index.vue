@@ -133,7 +133,7 @@ definePageMeta({
   layout: 'blank'
 })
 
-const incomeTarget = ref(100)
+const incomeTarget = ref<number | null>(null)
 
 // 动态计算目标年份：如果当前月份>=10月，则目标年份为下一年
 const now = new Date()

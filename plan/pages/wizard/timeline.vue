@@ -125,7 +125,8 @@ onMounted(async () => {
       body: {
         paths: store.paths,
         deadline: store.deadline,
-        goal: store.incomeGoal
+        goal: store.incomeGoal,
+        profile: store.profile
       }
     })
     

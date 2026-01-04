@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     // 1. Get Supervisors
     const { data: supervisors } = await client
         .from('supervisions')
-        .select('id, supervisor_nickname, supervisor_avatar, status')
+        .select('id, supervisor_id, supervisor_nickname, supervisor_avatar, status')
         .eq('user_id', userId)
         .eq('status', 'active')
         .limit(5)
@@ -26,6 +26,17 @@ export default defineEventHandler(async (event) => {
         .eq('receiver_id', userId)
         .order('created_at', { ascending: false })
         .limit(5)
+
+    // 2.5 Enrich Interactions with Sender Info
+    const enrichedInteractions = interactions?.map(i => {
+        // Find supervisor who sent this
+        const supervisor = supervisors?.find(s => s.supervisor_id === i.sender_id)
+        return {
+            ...i,
+            sender_nickname: supervisor?.supervisor_nickname || '神秘好友',
+            sender_avatar: supervisor?.supervisor_avatar
+        }
+    }) || []
 
     // 3. Calculate Check-in Streak (consecutive days)
     const { data: checkins } = await client
@@ -49,7 +60,7 @@ export default defineEventHandler(async (event) => {
 
         const today = new Date()
         const todayStr = getLocalStr(today)
-        
+
         const yesterday = new Date(today)
         yesterday.setDate(yesterday.getDate() - 1)
         const yesterdayStr = getLocalStr(yesterday)
@@ -61,7 +72,7 @@ export default defineEventHandler(async (event) => {
         if (uniqueDates[0] === todayStr || uniqueDates[0] === yesterdayStr) {
             // Count consecutive days
             let expectedDate = new Date(uniqueDates[0])
-            
+
             for (const dateStr of uniqueDates) {
                 const expectedStr = getLocalStr(expectedDate)
 
@@ -81,7 +92,7 @@ export default defineEventHandler(async (event) => {
 
     return {
         supervisors: supervisors || [],
-        interactions: interactions || [],
+        interactions: enrichedInteractions,
         alertLevel,
         checkinStreak
     }
