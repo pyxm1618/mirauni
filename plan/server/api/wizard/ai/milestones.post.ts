@@ -1,4 +1,4 @@
-import { createZhipuClient } from '~/server/utils/zhipu'
+import { createDeepSeekClient } from '~/server/utils/deepseek'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -10,57 +10,57 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const client = createZhipuClient()
-        
-        const backgroundStr = profile ? `User Background: ${profile.background.join(', ')}. Weekly Hours: ${profile.weeklyHours}.` : ''
+        const client = createDeepSeekClient()
 
-        const systemPrompt = `
-You are an expert Project Manager & Career Coach. 
-Your task is to break down the user's Money Making Paths into Milestones (Level 3).
-The Goal is to earn ${goal} Wan CNY by ${deadline}.
-${backgroundStr}
+        const backgroundStr = profile ? `用户背景: ${Array.isArray(profile.background) ? profile.background.join(', ') : profile.background}。每周可用时间: ${profile.weeklyHours}小时。` : ''
 
-Input Paths:
-${JSON.stringify(paths.map((p: any) => ({ 
-    name: p.name, 
-    type: p.type, 
-    weight: p.weight,
-    formula: p.formula.config // Include formula details (price, units) for context
-})), null, 2)}
+        const systemPrompt = `你是一位专业的项目管理顾问和职业规划师。
+你的任务是将用户的赚钱路径分解为具体的里程碑(Milestones)。
 
-Requirements:
-1. Return a JSON object ONLY. No markdown, no explanations.
-2. Structure: { "paths": [ { "path_index": 0, "milestones": [ { "name": "...", "weeks": 4, "criteria": "..." } ] } ] }
-3. Each path should have 3-5 milestones covering the timeline.
-4. **CRITICAL**: The content MUST be specific to the path name and user background. Avoid generic terms like "Phase 1". 
-   - Good: "Release MVP of AI Avatar Generator"
-   - Bad: "Release Product"
-5. The "criteria" must include specific numbers based on the user's goal formula (e.g., "Sell 50 units", "Get 1000 visitors") if possible.
-        `
+用户信息：
+- 目标: ${goal}万元，截止日期: ${deadline}
+- ${backgroundStr}
 
-        // Try AI generation
-        // Note: Real implementation would handle Zhipu's specific JWT requirement or use a proxy.
-        // Here we optimistically try, but fallback to deterministic logic if it fails or returns garbage.
-        let aiResult = null
-        
-        // Only try AI if we think we have a key (simple check)
+用户选择的路径：
+${JSON.stringify(paths.map((p: any) => ({
+            name: p.name,
+            type: p.type,
+            weight: p.weight,
+            dailyHours: p.dailyHours,
+            formula: p.formula?.config // 包含价格、数量等收入公式细节
+        })), null, 2)}
+
+**严格要求：**
+1. 返回纯JSON，不要任何markdown或解释
+2. 格式: { "paths": [ { "path_index": 0, "milestones": [ { "name": "...", "weeks": 4, "criteria": "..." } ] } ] }
+3. 每条路径3-5个里程碑，覆盖整个时间线
+4. **关键**: 里程碑名称必须具体到用户的路径。例如：
+   - 好: "发布AI头像生成器MVP"，"获取前100个付费用户"
+   - 差: "第一阶段"，"产品开发"
+5. criteria必须包含具体可量化的指标，基于用户的收入公式计算
+6. 所有内容必须用中文`
+
         const config = useRuntimeConfig()
-        if (config.zhipuApiKey) {
-             const response = await client.chat([
+
+        if (config.deepseekApiKey) {
+            const response = await client.chat([
                 { role: 'system', content: systemPrompt },
-                { role: 'user', content: "Generate the milestones now." }
+                { role: 'user', content: '请立即生成里程碑规划。' }
             ])
+
             const content = response.choices[0]?.message?.content
-            // simple cleanup for json
-            const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim()
-            aiResult = JSON.parse(jsonStr)
+            if (content) {
+                // 清理可能的markdown标记
+                const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim()
+                const aiResult = JSON.parse(jsonStr)
+
+                if (aiResult && aiResult.paths) {
+                    return aiResult
+                }
+            }
         }
 
-        if (aiResult && aiResult.paths) {
-            return aiResult
-        }
-
-        // Fallback: Deterministic Template Generation
+        // Fallback: 模版生成
         console.warn('AI generation failed or skipped. Using templates.')
         return generateMockMilestones(paths)
 
@@ -74,7 +74,7 @@ Requirements:
 function generateMockMilestones(paths: any[]) {
     const resultPaths = paths.map((path, index) => {
         let milestones = []
-        
+
         if (path.type === 'product') {
             milestones = [
                 { name: 'MVP 核心功能开发', weeks: 4, criteria: '完成核心功能闭环，部署上线' },

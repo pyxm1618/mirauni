@@ -85,7 +85,12 @@
                          <div class="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
                          {{ $t('dashboard.sections.monitor_room') }}
                      </div>
-                     <div class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded border border-black shadow-[2px_2px_0_0_#000]">{{ $t('dashboard.sections.live') }}</div>
+                     <div class="flex items-center gap-2">
+                        <button @click="showHistoryModal = true" class="text-xs font-bold text-gray-500 hover:text-black underline">
+                            {{ $t('common.history') || '记录' }}
+                        </button>
+                        <div class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded border border-black shadow-[2px_2px_0_0_#000]">{{ $t('dashboard.sections.live') }}</div>
+                     </div>
                  </div>
 
                  <!-- Avatars -->
@@ -259,6 +264,10 @@
       @saved="refreshData"
     />
 
+    <InteractionHistoryModal
+      v-model="showHistoryModal"
+    />
+
   </div>
 </template>
 
@@ -267,6 +276,7 @@ import TaskItem from '~/components/task/TaskItem.vue'
 import TaskDetailModal from '~/components/task/TaskDetailModal.vue'
 import QuickTaskModal from '~/components/task/QuickTaskModal.vue'
 import IncomeModal from '~/components/task/IncomeModal.vue'
+import InteractionHistoryModal from '~/components/supervision/InteractionHistoryModal.vue'
 import { useDashboardStore, type DashboardStats, type SupervisionData } from '~/stores/dashboard'
 
 definePageMeta({
@@ -324,6 +334,7 @@ const loadingTasks = computed(() => isLoading.value)
 const showModal = ref(false)
 const showQuickTaskModal = ref(false)
 const showIncomeModal = ref(false)
+const showHistoryModal = ref(false)
 const selectedTask = ref<any>(null)
 
 // Date Tab Logic

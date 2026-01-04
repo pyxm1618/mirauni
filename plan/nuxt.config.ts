@@ -36,6 +36,7 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
+    deepseekApiKey: '', // NUXT_DEEPSEEK_API_KEY
     wechatAppId: '', // NUXT_WECHAT_APP_ID
     wechatAppSecret: '', // NUXT_WECHAT_APP_SECRET
     public: {

@@ -1,4 +1,4 @@
-import { createZhipuClient } from '~/server/utils/zhipu'
+import { createDeepSeekClient } from '~/server/utils/deepseek'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -9,43 +9,47 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const client = createZhipuClient()
-        
-        const systemPrompt = `
-You are an expert Project Manager. Break down the Milestone (L3) into actionable Tasks (L4).
-Path Context: ${path.name} (${path.type})
-Milestone: "${milestone.name}"
-Duration: ${milestone.weeks} weeks.
-Success Criteria: "${milestone.criteria}"
+        const client = createDeepSeekClient()
 
-Requirements:
-1. Return a JSON object with "tasks" array.
-2. Each task: { "name": "...", "hours": 2, "type": "core" | "support", "sort_order": 1 }
-3. Tasks should be granular (2-8 hours each).
-4. **CRITICAL**: The tasks MUST be derived directly from the Milestone Name and Criteria. 
-   - If the milestone is "Market Research", do NOT generate coding tasks.
-   - If the milestone is "Write Code", do NOT generate marketing tasks.
-   - Respect the user's custom definition of the milestone.
-5. Focus on ESSENTIAL tasks.
-6. "type": "core" for essential tasks, "support" for admin/learning/setup.
-        `
+        const systemPrompt = `你是一位专业的项目管理顾问。将里程碑分解为具体可执行的任务清单。
 
-        // Try AI generation
-        let aiResult = null
+**路径信息：**
+- 路径名称: ${path.name}
+- 路径类型: ${path.type}
+
+**要分解的里程碑（用户自定义）：**
+- 里程碑名称: "${milestone.name}"
+- 周期: ${milestone.weeks}周
+- 验收标准: "${milestone.criteria}"
+- 预算工时: ${budgetHours}小时
+
+**严格要求：**
+1. 返回纯JSON: { "tasks": [ { "name": "...", "hours": 2, "type": "core", "sort_order": 1 } ] }
+2. 任务必须**完全基于**上述里程碑名称和验收标准来设计
+3. 如果里程碑是"市场调研"，不要生成编码任务
+4. 如果里程碑是"开发MVP"，不要生成营销任务
+5. 每个任务2-8小时，颗粒度要细
+6. type: "core"=核心任务, "support"=辅助任务
+7. 总工时尽量不超过预算${budgetHours}小时
+8. 所有内容用中文`
+
         const config = useRuntimeConfig()
-        
-        if (config.zhipuApiKey) {
-             const response = await client.chat([
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: "Generate the task list now." }
-            ])
-            const content = response.choices[0]?.message?.content
-            const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim()
-            aiResult = JSON.parse(jsonStr)
-        }
 
-        if (aiResult && aiResult.tasks) {
-            return aiResult
+        if (config.deepseekApiKey) {
+            const response = await client.chat([
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: '请根据里程碑生成任务列表。' }
+            ])
+
+            const content = response.choices[0]?.message?.content
+            if (content) {
+                const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim()
+                const aiResult = JSON.parse(jsonStr)
+
+                if (aiResult && aiResult.tasks) {
+                    return aiResult
+                }
+            }
         }
 
         // Fallback
@@ -61,7 +65,7 @@ Requirements:
 function generateMockTasks(path: any, milestone: any) {
     // Simple template based on keywords or path type
     let tasks = []
-    
+
     if (path.type === 'product') {
         tasks = [
             { name: '竞品与市场调研', hours: 4, type: 'core', sort_order: 1 },
