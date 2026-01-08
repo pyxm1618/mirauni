@@ -46,10 +46,13 @@ const props = defineProps<{
   project: Project
 }>()
 
-const getCategoryLabel = (val: string) => PROJECT_CATEGORIES.find(c => c.value === val)?.label || val
-const getWorkModeLabel = (val: string) => WORK_MODES.find(c => c.value === val)?.label || val
-const getRoleLabel = (val: string) => ROLES.find(c => c.value === val)?.label || val
-const getCooperationLabel = (val: string) => COOPERATION_TYPES.find(c => c.value === val)?.label || val
+const { t } = useI18n()
+const localePath = useLocalePath()
+
+const getCategoryLabel = (val: string) => t('project.categories.' + val)
+const getWorkModeLabel = (val: string) => t('project.workModes.' + val)
+const getRoleLabel = (val: string) => t('roles.' + val)
+const getCooperationLabel = (val: string) => t('project.cooperationTypes.' + val)
 
 const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)

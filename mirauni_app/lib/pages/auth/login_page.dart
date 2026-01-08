@@ -24,16 +24,19 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _phoneController = TextEditingController();
   final _codeController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _authService = AuthService();
   final _wechatService = WechatService();
 
   bool _isWechatInstalled = false;
-
   bool _isLoading = false;
+  bool _isPasswordLogin = true; // 默认为密码登录
   int _countdown = 0;
   Timer? _timer;
+  
   String? _phoneError;
   String? _codeError;
+  String? _passwordError;
 
   @override
   void initState() {
@@ -45,6 +48,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void dispose() {
     _phoneController.dispose();
     _codeController.dispose();
+    _passwordController.dispose();
     _timer?.cancel();
     super.dispose();
   }
@@ -72,43 +76,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (mounted) {
         Toast.success(context, '登录成功');
-        if (widget.redirect != null && widget.redirect!.isNotEmpty) {
-          context.go(widget.redirect!);
-        } else {
-          context.go('/');
-        }
+        _navigateHome();
       }
     } on NeedBindPhoneException {
-      // 需要绑定手机号
-      if (mounted) {
-        context.push('/bind-phone');
-      }
+      if (mounted) context.push('/bind-phone');
     } catch (e) {
-      if (mounted) {
-        Toast.error(context, e.toString());
-      }
+      if (mounted) Toast.error(context, e.toString());
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  bool get _isPhoneValid {
-    return Validators.phone(_phoneController.text) == null;
-  }
-
-  bool get _isCodeValid {
-    return Validators.code(_codeController.text) == null;
-  }
-
-  bool get _canLogin {
-    return _isPhoneValid && _isCodeValid && !_isLoading;
-  }
+  bool get _isPhoneValid => Validators.phone(_phoneController.text) == null;
 
   /// 发送验证码
   Future<void> _sendCode() async {
-    // 验证手机号
     final phoneError = Validators.phone(_phoneController.text);
     if (phoneError != null) {
       setState(() => _phoneError = phoneError);
@@ -127,17 +109,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         _startCountdown();
       }
     } catch (e) {
-      if (mounted) {
-        Toast.error(context, e.toString());
-      }
+      if (mounted) Toast.error(context, e.toString());
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  /// 开始倒计时
   void _startCountdown() {
     setState(() => _countdown = 60);
     _timer?.cancel();
@@ -150,59 +127,84 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
   }
 
-  /// 登录
+  void _navigateHome() {
+    if (widget.redirect != null && widget.redirect!.isNotEmpty) {
+      context.go(widget.redirect!);
+    } else {
+      context.go('/');
+    }
+  }
+
+  /// 登录逻辑
   Future<void> _login() async {
-    // 验证
     final phoneError = Validators.phone(_phoneController.text);
-    final codeError = Validators.code(_codeController.text);
+    String? codeError;
+    String? passwordError;
+
+    if (_isPasswordLogin) {
+      if (_passwordController.text.length < 6) passwordError = '请输入密码';
+    } else {
+      codeError = Validators.code(_codeController.text);
+    }
 
     setState(() {
       _phoneError = phoneError;
       _codeError = codeError;
+      _passwordError = passwordError;
     });
 
-    if (phoneError != null || codeError != null) {
+    if (phoneError != null || codeError != null || passwordError != null) {
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      await _authService.loginWithPhone(
-        _phoneController.text,
-        _codeController.text,
-      );
-
-      if (mounted) {
-        Toast.success(context, '登录成功');
-        // 跳转到首页或重定向页面
-        if (widget.redirect != null && widget.redirect!.isNotEmpty) {
-          context.go(widget.redirect!);
-        } else {
-          context.go('/');
+      if (_isPasswordLogin) {
+        // 密码登录
+        await _authService.loginWithPassword(
+          _phoneController.text,
+          _passwordController.text,
+        );
+        if (mounted) {
+          Toast.success(context, '登录成功');
+          _navigateHome();
+        }
+      } else {
+        // 验证码登录
+        final user = await _authService.loginWithCode(
+          _phoneController.text,
+          _codeController.text,
+        );
+        
+        if (mounted) {
+          if (!user.hasPassword) {
+            // 强制跳转设置密码
+            Toast.info(context, '为了您的账户安全，请设置密码');
+            context.go('/set-password');
+          } else {
+            Toast.success(context, '登录成功');
+            _navigateHome();
+          }
         }
       }
     } catch (e) {
-      if (mounted) {
-        Toast.error(context, e.toString());
-      }
+      if (mounted) Toast.error(context, e.toString());
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary, // Yellow background
+      backgroundColor: AppColors.primary,
       body: LoadingOverlay(
         isLoading: _isLoading,
         child: SafeArea(
           child: Stack(
             children: [
-              // 关闭按钮 - 返回首页
+              // Close Button
               Positioned(
                 top: 16,
                 left: 16,
@@ -222,211 +224,217 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
               ),
-              // 主内容
+              
               Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                // Logo/Header Area
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    border: Border.all(color: Colors.black, width: 3),
-                    boxShadow: const [
-                       BoxShadow(
-                         color: Colors.black,
-                         offset: Offset(4, 4),
-                         blurRadius: 0,
-                       )
-                    ],
-                  ),
-                  transform: Matrix4.rotationZ(-0.05), // Slight rotation
-                  child: const Text(
-                    'LOGIN.',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.black,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 64),
-
-                // Login Form Container
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.black, width: 3),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black,
-                        offset: Offset(8, 8),
-                        blurRadius: 0,
-                      )
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        'ACCESS SYSTEM',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.black,
-                          decoration: TextDecoration.underline,
-                          decorationThickness: 3,
+                      // Header
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                          border: Border.all(color: Colors.black, width: 3),
+                          boxShadow: const [
+                             BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0)
+                          ],
+                        ),
+                        transform: Matrix4.rotationZ(-0.05),
+                        child: const Text(
+                          'LOGIN.',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.black,
+                            letterSpacing: 1.0,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      
+                      const SizedBox(height: 48),
 
-                      // Phone Input
-                      BrutalistTextField(
-                        controller: _phoneController,
-                        label: 'Phone Number',
-                        placeholder: 'YOUR PHONE NO.',
-                        keyboardType: TextInputType.phone,
-                        errorText: _phoneError,
-                        enabled: !_isLoading,
-                        onChanged: (value) {
-                           if (_phoneError != null) setState(() => _phoneError = null);
-                        },
-                      ),
-                      const SizedBox(height: 24),
+                      // Form Container
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.black, width: 3),
+                          boxShadow: const [
+                            BoxShadow(color: Colors.black, offset: Offset(8, 8), blurRadius: 0)
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Tab Switcher
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _isPasswordLogin = true),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      decoration: BoxDecoration(
+                                        color: _isPasswordLogin ? Colors.white : Colors.grey[200],
+                                        border: const Border(
+                                          bottom: BorderSide(color: Colors.black, width: 3),
+                                          right: BorderSide(color: Colors.black, width: 1.5),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'PASSWORD',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _isPasswordLogin = false),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      decoration: BoxDecoration(
+                                        color: !_isPasswordLogin ? Colors.white : Colors.grey[200],
+                                        border: const Border(
+                                          bottom: BorderSide(color: Colors.black, width: 3),
+                                          left: BorderSide(color: Colors.black, width: 1.5),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'CODE', // 验证码登录
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
 
-                      // Code Input Row
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: BrutalistTextField(
-                              controller: _codeController,
-                              label: 'Verification Code',
-                              placeholder: 'XXXXXX',
-                              keyboardType: TextInputType.number,
-                              errorText: _codeError,
-                              enabled: !_isLoading,
-                              onChanged: (value) {
-                                if (_codeError != null) setState(() => _codeError = null);
-                              },
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Phone Input
+                                  BrutalistTextField(
+                                    controller: _phoneController,
+                                    label: 'Phone Number',
+                                    placeholder: 'YOUR PHONE NO.',
+                                    keyboardType: TextInputType.phone,
+                                    errorText: _phoneError,
+                                    enabled: !_isLoading,
+                                    onChanged: (val) {
+                                      if (_phoneError != null) setState(() => _phoneError = null);
+                                    },
+                                  ),
+                                  const SizedBox(height: 24),
+
+                                  if (_isPasswordLogin) ...[
+                                    // Password Input
+                                    BrutalistTextField(
+                                      controller: _passwordController,
+                                      label: 'Password',
+                                      placeholder: '******',
+                                      obscureText: true,
+                                      errorText: _passwordError,
+                                      enabled: !_isLoading,
+                                      onChanged: (val) {
+                                        if (_passwordError != null) setState(() => _passwordError = null);
+                                      },
+                                    ),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: TextButton(
+                                        onPressed: () => context.push('/reset-password'),
+                                        child: const Text(
+                                          'Forgot Password?',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            decoration: TextDecoration.underline,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ] else ...[
+                                    // Code Input
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Expanded(
+                                          child: BrutalistTextField(
+                                            controller: _codeController,
+                                            label: 'Verification Code',
+                                            placeholder: 'XXXXXX',
+                                            keyboardType: TextInputType.number,
+                                            errorText: _codeError,
+                                            enabled: !_isLoading,
+                                            onChanged: (val) {
+                                              if (_codeError != null) setState(() => _codeError = null);
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        SizedBox(
+                                          width: 120,
+                                          child: BrutalistButton(
+                                             text: _countdown > 0 ? '${_countdown}S' : 'GET CODE',
+                                             fontSize: 14,
+                                             backgroundColor: _countdown > 0 ? Colors.grey[300] : AppColors.secondary,
+                                             onPressed: (_countdown > 0 || !_isPhoneValid || _isLoading) 
+                                                 ? null 
+                                                 : _sendCode,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+
+                                  const SizedBox(height: 32),
+
+                                  // Login Button
+                                  BrutalistButton(
+                                    text: 'ENTER SYSTEM',
+                                    isFullWidth: true,
+                                     backgroundColor: AppColors.primary,
+                                    onPressed: _login,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Send Code Button
-                          SizedBox(
-                            width: 120,
-                            child: BrutalistButton(
-                               text: _countdown > 0 ? '${_countdown}S' : 'GET CODE',
-                               fontSize: 14,
-                               backgroundColor: _countdown > 0 ? Colors.grey[300] : AppColors.secondary,
-                               onPressed: (_countdown > 0 || !_isPhoneValid || _isLoading) 
-                                   ? null 
-                                   : _sendCode,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       
                       const SizedBox(height: 32),
-
-                      // Login Button
-                      BrutalistButton(
-                        text: 'ENTER SYSTEM',
-                        isFullWidth: true,
-                         backgroundColor: AppColors.primary,
-                        onPressed: _canLogin ? _login : null,
-                      ),
+                      
+                      // WeChat Login
+                      if (_isWechatInstalled) ...[
+                         // ... (keep WeChat login logic if needed, simplified here)
+                         InkWell(
+                          onTap: _isLoading ? null : _loginWithWechat,
+                          child: Container(
+                            width: 50, height: 50,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF07C160),
+                              border: Border.all(color: Colors.black, width: 2),
+                              boxShadow: const [BoxShadow(color: Colors.black, offset: Offset(2, 2))],
+                            ),
+                            child: const Icon(Icons.chat_bubble, color: Colors.white),
+                          ),
+                         ),
+                      ],
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 32),
-
-                // Agreement
-                 Text.rich(
-                    TextSpan(
-                      text: 'AGREE TO ',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: 'TERMS',
-                          style: const TextStyle(
-                            decoration: TextDecoration.underline,
-                          ),
-                          // TODO: Add tap handler
-                        ),
-                        const TextSpan(text: ' & '),
-                        TextSpan(
-                          text: 'PRIVACY',
-                          style: const TextStyle(
-                            decoration: TextDecoration.underline,
-                          ),
-                           // TODO: Add tap handler
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                const SizedBox(height: 48),
-
-                // WeChat Login
-                if (_isWechatInstalled) ...[
-                   Column(
-                    children: [
-                      const Text(
-                        'OR CONNECT WITH',
-                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      InkWell(
-                        onTap: _isLoading ? null : _loginWithWechat,
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF07C160),
-                            border: Border.all(color: Colors.black, width: 3),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black,
-                                offset: Offset(4, 4),
-                                blurRadius: 0,
-                              )
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.chat_bubble,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      ],
-    ),
-  ),
-),
+      ),
     );
   }
 }

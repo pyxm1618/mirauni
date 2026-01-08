@@ -78,7 +78,7 @@
                 <span class="text-2xl">📱</span>
                 <div>
                   <div class="font-bold">{{ $t('contact.social.wechat') }}</div>
-                  <div class="text-gray-400 text-sm">{{ $t('contact.social.wechatId') }}: 小概率</div>
+                  <div class="text-gray-400 text-sm">{{ $t('contact.social.wechatId') }}: {{ $t('common.appName') }}</div>
                 </div>
               </div>
 
@@ -96,7 +96,7 @@
                 <span class="text-2xl">⚡</span>
                 <div>
                   <div class="font-bold">{{ $t('contact.social.jike') }}</div>
-                  <div class="text-gray-400 text-sm">{{ $t('contact.social.jikeId') }}: 小概率</div>
+                  <div class="text-gray-400 text-sm">{{ $t('contact.social.jikeId') }}: {{ $t('common.appName') }}</div>
                 </div>
               </div>
             </div>

@@ -4,6 +4,8 @@ import '../providers/auth_provider.dart';
 import '../pages/splash/splash_page.dart';
 import '../pages/auth/login_page.dart';
 import '../pages/auth/bind_phone_page.dart';
+import '../pages/auth/set_password_page.dart';
+import '../pages/auth/reset_password_page.dart';
 import '../pages/projects/project_detail_page.dart';
 import '../pages/developers/developer_profile_page.dart';
 import '../pages/messages/chat_page.dart';
@@ -18,17 +20,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/splash',
     debugLogDiagnostics: true,
     redirect: (context, state) {
-      // 启动页和登录页不需要登录检查
+      // 启动页、登录页、重置密码页不需要检查
       if (state.matchedLocation == '/splash' || 
           state.matchedLocation == '/login' ||
-          state.matchedLocation == '/') {
+          state.matchedLocation == '/reset-password') {
         return null;
       }
 
       final isLoggedIn = ref.read(isLoggedInProvider);
 
+      // 强制设置密码检查
+      if (isLoggedIn) {
+        final userAsync = ref.read(currentUserProvider);
+        // 如果用户数据已加载且未设置密码
+        if (userAsync.hasValue && userAsync.value != null) {
+          final user = userAsync.value!;
+          if (!user.hasPassword) {
+            if (state.matchedLocation != '/set-password') {
+              return '/set-password';
+            }
+            return null; // 允许访问 /set-password
+          } else {
+             // 已设置密码，如果不允许访问 /set-password (可选，防止误入)
+             if (state.matchedLocation == '/set-password') {
+               return '/';
+             }
+          }
+        }
+      }
+
       // 需要登录的路由
-      const protectedRoutes = ['/chat', '/recharge', '/bind-phone', '/profile', '/my-projects'];
+      const protectedRoutes = ['/chat', '/recharge', '/bind-phone', '/profile', '/my-projects', '/set-password'];
       final needsAuth = protectedRoutes.any(
         (r) => state.matchedLocation.startsWith(r),
       );
@@ -55,6 +77,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
+      // 设置密码页
+      GoRoute(
+        path: '/set-password',
+        builder: (context, state) => const SetPasswordPage(),
+      ),
+
+      // 重置密码页
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) => const ResetPasswordPage(),
+      ),
+
       // 绑定手机号页
       GoRoute(
         path: '/bind-phone',
@@ -62,7 +96,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // 主页（带底部导航的 IndexedStack）
-      // 不再使用 ShellRoute，而是直接用 MainShell 管理所有 Tab 页面
       GoRoute(
         path: '/',
         builder: (context, state) => const MainShell(),

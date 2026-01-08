@@ -136,7 +136,7 @@ const selectedPackageInfo = computed(() =>
 )
 
 useSeoMeta({
-  title: t('me.recharge.title') + ' - 小概率', // Or translated Brand
+  title: () => `${t('me.recharge.title')} - ${t('common.appName')}`,
   robots: 'noindex'
 })
 </script>

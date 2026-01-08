@@ -14,6 +14,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- DROP TABLE IF EXISTS users;
 -- DROP TABLE IF EXISTS articles;
 -- DROP TABLE IF EXISTS sms_codes;
+-- DROP TABLE IF EXISTS user_secrets;
 
 -- ==============================================================================
 -- 3. Create Tables
@@ -43,6 +44,7 @@ CREATE TABLE users (
   email VARCHAR(100),                -- 邮箱
   
   -- 系统字段
+  has_password BOOLEAN DEFAULT false, -- 是否已设置密码
   unlock_credits INT DEFAULT 0,      -- 解锁次数余额
   is_first_charge BOOLEAN DEFAULT true, -- 是否首充（用于首充优惠）
   role VARCHAR(20) DEFAULT 'user',   -- 角色: user/admin
@@ -152,6 +154,15 @@ CREATE TABLE sms_codes (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 3.9 user_secrets 用户私密信息表 (仅服务端可见)
+CREATE TABLE user_secrets (
+  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  password_hash TEXT,                -- 用户自定义密码的哈希
+  supabase_password TEXT,            -- Supabase Auth 的随机密码
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ==============================================================================
 -- 4. Create Indexes
 -- ==============================================================================
@@ -210,6 +221,16 @@ CREATE POLICY "Recipients can update message status"
   ON messages FOR UPDATE
   USING (auth.uid() = to_user_id);
 
+-- 5.5 user_secrets RLS
+ALTER TABLE user_secrets ENABLE ROW LEVEL SECURITY;
+
+-- 只有 Service Role 可以访问 user_secrets，普通用户无权限
+CREATE POLICY "Service Role can manage user_secrets"
+  ON user_secrets
+  USING (false); 
+  -- 这里 USING(false) 意味着任何用户（包括 admin 角色通过 API 访问）都无法直接访问。
+  -- 只有通过 supabaseAdmin (Service Role) 客户端才能绕过 RLS。
+
 -- ==============================================================================
 -- 9. Realtime Setup
 -- ==============================================================================
@@ -262,6 +283,7 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_articles_updated_at BEFORE UPDATE ON articles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER update_user_secrets_updated_at BEFORE UPDATE ON user_secrets FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 -- ==============================================================================
 -- 8. RPC Functions

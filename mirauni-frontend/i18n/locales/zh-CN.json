@@ -16,13 +16,16 @@
         "noData": "暂无数据",
         "viewMore": "查看更多",
         "back": "返回",
+        "copied": "已复制",
+        "sendFailed": "发送失败",
         "errors": {
             "network": "网络好像开小差了，检查一下连接？",
             "server": "服务器出了点小状况，正在抢修中",
             "unknown": "发生了一个未知的错误，请稍后重试",
             "not_found": "这个页面好像去火星了，找不到啦",
             "unauthorized": "您需要登录才能继续操作哦",
-            "forbidden": "您暂时没有权限执行这个操作"
+            "forbidden": "您暂时没有权限执行这个操作",
+            "timeout": "请求超时，请重试"
         }
     },
     "nav": {
@@ -157,6 +160,14 @@
         }
     },
     "developer": {
+        "unlock": {
+            "success": "解锁成功",
+            "failed": "解锁失败",
+            "confirmTitle": "确认解锁",
+            "confirmDesc": "解锁将消耗 1 次机会，确定继续吗？",
+            "unlocked": "已解锁",
+            "action": "解锁联系方式"
+        },
         "skills": "技能",
         "experience": "工作经验",
         "bio": "个人简介",
@@ -194,6 +205,7 @@
         "userProtocol": "用户协议",
         "and": "和",
         "privacyPolicy": "隐私政策",
+        "wechatUnavailable": "微信登录暂不可用",
         "error": {
             "phone": "手机号码写得不太对，再检查一下？",
             "code": "验证码是6位数字哦",
@@ -630,5 +642,48 @@
             "investor": "欢迎加入投资圈！\n\n请发送邮件至 mirauni{'@'}163.com 分享您的故事，解锁早期项目优先通道。",
             "founder": "请将商业计划书 (BP) 发送至：\n\nmirauni{'@'}163.com\n\n我们将即刻为您进入项目专属对接通道！"
         }
+    },
+    "validation": {
+        "username": {
+            "min": "用户名至少2个字符",
+            "max": "用户名最多20个字符"
+        },
+        "bio": {
+            "max": "简介最多200字"
+        },
+        "skills": {
+            "max": "最多选择10个技能"
+        },
+        "email": {
+            "invalid": "邮箱格式不正确"
+        },
+        "project": {
+            "title": {
+                "min": "标题至少2个字",
+                "max": "标题最多50字"
+            },
+            "summary": {
+                "min": "简介至少10字",
+                "max": "简介最多200字"
+            },
+            "roles": {
+                "min": "至少选择一个招募角色"
+            },
+            "desc": {
+                "max": "详情最多5000字"
+            }
+        },
+        "url": {
+            "invalid": "请输入正确的链接"
+        }
+    },
+    "upload": {
+        "loginRequired": "请先登录",
+        "formatError": "请上传 JPG/PNG/WebP 格式的图片",
+        "compressFailed": "压缩失败",
+        "loadFailed": "图片加载失败",
+        "readFailed": "读取文件失败",
+        "uploadFailed": "上传失败",
+        "updateFailed": "更新失败"
     }
 }

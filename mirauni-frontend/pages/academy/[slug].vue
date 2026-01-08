@@ -82,31 +82,25 @@ const slug = route.params.slug as string
 
 const { data, pending, error } = await useFetch<any>(`/api/articles/${slug}`)
 
+const { t } = useI18n()
+const localePath = useLocalePath()
+
 const article = computed(() => data.value?.data)
 
 const categoryLabel = (val: string) => {
-  const map: Record<string, string> = {
-    'saas': 'SaaS',
-    'app': 'App',
-    'game': '游戏',
-    'ai': 'AI',
-    'ecommerce': '电商',
-    'content': '内容',
-    'hardware': '硬件',
-    'other': '其他'
-  }
-  return map[val] || val
+  const key = `project.categories.${val}`
+  return t(key) === key ? val : t(key)
 }
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return ''
-  return new Date(dateStr).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+  return new Date(dateStr).toLocaleDateString(t('common.locale') === 'en' ? 'en-US' : 'zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 useSeoMeta({
-  title: () => article.value ? `${article.value.title} - 小概率学院` : '文章详情',
+  title: () => article.value ? `${article.value.title} - ${t('common.appName')}` : t('academy.detail.title'),
   description: () => article.value?.summary || article.value?.content?.slice(0, 150),
-  keywords: () => article.value ? `独立开发者,${article.value.category},创业,技术` : '',
+  keywords: () => article.value ? `indie hacker,${article.value.category},startup,tech` : '',
   ogTitle: () => article.value?.title,
   ogDescription: () => article.value?.summary,
   ogType: 'article'
@@ -123,11 +117,11 @@ const structuredData = computed(() => article.value ? JSON.stringify({
   dateModified: article.value.updated_at || article.value.created_at,
   author: {
     '@type': 'Person',
-    name: article.value.author?.username || '小概率'
+    name: article.value.author?.username || t('common.appName')
   },
   publisher: {
     '@type': 'Organization',
-    name: '小概率',
+    name: t('common.appName'),
     url: 'https://mirauni.com'
   },
   mainEntityOfPage: {

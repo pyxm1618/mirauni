@@ -125,6 +125,7 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
 const route = useRoute()
 const id = route.params.id as string
 
@@ -170,14 +171,14 @@ const copyContact = () => {
   const toast = useToast()
   if (contactInfo.value?.wechat_id) {
     navigator.clipboard.writeText(contactInfo.value.wechat_id)
-    toast.add({ title: '已复制微信号' })
+    toast.add({ title: t('common.copied') })
   }
 }
 
 useSeoMeta({
-  title: () => developer.value ? `${developer.value.username} - 独立开发者 | 小概率` : '开发者详情',
-  description: () => developer.value?.bio || `${developer.value?.username} 是一位独立开发者，拥有 ${developer.value?.experience_years || '多'}年开发经验`,
-  keywords: () => developer.value ? `独立开发者,${developer.value.skills?.join(',')},技术合伙人` : '',
+  title: () => developer.value ? `${developer.value.username} - ${t('common.appName')}` : t('developer.square.title'),
+  description: () => developer.value?.bio || `${developer.value?.username} is an indie developer on ${t('common.appName')}`,
+  keywords: () => developer.value ? `${t('roles.backend')},${developer.value.skills?.join(',')},${t('home.heroTitleSuffix')}` : '',
   ogTitle: () => developer.value?.username,
   ogDescription: () => developer.value?.bio,
   ogType: 'profile'
@@ -189,7 +190,7 @@ const structuredData = computed(() => developer.value ? JSON.stringify({
   '@type': 'Person',
   name: developer.value.username,
   description: developer.value.bio,
-  jobTitle: developer.value.profession || '独立开发者',
+  jobTitle: developer.value.profession || t('roles.frontend'),
   knowsAbout: developer.value.skills || [],
   url: `https://mirauni.com/developers/${id}`
 }) : '{}')

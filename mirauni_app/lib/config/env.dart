@@ -22,8 +22,11 @@ class Env {
     defaultValue: '',
   );
 
-  /// API 基础 URL（与 Web 共用 Supabase Edge Functions）
-  static String get apiBaseUrl => '$supabaseUrl/functions/v1';
+  /// API 基础 URL
+  /// 开发环境使用本地 Nuxt 服务，生产环境使用线上域名
+  static String get apiBaseUrl => isDevelopment 
+      ? 'http://localhost:3000/api' // iOS 模拟器请用 http://127.0.0.1:3000 或本机 IP
+      : 'https://mirauni.com/api';
 
   /// 是否为开发环境
   static const isDevelopment = bool.fromEnvironment('DEVELOPMENT', defaultValue: true);

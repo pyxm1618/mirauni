@@ -46,11 +46,17 @@ const { data, pending } = await useFetch<ProjectListResponse>('/api/projects', {
 
 const projects = computed(() => data.value?.data || [])
 
-const categoryLabel = computed(() => PROJECT_CATEGORIES.find(c => c.value === category)?.label || category)
+const { t } = useI18n()
+const categoryLabel = computed(() => {
+  if (PROJECT_CATEGORIES.some(c => c.value === category)) {
+    return t('project.categories.' + category)
+  }
+  return category
+})
 
 useSeoMeta({
-  title: () => `${categoryLabel.value} 项目 - 小概率`,
-  description: () => `浏览所有 ${categoryLabel.value} 类别的创业项目`,
-  ogTitle: () => `${categoryLabel.value} 项目 - 小概率`
+  title: () => `${categoryLabel.value} - ${t('common.appName')}`,
+  description: () => `Browse ${categoryLabel.value} projects on ${t('common.appName')}`,
+  ogTitle: () => `${categoryLabel.value} - ${t('common.appName')}`
 })
 </script>

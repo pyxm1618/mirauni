@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
 import type { Project } from '~/types'
 
 // Theme Components
@@ -106,10 +107,10 @@ const handleRecharge = () => {
 }
 
 useSeoMeta({
-  title: () => project.value ? `${project.value.title} - 招募技术合伙人 | 小概率` : '项目详情',
-  description: () => project.value?.summary,
-  keywords: () => project.value ? `${project.value.category},技术合伙人,找合伙人,${project.value.roles_needed?.join(',')}` : '',
-  ogTitle: () => project.value ? `${project.value.title} - 招募技术合伙人` : '项目详情',
+  title: () => project.value ? `${project.value.title} - ${t('common.appName')}` : t('project.title'),
+  description: () => project.value?.summary || '',
+  keywords: () => project.value ? `${project.value.category},${t('home.heroTitleSuffix')},${t('home.heroTitlePrefix')},${project.value.roles_needed?.join(',')}` : '',
+  ogTitle: () => project.value ? `${project.value.title} - ${t('home.heroTitleSuffix')}` : t('project.title'),
   ogDescription: () => project.value?.summary,
   ogType: 'article'
 })
@@ -124,12 +125,12 @@ const structuredData = computed(() => project.value ? JSON.stringify({
   employmentType: project.value.work_mode === 'remote' ? 'CONTRACTOR' : 'FULL_TIME',
   hiringOrganization: {
     '@type': 'Organization',
-    name: '小概率',
+    name: t('common.appName'),
     url: 'https://mirauni.com'
   },
   jobLocation: {
     '@type': 'Place',
-    address: project.value.work_mode === 'remote' ? '远程办公' : '中国'
+    address: project.value.work_mode === 'remote' ? t('project.workModes.remote') : 'China'
   }
 }) : '{}')
 

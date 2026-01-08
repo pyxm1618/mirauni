@@ -77,6 +77,7 @@ const conversationId = route.params.id as string
 const user = useSupabaseUser()
 const client = useSupabaseClient()
 const { fetchUnreadCount } = useMessages()
+const { t } = useI18n()
 
 const inputContent = ref('')
 const sending = ref(false)
@@ -162,7 +163,7 @@ const handleSend = async () => {
       scrollToBottom()
     }
   } catch (e) {
-    alert('发送失败')
+    alert(t('common.sendFailed'))
   } finally {
     sending.value = false
   }

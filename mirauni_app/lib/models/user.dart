@@ -11,6 +11,7 @@ class AppUser {
   final String? wechat;
   final String? email;
   final bool? isVerified;
+  final bool hasPassword;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -26,6 +27,7 @@ class AppUser {
     this.wechat,
     this.email,
     this.isVerified,
+    this.hasPassword = false,
     required this.createdAt,
     this.updatedAt,
   });
@@ -43,6 +45,7 @@ class AppUser {
       wechat: json['wechat'] as String?,
       email: json['email'] as String?,
       isVerified: json['is_verified'] as bool?,
+      hasPassword: json['has_password'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null 
           ? DateTime.parse(json['updated_at'] as String) 
@@ -63,6 +66,7 @@ class AppUser {
       'wechat': wechat,
       'email': email,
       'is_verified': isVerified,
+      'has_password': hasPassword,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };

@@ -15,7 +15,18 @@
         "loading": "Loading...",
         "noData": "No Data",
         "viewMore": "View More",
-        "back": "Back"
+        "back": "Back",
+        "copied": "Copied",
+        "sendFailed": "Send failed",
+        "errors": {
+            "network": "Network Error",
+            "server": "Server Error",
+            "unknown": "Unknown Error",
+            "not_found": "Not Found",
+            "unauthorized": "Unauthorized",
+            "forbidden": "Access Denied",
+            "timeout": "Request timeout, please try again"
+        }
     },
     "nav": {
         "home": "Home",
@@ -149,6 +160,14 @@
         }
     },
     "developer": {
+        "unlock": {
+            "success": "Unlock successful",
+            "failed": "Unlock failed",
+            "confirmTitle": "Confirm Unlock",
+            "confirmDesc": "Unlock will cost 1 credit. Continue?",
+            "unlocked": "Unlocked",
+            "action": "Unlock Contact"
+        },
         "skills": "Skills",
         "experience": "Experience",
         "bio": "Bio",
@@ -186,13 +205,15 @@
         "userProtocol": "User Agreement",
         "and": "and",
         "privacyPolicy": "Privacy Policy",
+        "wechatUnavailable": "WeChat login unavailable",
         "error": {
             "phone": "Invalid phone number",
             "code": "Enter 6-digit code",
             "sendFailed": "Failed to send code",
             "loginFailed": "Login failed",
             "bindFailed": "Bind failed",
-            "missingWechat": "WeChat info missing"
+            "forbidden": "Access Denied",
+            "timeout": "Request timeout, please try again"
         },
         "bind": {
             "title": "Bind Phone",
@@ -622,5 +643,48 @@
             "investor": "Welcome to the Investor Circle!\n\nPlease email mirauni{'@'}163.com with your story to unlock priority access.",
             "founder": "Please send your Business Plan (BP) to:\n\nmirauni{'@'}163.com\n\nWe will fast-track your application immediately!"
         }
+    },
+    "validation": {
+        "username": {
+            "min": "Username too short (min 2 chars)",
+            "max": "Username too long (max 20 chars)"
+        },
+        "bio": {
+            "max": "Bio too long (max 200 chars)"
+        },
+        "skills": {
+            "max": "Max 10 skills"
+        },
+        "email": {
+            "invalid": "Invalid email address"
+        },
+        "project": {
+            "title": {
+                "min": "Title too short (min 2 chars)",
+                "max": "Title too long (max 50 chars)"
+            },
+            "summary": {
+                "min": "Summary too short (min 10 chars)",
+                "max": "Summary too long (max 200 chars)"
+            },
+            "roles": {
+                "min": "Select at least one role"
+            },
+            "desc": {
+                "max": "Description too long (max 5000 chars)"
+            }
+        },
+        "url": {
+            "invalid": "Invalid URL"
+        }
+    },
+    "upload": {
+        "loginRequired": "Please login first",
+        "formatError": "Please upload JPG/PNG/WebP images",
+        "compressFailed": "Compression failed",
+        "loadFailed": "Image load failed",
+        "readFailed": "File read failed",
+        "uploadFailed": "Upload failed",
+        "updateFailed": "Update failed"
     }
 }

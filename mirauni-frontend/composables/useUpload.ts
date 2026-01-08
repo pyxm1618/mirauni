@@ -7,6 +7,7 @@ export function useUpload() {
     const supabase = useSupabaseClient()
     const authStore = useAuthStore()
     const user = computed(() => authStore.user)
+    const { t } = useI18n()
 
     /**
      * 压缩图片
@@ -76,13 +77,13 @@ export function useUpload() {
      */
     async function uploadAvatar(file: File): Promise<string> {
         if (!user.value) {
-            throw new Error('请先登录')
+            throw new Error(t('upload.loginRequired'))
         }
 
         // 验证文件类型
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
         if (!allowedTypes.includes(file.type)) {
-            throw new Error('请上传 JPG/PNG/WebP/GIF 格式的图片')
+            throw new Error(t('upload.formatError'))
         }
 
         // 压缩图片
@@ -101,7 +102,7 @@ export function useUpload() {
 
         if (uploadError) {
             console.error('上传头像失败:', uploadError)
-            throw new Error('上传失败')
+            throw new Error(t('upload.uploadFailed'))
         }
 
         // 获取公开 URL
@@ -122,7 +123,7 @@ export function useUpload() {
 
         if (updateError) {
             console.error('更新头像URL失败:', updateError)
-            throw new Error('更新失败')
+            throw new Error(t('upload.updateFailed'))
         }
 
         return avatarUrl
@@ -133,13 +134,13 @@ export function useUpload() {
      */
     async function uploadProjectImage(file: File, projectId: string): Promise<string> {
         if (!user.value) {
-            throw new Error('请先登录')
+            throw new Error(t('upload.loginRequired'))
         }
 
         // 验证文件类型
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
         if (!allowedTypes.includes(file.type)) {
-            throw new Error('请上传 JPG/PNG/WebP 格式的图片')
+            throw new Error(t('upload.formatError')) // Note: Reusing same error even though GIF is allowed in avatar but not here? Or just update trans to say Image.
         }
 
         // 压缩图片
@@ -157,7 +158,7 @@ export function useUpload() {
 
         if (uploadError) {
             console.error('上传项目图片失败:', uploadError)
-            throw new Error('上传失败')
+            throw new Error(t('upload.uploadFailed'))
         }
 
         const { data: urlData } = supabase.storage

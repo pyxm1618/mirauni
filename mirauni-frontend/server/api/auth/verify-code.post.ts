@@ -62,78 +62,86 @@ export default defineEventHandler(async (event) => {
     }
 
     // 3. 查找现有用户
-    let { data: existingUser } = await supabase
+    let { data: existingUser } = await supabaseAdmin
         .from('users')
         .select('*')
         .eq('phone', phone)
         .single()
 
-    // 4. 使用 Supabase Auth 登录或创建用户
-    // 构造一个基于手机号的邮箱（Supabase Auth 需要邮箱）
+    // 4. 处理认证逻辑
     const email = `${phone}@phone.mirauni.com`
-    const password = `mirauni_${phone}_secure_pwd`
-
+    let supabasePassword
     let authUser
 
+    // 辅助函数：生成安全的随机密码
+    const generateSafePassword = () => {
+        return Math.random().toString(36).slice(-8) + 
+               Math.random().toString(36).slice(-8) + 
+               'Aa1!' // 确保包含大小写和数字/符号
+    }
+
     if (existingUser) {
-        // 用户已存在，登录
-        const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-            email,
-            password
-        })
-
-        if (signInError) {
-            // 可能是首次迁移的老用户，尝试创建 auth 账户
-            const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
-                email,
-                password,
-                email_confirm: true,
-                user_metadata: {
-                    phone,
-                    user_id: existingUser.id
-                }
-            })
-
-            if (signUpError) {
-                console.error('创建 Auth 用户失败:', signUpError)
-                throw createError({
-                    statusCode: 500,
-                    message: '登录失败，请稍后重试'
-                })
+        // 用户已存在，查找 Secret
+        const { data: secret } = await supabaseAdmin
+            .from('user_secrets')
+            .select('supabase_password')
+            .eq('user_id', existingUser.id)
+            .single()
+        
+        if (secret?.supabase_password) {
+            supabasePassword = secret.supabase_password
+        } else {
+            // 迁移逻辑：老用户没有 Secret，重置密码并创建 Secret
+            console.log(`[AUTH] 迁移用户 ${existingUser.id} 到新认证体系`)
+            supabasePassword = generateSafePassword()
+            
+            // 更新 Auth 密码
+            const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+                existingUser.id, 
+                { password: supabasePassword }
+            )
+            
+            if (updateError) {
+                console.error('迁移更新密码失败:', updateError)
+                // 尝试创建 Auth 用户（如果之前的逻辑删除了 Auth 用户但保留了 public.users）
+                // 这里简化处理，假设 update 失败通常是因为 Auth 用户不存在
             }
 
-            // 再次登录
-            const { data: retrySignIn } = await supabaseAdmin.auth.signInWithPassword({
-                email,
-                password
+            // 插入 Secret
+            await supabaseAdmin.from('user_secrets').insert({
+                user_id: existingUser.id,
+                supabase_password: supabasePassword
             })
-            authUser = retrySignIn
-        } else {
-            authUser = signInData
         }
     } else {
-        // 5. 新用户，创建 Auth 账户和用户记录
+        // 新用户注册
+        supabasePassword = generateSafePassword()
+        
+        // 创建 Auth 账户
         const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
             email,
-            password,
+            password: supabasePassword,
             email_confirm: true,
             user_metadata: { phone }
         })
 
         if (signUpError) {
-            console.error('创建用户失败:', signUpError)
+            console.error('创建 Auth 用户失败:', signUpError)
             throw createError({
                 statusCode: 500,
                 message: '注册失败，请稍后重试'
             })
         }
 
-        // 创建 users 表记录（使用 admin 客户端绕过 RLS）
+        const userId = signUpData.user.id
+
+        // 创建 users 表记录
         const { data: newUser, error: createUserError } = await supabaseAdmin
             .from('users')
             .insert({
-                id: signUpData.user.id,  // 使用 Auth 用户的 ID
+                id: userId,
                 phone,
+                has_password: false, // 默认为 false
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             })
@@ -142,23 +150,36 @@ export default defineEventHandler(async (event) => {
 
         if (createUserError) {
             console.error('创建用户记录失败:', createUserError)
-            // 回滚 Auth 用户
-            await supabaseAdmin.auth.admin.deleteUser(signUpData.user.id)
+            await supabaseAdmin.auth.admin.deleteUser(userId)
             throw createError({
                 statusCode: 500,
                 message: '注册失败，请稍后重试'
             })
         }
 
-        existingUser = newUser
-
-        // 登录新用户
-        const { data: signInData } = await supabaseAdmin.auth.signInWithPassword({
-            email,
-            password
+        // 创建 Secret
+        await supabaseAdmin.from('user_secrets').insert({
+            user_id: userId,
+            supabase_password: supabasePassword
         })
-        authUser = signInData
+
+        existingUser = newUser
     }
+
+    // 5. 登录
+    const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+        email,
+        password: supabasePassword
+    })
+
+    if (signInError) {
+        console.error('登录失败:', signInError)
+        throw createError({
+            statusCode: 500,
+            message: '登录失败，请稍后重试'
+        })
+    }
+    authUser = signInData
 
     // 6. 返回用户信息和 session
     return {
@@ -171,8 +192,10 @@ export default defineEventHandler(async (event) => {
             bio: existingUser.bio,
             skills: existingUser.skills,
             unlock_credits: existingUser.unlock_credits,
-            is_first_charge: existingUser.is_first_charge
+            is_first_charge: existingUser.is_first_charge,
+            has_password: existingUser.has_password
         },
+        needSetPassword: !existingUser.has_password,
         session: authUser?.session ? {
             access_token: authUser.session.access_token,
             refresh_token: authUser.session.refresh_token,

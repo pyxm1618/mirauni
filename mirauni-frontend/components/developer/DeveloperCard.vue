@@ -37,13 +37,9 @@ const props = defineProps<{
   developer: any
 }>()
 
-const formatWorkPreference = (pref: string) => {
-  const map: Record<string, string> = {
-    fulltime: '全职',
-    parttime: '兼职',
-    contract: '外包/合约',
-    freelance: '自由职业'
-  }
-  return map[pref] || '开放合作'
+const getPreferenceLabel = (pref: string) => {
+  const key = `me.profile.${pref}`
+  // 检查翻译是否存在，不存在则回退到默认
+  return t(key) === key ? pref : t(key)
 }
 </script>

@@ -98,8 +98,8 @@
     <div class="container mx-auto px-4">
       <div class="flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3">
-           <img src="/logo.png" alt="小概率" class="w-8 h-8 object-contain" />
-          <span class="font-bold text-lg">小概率</span>
+           <img src="/logo.png" :alt="$t('common.appName')" class="w-8 h-8 object-contain" />
+          <span class="font-bold text-lg">{{ $t('common.appName') }}</span>
           <span class="text-gray-500 text-sm hidden sm:inline-block">{{ $t('footer.slogan') }}</span>
         </div>
         <div class="flex gap-6 text-sm text-gray-500">

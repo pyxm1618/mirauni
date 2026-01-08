@@ -43,18 +43,11 @@ const props = defineProps<{
   article: any 
 }>()
 
+const { t } = useI18n()
+
 const categoryLabel = (val: string) => {
-  const map: Record<string, string> = {
-    'saas': 'SaaS',
-    'app': 'App',
-    'game': '游戏',
-    'ai': 'AI',
-    'ecommerce': '电商',
-    'content': '内容',
-    'hardware': '硬件',
-    'other': '其他'
-  }
-  return map[val] || val
+  const key = `project.categories.${val}`
+  return t(key) === key ? val : t(key)
 }
 
 const formatDate = (dateStr: string) => {

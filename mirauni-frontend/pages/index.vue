@@ -50,29 +50,33 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 useSeoMeta({
-  title: '小概率 - 独立开发者找合伙人的第一站',
-  description: '帮助独立开发者发布项目、寻找技术合伙人，找到靠谱的创业伙伴',
-  keywords: '独立开发者,技术合伙人,找合伙人,创业项目,程序员副业',
-  ogTitle: '小概率 - 独立开发者找合伙人的第一站',
-  ogDescription: '帮助独立开发者发布项目、寻找技术合伙人，找到靠谱的创业伙伴',
+  title: () => `${t('common.appName')} - ${t('home.title')}`,
+  description: () => t('home.subtitle'),
+  keywords: () => t('home.features.post.desc'), // 简化 keywords，或者在 i18n 中添加 keywords key
+  ogTitle: () => `${t('common.appName')} - ${t('home.title')}`,
+  ogDescription: () => t('home.subtitle'),
   ogType: 'website'
 })
 
 // 结构化数据 - Organization
+const jsonLd = computed(() => JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: t('common.appName'),
+  url: 'https://mirauni.com',
+  logo: 'https://mirauni.com/logo.png',
+  description: t('home.subtitle'),
+  sameAs: []
+}))
+
 useHead({
   script: [
     {
       type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: '小概率',
-        url: 'https://mirauni.com',
-        logo: 'https://mirauni.com/logo.png',
-        description: '独立开发者找合伙人的第一站',
-        sameAs: []
-      })
+      innerHTML: jsonLd
     }
   ]
 })

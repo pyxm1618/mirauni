@@ -6,12 +6,13 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:modelValue', 'success'])
+const { t } = useI18n()
 
-const packages = [
-  { id: 'basic', amount: 30, credits: 10, label: '体验包' },
-  { id: 'standard', amount: 50, credits: 30, label: '推荐包', tag: '热销' },
-  { id: 'premium', amount: 100, credits: 100, label: '豪华包' }
-]
+const packages = computed(() => [
+  { id: 'basic', amount: 30, credits: 10, label: t('me.recharge.packages.basic') },
+  { id: 'standard', amount: 50, credits: 30, label: t('me.recharge.packages.standard'), tag: t('common.hot') }, // 假设添加一个 hot 翻译或者省略
+  { id: 'premium', amount: 100, credits: 100, label: t('me.recharge.packages.premium') }
+])
 
 const selectedPackage = ref('standard')
 const loading = ref(false)
@@ -56,7 +57,7 @@ async function handlePay() {
           onBridgeReady(data)
       }
   } catch (e) {
-      alert('支付发起失败')
+      alert(t('me.recharge.payFail') || '支付发起失败')
   } finally {
       loading.value = false
   }
@@ -67,7 +68,7 @@ function onBridgeReady(params: any) {
     // @ts-ignore
     const WeixinJSBridge = (window as any).WeixinJSBridge
     if (!WeixinJSBridge) {
-        alert('请在微信内打开')
+        alert(t('me.recharge.wechatOnly') || '请在微信内打开')
         return
     }
     
@@ -125,7 +126,7 @@ watch(() => props.modelValue, (val) => {
   <UModal :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
     <UCard>
       <template #header>
-        <div class="text-xl font-bold">充值解锁次数</div>
+        <div class="text-xl font-bold">{{ $t('me.recharge.title') }}</div>
       </template>
       
       <div v-if="!qrCodeUrl" class="space-y-4">
@@ -142,21 +143,21 @@ watch(() => props.modelValue, (val) => {
                         <div class="font-bold text-lg">{{ pkg.label }}</div>
                         <UBadge v-if="pkg.tag" color="red" variant="subtle" size="xs">{{ pkg.tag }}</UBadge>
                       </div>
-                      <div class="text-gray-500 text-sm">{{ pkg.credits }}次解锁机会</div>
+                      <div class="text-gray-500 text-sm">{{ pkg.credits }} {{ $t('me.recharge.unlocks') }}</div>
                   </div>
                   <div class="text-primary-600 font-bold text-xl">¥{{ pkg.amount }}</div>
               </div>
           </div>
           
           <UButton block :loading="loading" @click="handlePay">
-              立即支付
+              {{ $t('me.recharge.pay') }}
           </UButton>
       </div>
       
       <div v-else class="flex flex-col items-center space-y-4 py-4">
           <img :src="qrCodeUrl" class="w-48 h-48" />
-          <div class="text-gray-500 text-sm">请使用微信扫码支付</div>
-          <div class="text-xs text-gray-400">支付完成后自动关闭</div>
+          <div class="text-gray-500 text-sm">{{ $t('me.recharge.scanCode') || '请使用微信扫码支付' }}</div>
+          <div class="text-xs text-gray-400">{{ $t('me.recharge.autoClose') || '支付完成后自动关闭' }}</div>
       </div>
     </UCard>
   </UModal>

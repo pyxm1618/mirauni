@@ -107,10 +107,11 @@
 </template>
 
 <script setup lang="ts">
-import { PROJECT_CATEGORIES, ROLES, WORK_MODES, COOPERATION_TYPES, projectSchema } from '~/types'
+import { PROJECT_CATEGORIES, ROLES, WORK_MODES, COOPERATION_TYPES } from '~/types'
 import type { Project } from '~/types'
 
 const { t } = useI18n()
+const { projectSchema } = useFormSchemas()
 
 const props = defineProps<{
   initialData?: Partial<Project>

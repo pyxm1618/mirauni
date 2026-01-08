@@ -117,8 +117,11 @@ watch(() => filters.value.category, () => {
     filters.value.page = 1
 })
 
+const { t } = useI18n()
+
 useSeoMeta({
-  title: '独立开发者学院 - 小概率',
-  description: '独立开发者学习成长的知识库，提供SaaS、App开发、游戏制作、AI应用等方向的实战经验与教程。',
+  title: () => `${t('nav.academy')} - ${t('common.appName')}`,
+  description: 'Indie Developer Academy',
+  keywords: 'indie hacker,startup,code,marketing',
 })
 </script>

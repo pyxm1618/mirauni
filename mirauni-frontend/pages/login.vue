@@ -8,8 +8,8 @@
         {{ error }}
       </div>
 
-      <!-- 手机号登录 & 验证码 (暂时隐藏) -->
-      <div v-if="false">
+      <!-- 手机号登录 & 验证码 -->
+      <div>
         <div v-if="!showCodeInput" class="space-y-4">
           <div>
             <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.phoneLabel') }}</label>
@@ -216,7 +216,7 @@ async function loginWithWechat() {
     if (url) {
       window.location.href = url
     } else {
-      error.value = '微信登录暂不可用'
+      error.value = t('auth.wechatUnavailable') || 'WeChat login unavailable'
     }
   } catch (e: any) {
     error.value = e.data?.message || '获取微信登录链接失败'
@@ -231,7 +231,7 @@ onUnmounted(() => {
 })
 
 useSeoMeta({
-  title: '登录 - 小概率', // This could be translated too if needed: t('auth.title') + ' - ' + t('common.appName')
-  robots: 'noindex'
+  title: () => `${t('auth.title')} - ${t('common.appName')}`,
+  description: 'Login to Mirauni'
 })
 </script>
