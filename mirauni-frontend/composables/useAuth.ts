@@ -33,6 +33,7 @@ export function useAuth() {
         const response = await $fetch<{
             success: boolean
             user: any
+            needSetPassword?: boolean
             session: {
                 access_token: string
                 refresh_token: string
@@ -54,6 +55,12 @@ export function useAuth() {
 
             // 更新 store
             authStore.setUser(response.user)
+
+            // 检查是否需要强制设置密码
+            if (response.needSetPassword) {
+                await router.push('/settings/password?initial=true')
+                return response
+            }
 
             // 跳转逻辑
             const redirect = route.query.redirect as string
@@ -116,6 +123,74 @@ export function useAuth() {
     }
 
     /**
+     * 密码登录
+     */
+    async function loginWithPassword(phone: string, password: string) {
+        console.log('[useAuth] loginWithPassword called. Fetching /api/auth/login-password...')
+        const response = await $fetch<{
+            success: boolean
+            user: any
+            session: {
+                access_token: string
+                refresh_token: string
+                expires_at: number
+            } | null
+        }>('/api/auth/login-password', {
+            method: 'POST',
+            body: { phone, password },
+            timeout: 15000
+        })
+        console.log('[useAuth] /api/auth/login-password response:', response)
+
+        if (response.success && response.session) {
+            // 设置 Supabase session
+            await supabase.auth.setSession({
+                access_token: response.session.access_token,
+                refresh_token: response.session.refresh_token
+            })
+
+            // 更新 store
+            authStore.setUser(response.user)
+
+            // 跳转逻辑
+            const redirect = route.query.redirect as string
+            const fromPlan = route.query.from === 'plan'
+
+            if (fromPlan && redirect) {
+                try {
+                    const targetUrl = new URL(decodeURIComponent(redirect))
+                    targetUrl.searchParams.set('sso_access', response.session.access_token)
+                    targetUrl.searchParams.set('sso_refresh', response.session.refresh_token)
+                    window.location.href = targetUrl.toString()
+                    return response
+                } catch (e) {
+                    console.error('[useAuth] Invalid redirect URL:', e)
+                }
+            }
+
+            await router.push(redirect || '/')
+            return response
+        }
+
+        throw new Error('登录失败')
+    }
+
+    /**
+     * 重置密码
+     */
+    async function resetPassword(phone: string, code: string, newPassword: string) {
+        const response = await $fetch<{
+            success: boolean
+            message: string
+        }>('/api/auth/reset-password', {
+            method: 'POST',
+            body: { phone, code, newPassword },
+            timeout: 15000
+        })
+        return response
+    }
+
+    /**
      * 退出登录
      */
     async function logout() {
@@ -135,6 +210,8 @@ export function useAuth() {
         isLoading,
         sendSmsCode,
         loginWithCode,
+        loginWithPassword,
+        resetPassword,
         getWechatLoginUrl,
         bindPhone,
         logout,

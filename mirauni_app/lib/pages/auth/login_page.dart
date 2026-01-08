@@ -14,8 +14,13 @@ import '../../widgets/common/loading.dart';
 /// 登录页面
 class LoginPage extends ConsumerStatefulWidget {
   final String? redirect;
+  final String initialType; // 'password' or 'code'
 
-  const LoginPage({super.key, this.redirect});
+  const LoginPage({
+    super.key,
+    this.redirect,
+    this.initialType = 'password',
+  });
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
@@ -30,7 +35,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   bool _isWechatInstalled = false;
   bool _isLoading = false;
-  bool _isPasswordLogin = true; // 默认为密码登录
+  late bool _isPasswordLogin;
   int _countdown = 0;
   Timer? _timer;
   
@@ -41,6 +46,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   void initState() {
     super.initState();
+    _isPasswordLogin = widget.initialType != 'code';
     _checkWechatInstalled();
   }
 
@@ -195,6 +201,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+  void _switchToRegister() {
+    setState(() {
+      _isPasswordLogin = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -283,7 +295,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                         ),
                                       ),
                                       child: const Text(
-                                        'PASSWORD',
+                                        '密码登录',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
@@ -303,7 +315,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                         ),
                                       ),
                                       child: const Text(
-                                        'CODE', // 验证码登录
+                                        '验证码登录', 
                                         textAlign: TextAlign.center,
                                         style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
@@ -321,8 +333,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   // Phone Input
                                   BrutalistTextField(
                                     controller: _phoneController,
-                                    label: 'Phone Number',
-                                    placeholder: 'YOUR PHONE NO.',
+                                    label: '手机号',
+                                    placeholder: '请输入手机号',
                                     keyboardType: TextInputType.phone,
                                     errorText: _phoneError,
                                     enabled: !_isLoading,
@@ -336,8 +348,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     // Password Input
                                     BrutalistTextField(
                                       controller: _passwordController,
-                                      label: 'Password',
-                                      placeholder: '******',
+                                      label: '密码',
+                                      placeholder: '请输入密码',
                                       obscureText: true,
                                       errorText: _passwordError,
                                       enabled: !_isLoading,
@@ -350,7 +362,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       child: TextButton(
                                         onPressed: () => context.push('/reset-password'),
                                         child: const Text(
-                                          'Forgot Password?',
+                                          '忘记密码?',
                                           style: TextStyle(
                                             color: Colors.black,
                                             decoration: TextDecoration.underline,
@@ -367,8 +379,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                         Expanded(
                                           child: BrutalistTextField(
                                             controller: _codeController,
-                                            label: 'Verification Code',
-                                            placeholder: 'XXXXXX',
+                                            label: '验证码',
+                                            placeholder: '6位数字',
                                             keyboardType: TextInputType.number,
                                             errorText: _codeError,
                                             enabled: !_isLoading,
@@ -381,7 +393,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                         SizedBox(
                                           width: 120,
                                           child: BrutalistButton(
-                                             text: _countdown > 0 ? '${_countdown}S' : 'GET CODE',
+                                             text: _countdown > 0 ? '${_countdown}s' : '获取验证码',
                                              fontSize: 14,
                                              backgroundColor: _countdown > 0 ? Colors.grey[300] : AppColors.secondary,
                                              onPressed: (_countdown > 0 || !_isPhoneValid || _isLoading) 
@@ -397,7 +409,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                                   // Login Button
                                   BrutalistButton(
-                                    text: 'ENTER SYSTEM',
+                                    text: '登 录',
                                     isFullWidth: true,
                                      backgroundColor: AppColors.primary,
                                     onPressed: _login,
@@ -411,22 +423,71 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       
                       const SizedBox(height: 32),
                       
-                      // WeChat Login
-                      if (_isWechatInstalled) ...[
-                         // ... (keep WeChat login logic if needed, simplified here)
-                         InkWell(
-                          onTap: _isLoading ? null : _loginWithWechat,
-                          child: Container(
-                            width: 50, height: 50,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF07C160),
-                              border: Border.all(color: Colors.black, width: 2),
-                              boxShadow: const [BoxShadow(color: Colors.black, offset: Offset(2, 2))],
+                      // WeChat & Register
+                      Column(
+                        children: [
+                           const Row(
+                             children: [
+                               Expanded(child: Divider(color: Colors.black, thickness: 1)),
+                               Padding(
+                                 padding: EdgeInsets.symmetric(horizontal: 16),
+                                 child: Text('或', style: TextStyle(fontWeight: FontWeight.bold)),
+                               ),
+                               Expanded(child: Divider(color: Colors.black, thickness: 1)),
+                             ],
+                           ),
+                           const SizedBox(height: 24),
+                           
+                           // WeChat Login Button
+                           InkWell(
+                            onTap: _isLoading ? null : _loginWithWechat,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF07C160),
+                                border: Border.all(color: Colors.black, width: 2),
+                                boxShadow: const [BoxShadow(color: Colors.black, offset: Offset(2, 2))],
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.chat_bubble, color: Colors.white, size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    '微信登录',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: const Icon(Icons.chat_bubble, color: Colors.white),
+                           ),
+                           const SizedBox(height: 32),
+
+                          GestureDetector(
+                            onTap: _switchToRegister,
+                            child: RichText(
+                              text: const TextSpan(
+                                text: "还没有账号？",
+                                style: TextStyle(color: Colors.black),
+                                children: [
+                                  TextSpan(
+                                    text: "[ 立即注册 ]",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                         ),
-                      ],
+                          const SizedBox(height: 24),
+                        ],
+                      ),
                     ],
                   ),
                 ),

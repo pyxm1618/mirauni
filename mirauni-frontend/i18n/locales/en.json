@@ -186,6 +186,15 @@
     },
     "auth": {
         "title": "Login / Register",
+        "tabPassword": "Password Login",
+        "tabCode": "Code Login",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter password",
+        "forgotPassword": "Forgot Password?",
+        "noAccount": "No account yet?",
+        "registerNow": "Register Now",
+        "hasAccount": "Already have an account?",
+        "goLogin": "Login",
         "phoneLabel": "Phone Number",
         "phonePlaceholder": "Enter phone number",
         "sendCode": "Get Code",
@@ -197,7 +206,7 @@
         "resendBtn": "Resend",
         "loginBtn": "Login",
         "loggingIn": "Logging in...",
-        "back": "Back to edit phone",
+        "back": "Back",
         "or": "OR",
         "wechatLogin": "WeChat Login",
         "wechatLoading": "Redirecting...",
@@ -206,14 +215,47 @@
         "and": "and",
         "privacyPolicy": "Privacy Policy",
         "wechatUnavailable": "WeChat login unavailable",
+        "register": {
+            "title": "Register Now",
+            "subtitle": "Create your Mirauni account",
+            "registerBtn": "Register",
+            "registering": "Registering..."
+        },
+        "forgot": {
+            "title": "Reset Password",
+            "step1": "Verify Phone",
+            "step2": "Set New Password",
+            "newPassword": "New Password",
+            "newPasswordPlaceholder": "Enter new password (min 6 chars)",
+            "confirmPassword": "Confirm Password",
+            "confirmPasswordPlaceholder": "Re-enter new password",
+            "nextStep": "Next Step",
+            "resetBtn": "Reset Password",
+            "resetting": "Resetting...",
+            "backToLogin": "Back to Login",
+            "success": "Password reset successfully. Please login."
+        },
+        "settings": {
+            "setPassword": "Set Password",
+            "changePassword": "Change Password",
+            "initialTip": "For your security, please set a login password.",
+            "success": "Password set successfully"
+        },
         "error": {
             "phone": "Invalid phone number",
             "code": "Enter 6-digit code",
+            "password": "Enter password",
+            "passwordMin": "Password min length is 6",
+            "passwordMismatch": "Passwords do not match",
+            "noPassword": "Password not set, please use code login",
             "sendFailed": "Failed to send code",
             "loginFailed": "Login failed",
             "bindFailed": "Bind failed",
             "forbidden": "Access Denied",
-            "timeout": "Request timeout, please try again"
+            "timeout": "Request timeout, please try again",
+            "missingWechat": "WeChat auth info missing, please scan again",
+            "resetFailed": "Password reset failed, please try again",
+            "wechatFailed": "Failed to get WeChat login URL"
         },
         "bind": {
             "title": "Bind Phone",

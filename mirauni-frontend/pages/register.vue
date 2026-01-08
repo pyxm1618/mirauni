@@ -1,71 +1,16 @@
 <template>
   <div class="min-h-[80vh] flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-white border-2 border-indie-border shadow-brutal-lg p-8">
-      <h1 class="text-4xl font-display font-black mb-8 border-b-4 border-indie-accent pb-2 inline-block">{{ $t('auth.title') }}</h1>
+      <h1 class="text-4xl font-display font-black mb-8 border-b-4 border-indie-accent pb-2 inline-block">{{ $t('auth.register.title') }}</h1>
+      <p class="mb-8 text-gray-500 font-medium">{{ $t('auth.register.subtitle') }}</p>
       
       <!-- 错误提示 -->
       <div v-if="error" class="mb-4 p-3 bg-red-50 border-2 border-red-300 text-red-600 text-sm">
         {{ error }}
       </div>
 
-      <!-- Tab 切换 -->
-      <div class="flex mb-8 border-b-2 border-gray-200">
-        <button 
-          @click="activeTab = 'password'"
-          class="flex-1 pb-2 font-bold text-lg transition-colors border-b-4"
-          :class="activeTab === 'password' ? 'border-indie-primary text-black' : 'border-transparent text-gray-400 hover:text-gray-600'"
-        >
-          {{ $t('auth.tabPassword') }}
-        </button>
-        <button 
-          @click="activeTab = 'code'"
-          class="flex-1 pb-2 font-bold text-lg transition-colors border-b-4"
-          :class="activeTab === 'code' ? 'border-indie-primary text-black' : 'border-transparent text-gray-400 hover:text-gray-600'"
-        >
-          {{ $t('auth.tabCode') }}
-        </button>
-      </div>
-
-      <!-- 密码登录 -->
-      <div v-if="activeTab === 'password'" class="space-y-4">
-        <div>
-          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.phoneLabel') }}</label>
-          <input 
-            v-model="phone"
-            type="tel" 
-            :placeholder="$t('auth.phonePlaceholder')"
-            class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
-            maxlength="11"
-          />
-        </div>
-        <div>
-          <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.passwordLabel') }}</label>
-          <input 
-            v-model="password"
-            type="password" 
-            :placeholder="$t('auth.passwordPlaceholder')"
-            class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
-            @keyup.enter="handlePasswordLogin"
-          />
-        </div>
-        
-        <div class="flex justify-end">
-          <NuxtLink to="/forgot-password" class="text-sm text-indie-text hover:underline font-medium">
-            {{ $t('auth.forgotPassword') }}
-          </NuxtLink>
-        </div>
-
-        <button 
-          @click="handlePasswordLogin"
-          :disabled="isLoggingIn || !phone || !password"
-          class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {{ isLoggingIn ? $t('auth.loggingIn') : $t('auth.loginBtn') }}
-        </button>
-      </div>
-
-      <!-- 验证码登录 -->
-      <div v-else class="space-y-4">
+      <div class="space-y-4">
+        <!-- 手机号输入 -->
         <div v-if="!showCodeInput">
           <div>
             <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.phoneLabel') }}</label>
@@ -87,6 +32,7 @@
           </button>
         </div>
 
+        <!-- 验证码输入 -->
         <div v-else class="space-y-4">
           <div>
             <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.codeLabel') }}</label>
@@ -96,7 +42,7 @@
               :placeholder="$t('auth.codePlaceholder')"
               class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg text-center tracking-widest focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all"
               maxlength="6"
-              @keyup.enter="handleCodeLogin"
+              @keyup.enter="handleRegister"
             />
             <div class="flex justify-between items-center mt-2">
               <p class="text-sm text-gray-500">{{ $t('auth.codeSent') }} {{ phone }}</p>
@@ -117,11 +63,11 @@
             </div>
           </div>
           <button 
-            @click="handleCodeLogin"
-            :disabled="isLoggingIn || code.length !== 6"
+            @click="handleRegister"
+            :disabled="isRegistering || code.length !== 6"
             class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ isLoggingIn ? $t('auth.loggingIn') : $t('auth.loginBtn') }}
+            {{ isRegistering ? $t('auth.register.registering') : $t('auth.register.registerBtn') }}
           </button>
           <button 
             @click="goBack"
@@ -151,11 +97,11 @@
         {{ isWechatLoading ? $t('auth.wechatLoading') : $t('auth.wechatLogin') }}
       </button>
 
-      <!-- 注册引导 -->
+      <!-- 登录引导 -->
       <div class="mt-6 text-center">
-        <span class="text-gray-500">{{ $t('auth.noAccount') }}</span>
-        <NuxtLink to="/register" class="ml-2 font-bold text-indie-primary underline hover:text-indie-accent transition-colors">
-          {{ $t('auth.registerNow') }}
+        <span class="text-gray-500">{{ $t('auth.hasAccount') }}</span>
+        <NuxtLink to="/login" class="ml-2 font-bold text-indie-primary underline hover:text-indie-accent transition-colors">
+          {{ $t('auth.goLogin') }}
         </NuxtLink>
       </div>
 
@@ -171,18 +117,16 @@
 </template>
 
 <script setup lang="ts">
-const { sendSmsCode, loginWithCode, loginWithPassword, getWechatLoginUrl } = useAuth()
+const { sendSmsCode, loginWithCode, getWechatLoginUrl } = useAuth()
 const { t } = useI18n()
 
 // 状态
-const activeTab = ref<'password' | 'code'>('password')
 const phone = ref('')
-const password = ref('')
 const code = ref('')
 const showCodeInput = ref(false)
 const error = ref('')
 const isSending = ref(false)
-const isLoggingIn = ref(false)
+const isRegistering = ref(false)
 const isWechatLoading = ref(false)
 const countdown = ref(0)
 
@@ -209,45 +153,22 @@ async function handleSendCode() {
   }
 }
 
-// 验证码登录
-async function handleCodeLogin() {
+// 注册（复用验证码登录流程）
+async function handleRegister() {
   if (code.value.length !== 6) {
     error.value = t('auth.error.code')
     return
   }
   
   error.value = ''
-  isLoggingIn.value = true
+  isRegistering.value = true
 
   try {
     await loginWithCode(phone.value, code.value)
   } catch (e: any) {
     error.value = e.data?.message || e.message || t('auth.error.loginFailed')
   } finally {
-    isLoggingIn.value = false
-  }
-}
-
-// 密码登录
-async function handlePasswordLogin() {
-  if (phone.value.length !== 11) {
-    error.value = t('auth.error.phone')
-    return
-  }
-  if (!password.value) {
-    error.value = t('auth.error.password')
-    return
-  }
-
-  error.value = ''
-  isLoggingIn.value = true
-
-  try {
-    await loginWithPassword(phone.value, password.value)
-  } catch (e: any) {
-    error.value = e.data?.message || e.message || t('auth.error.loginFailed')
-  } finally {
-    isLoggingIn.value = false
+    isRegistering.value = false
   }
 }
 
@@ -270,7 +191,6 @@ async function handleWechatLogin() {
   }
 }
 
-// 返回修改手机号
 function goBack() {
   showCodeInput.value = false
   code.value = ''
@@ -278,7 +198,6 @@ function goBack() {
   stopCountdown()
 }
 
-// 倒计时逻辑
 function startCountdown() {
   countdown.value = 60
   countdownTimer = setInterval(() => {
@@ -302,7 +221,7 @@ onUnmounted(() => {
 })
 
 useSeoMeta({
-  title: () => `${t('auth.title')} - ${t('common.appName')}`,
-  description: 'Login to Mirauni'
+  title: () => `${t('auth.register.title')} - ${t('common.appName')}`,
+  description: 'Register for Mirauni'
 })
 </script>

@@ -73,7 +73,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         builder: (context, state) {
           final redirect = state.uri.queryParameters['redirect'];
-          return LoginPage(redirect: redirect);
+          final type = state.uri.queryParameters['type']; // 'password' or 'code'
+          return LoginPage(
+            redirect: redirect,
+            initialType: type ?? 'password',
+          );
         },
       ),
 
