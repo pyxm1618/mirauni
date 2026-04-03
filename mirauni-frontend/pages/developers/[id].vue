@@ -22,51 +22,53 @@
             </div>
             
             <div class="flex-grow pt-4 md:pt-0">
-              <h1 class="text-4xl font-black text-black mb-1 uppercase tracking-tight">{{ developer.username }}</h1>
-              <p class="text-xl font-bold text-gray-700 mb-2 border-l-4 border-indie-secondary pl-2">{{ developer.profession || 'INDEPENDENT_DEV' }} <span v-if="developer.position">| {{ developer.position }}</span></p>
-              <div class="flex flex-wrap gap-4 text-sm font-bold text-gray-500 uppercase">
+              <h1 class="text-4xl font-black text-black mb-1 tracking-tight">{{ developer.username }}</h1>
+              <p class="text-xl font-bold text-gray-700 mb-2 border-l-4 border-indie-secondary pl-2">{{ developer.profession || '独立开发者' }} <span v-if="developer.position">| {{ developer.position }}</span></p>
+              <div class="flex flex-wrap gap-4 text-sm font-bold text-gray-500">
                 <span v-if="developer.location"><UIcon name="i-heroicons-map-pin" /> {{ developer.location }}</span>
-                <span v-if="developer.experience_years"><UIcon name="i-heroicons-briefcase" /> {{ developer.experience_years }} YRS EXP</span>
-                <span><UIcon name="i-heroicons-clock" /> JOINED {{ new Date(developer.created_at).toLocaleDateString() }}</span>
+                <span v-if="developer.experience_years"><UIcon name="i-heroicons-briefcase" /> {{ developer.experience_years }} 年经验</span>
+                <span><UIcon name="i-heroicons-clock" /> 加入时间 {{ new Date(developer.created_at).toLocaleDateString('zh-CN') }}</span>
               </div>
             </div>
             <div class="w-full md:w-auto flex gap-3 mt-4 md:mt-0">
                <!-- Actions -->
-               <UnlockButton :target-user-id="developer.id" @unlocked="fetchContact">
-                   <template #default="{ unlocked, onClick }">
-                       <button v-if="!unlocked" @click="onClick" class="px-6 py-3 bg-black text-white border-2 border-black font-brand font-bold shadow-brutal hover:bg-indie-accent hover:text-black hover:shadow-brutal-hover transition-all active:translate-y-1 active:translate-x-1 uppercase flex items-center gap-2">
-                         <UIcon name="i-heroicons-lock-open" /> UNLOCK CONTACT
-                       </button>
-                       <button v-else class="px-6 py-3 bg-gray-200 text-gray-500 border-2 border-gray-400 font-bold cursor-default uppercase flex items-center gap-2">
-                           <UIcon name="i-heroicons-check" /> UNLOCKED
-                       </button>
-                   </template>
-               </UnlockButton>
+               <ClientOnly>
+                 <UnlockButton :target-user-id="developer.id" @unlocked="fetchContact">
+                     <template #default="{ unlocked, onClick }">
+                         <button v-if="!unlocked" @click="onClick" class="px-6 py-3 bg-black text-white border-2 border-black font-brand font-bold shadow-brutal hover:bg-indie-accent hover:text-black hover:shadow-brutal-hover transition-all active:translate-y-1 active:translate-x-1 flex items-center gap-2">
+                           <UIcon name="i-heroicons-lock-open" /> 解锁联系方式
+                         </button>
+                         <button v-else class="px-6 py-3 bg-gray-200 text-gray-500 border-2 border-gray-400 font-bold cursor-default flex items-center gap-2">
+                             <UIcon name="i-heroicons-check" /> 已解锁
+                         </button>
+                     </template>
+                 </UnlockButton>
+               </ClientOnly>
             </div>
           </div>
           
           <!-- Bio -->
           <div class="mb-8">
-            <h2 class="text-2xl font-black uppercase mb-4 border-b-4 border-black inline-block">ABOUT_ME</h2>
+            <h2 class="text-2xl font-black mb-4 border-b-4 border-black inline-block">个人介绍</h2>
             <div class="bg-gray-50 border-3 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <p class="text-lg font-medium text-gray-800 leading-relaxed whitespace-pre-wrap font-mono">{{ developer.bio || 'NO BIO YET.' }}</p>
+                <p class="text-lg font-medium text-gray-800 leading-relaxed whitespace-pre-wrap font-mono">{{ developer.bio || '暂未填写个人介绍。' }}</p>
             </div>
           </div>
           
           <!-- Skills -->
           <div class="mb-8">
-            <h2 class="text-2xl font-black uppercase mb-4 border-b-4 border-black inline-block">SKILLS</h2>
+            <h2 class="text-2xl font-black mb-4 border-b-4 border-black inline-block">技能标签</h2>
             <div class="flex flex-wrap gap-2">
               <span v-for="skill in developer.skills" :key="skill" class="bg-white border-2 border-black px-3 py-1 text-sm font-black uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 {{ skill }}
               </span>
-              <span v-if="!developer.skills?.length" class="text-gray-400 font-bold uppercase italic">NO SKILLS LISTED</span>
+              <span v-if="!developer.skills?.length" class="text-gray-400 font-bold italic">暂未填写技能</span>
             </div>
           </div>
           
           <!-- Social Links -->
           <div>
-            <h2 class="text-2xl font-black uppercase mb-4 border-b-4 border-black inline-block">SOCIAL_LINKS</h2>
+            <h2 class="text-2xl font-black mb-4 border-b-4 border-black inline-block">社交链接</h2>
              <div class="flex gap-4">
                <template v-if="developer.social_links">
                  <UButton 
@@ -88,7 +90,7 @@
                     class="font-bold uppercase border-2 border-black hover:bg-black hover:text-white transition-all"
                   >Website</UButton>
                </template>
-               <span v-else class="text-gray-400 text-sm font-bold uppercase">NO LINKS</span>
+               <span v-else class="text-gray-400 text-sm font-bold">暂无公开链接</span>
              </div>
           </div>
         </div>
@@ -96,30 +98,30 @@
       
       <!-- Contact Info Card (Unlocked) -->
       <div v-if="contactInfo" class="bg-indie-secondary border-3 border-black p-6 shadow-brutal flex flex-col md:flex-row items-center justify-between gap-4 animate-fade-in relative overflow-hidden">
-        <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">📞</div>
+        <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">联</div>
         <div class="relative z-10">
-          <h3 class="text-2xl font-black uppercase mb-4">CONTACT_INFO</h3>
+          <h3 class="text-2xl font-black mb-4">联系方式</h3>
           <div class="space-y-2 font-bold text-lg">
             <p class="flex items-center gap-2">
               <UIcon name="i-simple-icons-wechat" class="w-6 h-6" />
-              <span>WECHAT: <span class="bg-black text-white px-2">{{ contactInfo.wechat_id || 'N/A' }}</span></span>
+              <span>微信：<span class="bg-black text-white px-2">{{ contactInfo.wechat_id || '暂无' }}</span></span>
             </p>
             <p class="flex items-center gap-2">
               <UIcon name="i-heroicons-envelope" class="w-6 h-6" />
-              <span>EMAIL: <span class="underline">{{ contactInfo.email || 'N/A' }}</span></span>
+              <span>邮箱：<span class="underline">{{ contactInfo.email || '暂无' }}</span></span>
             </p>
           </div>
         </div>
-        <button class="px-6 py-3 bg-white border-3 border-black font-black uppercase shadow-brutal hover:bg-gray-100 active:translate-y-1 active:translate-x-1 relative z-10" @click="copyContact">
-            COPY INFO
+        <button class="px-6 py-3 bg-white border-3 border-black font-black shadow-brutal hover:bg-gray-100 active:translate-y-1 active:translate-x-1 relative z-10" @click="copyContact">
+            复制微信号
         </button>
       </div>
 
     </div>
     
     <div v-else class="text-center py-20 border-3 border-dashed border-gray-300 m-8">
-       <h2 class="text-2xl font-black text-gray-400 uppercase">USER NOT FOUND</h2>
-       <NuxtLink to="/developers" class="inline-block mt-4 font-bold border-b-2 border-black">BACK TO LIST</NuxtLink>
+       <h2 class="text-2xl font-black text-gray-400">未找到该开发者</h2>
+       <NuxtLink to="/developers" class="inline-block mt-4 font-bold border-b-2 border-black">返回列表</NuxtLink>
     </div>
   </div>
 </template>
@@ -176,13 +178,15 @@ const copyContact = () => {
 }
 
 useSeoMeta({
-  title: () => developer.value ? `${developer.value.username} - ${t('common.appName')}` : t('developer.square.title'),
-  description: () => developer.value?.bio || `${developer.value?.username} is an indie developer on ${t('common.appName')}`,
-  keywords: () => developer.value ? `${t('roles.backend')},${developer.value.skills?.join(',')},${t('home.heroTitleSuffix')}` : '',
+  title: () => developer.value ? `${developer.value.username}｜技术合伙人候选人资料 - ${t('common.appName')}` : t('developer.square.title'),
+  description: () => developer.value?.bio || `${developer.value?.username} 的公开资料页，查看技能背景与合作偏好。`,
+  keywords: () => developer.value ? `技术合伙人,招募开发者,${developer.value.skills?.join(',') || ''}` : '技术合伙人,招募开发者',
   ogTitle: () => developer.value?.username,
   ogDescription: () => developer.value?.bio,
   ogType: 'profile'
 })
+
+useCanonical(`/developers/${id}`)
 
 // 结构化数据 - Person
 const structuredData = computed(() => developer.value ? JSON.stringify({

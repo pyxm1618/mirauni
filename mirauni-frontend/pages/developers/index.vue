@@ -2,7 +2,8 @@
   <div class="min-h-screen bg-indie-bg py-8">
     <div class="container mx-auto px-4">
       <div class="mb-12">
-        <h1 class="text-7xl font-black uppercase mb-6 tracking-tighter">{{ $t('developer.square.titleEn') }}<br><span class="text-4xl text-indie-secondary">{{ $t('developer.square.title') }}</span></h1>
+        <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tight">{{ $t('developer.square.title') }}</h1>
+        <p class="text-lg font-bold text-gray-700 mb-6">浏览开发者公开资料，按技能和经验筛选合作对象。</p>
         
         <div class="flex flex-col md:flex-row gap-6 items-start md:items-end justify-between border-b-4 border-black pb-8">
             <!-- Brutalist Search -->
@@ -14,7 +15,7 @@
                       v-model="filters.keyword"
                       type="text" 
                       :placeholder="$t('developer.square.search')" 
-                      class="relative w-full bg-white border-3 border-black p-4 font-bold text-xl focus:outline-none placeholder-gray-400 uppercase focus:translate-x-1 focus:translate-y-1 transition-transform"
+                      class="relative w-full bg-white border-3 border-black p-4 font-bold text-xl focus:outline-none placeholder-gray-400 focus:translate-x-1 focus:translate-y-1 transition-transform"
                       @keyup.enter="() => refresh()"
                     />
                 </div>
@@ -128,4 +129,6 @@ useHead({
     { name: 'description', content: t('developer.square.seoDesc') }
   ]
 })
+
+useCanonical('/developers')
 </script>

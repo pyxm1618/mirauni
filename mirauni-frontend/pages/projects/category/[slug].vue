@@ -55,8 +55,11 @@ const categoryLabel = computed(() => {
 })
 
 useSeoMeta({
-  title: () => `${categoryLabel.value} - ${t('common.appName')}`,
-  description: () => `Browse ${categoryLabel.value} projects on ${t('common.appName')}`,
+  title: () => `${categoryLabel.value}项目招募开发者 - ${t('common.appName')}`,
+  description: () => `查看${categoryLabel.value}方向的创业项目，快速找到技术合伙人与开发合作伙伴。`,
+  keywords: () => `${categoryLabel.value},找技术合伙人,创业项目招募开发者,招募技术合伙人`,
   ogTitle: () => `${categoryLabel.value} - ${t('common.appName')}`
 })
+
+useCanonical(`/projects/category/${category}`)
 </script>

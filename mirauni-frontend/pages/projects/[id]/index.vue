@@ -107,13 +107,15 @@ const handleRecharge = () => {
 }
 
 useSeoMeta({
-  title: () => project.value ? `${project.value.title} - ${t('common.appName')}` : t('project.title'),
-  description: () => project.value?.summary || '',
-  keywords: () => project.value ? `${project.value.category},${t('home.heroTitleSuffix')},${t('home.heroTitlePrefix')},${project.value.roles_needed?.join(',')}` : '',
-  ogTitle: () => project.value ? `${project.value.title} - ${t('home.heroTitleSuffix')}` : t('project.title'),
+  title: () => project.value ? `${project.value.title}｜创业项目招募开发者 - ${t('common.appName')}` : t('project.title'),
+  description: () => project.value?.summary || '创业项目招募开发者，查看项目背景、合作方式与角色需求。',
+  keywords: () => project.value ? `找技术合伙人,创业项目招募开发者,${project.value.category},${project.value.roles_needed?.join(',')}` : '找技术合伙人,创业项目招募开发者',
+  ogTitle: () => project.value ? `${project.value.title}｜创业项目招募开发者` : t('project.title'),
   ogDescription: () => project.value?.summary,
   ogType: 'article'
 })
+
+useCanonical(`/projects/${route.params.id}`)
 
 // 结构化数据 - JobPosting
 const structuredData = computed(() => project.value ? JSON.stringify({
@@ -139,6 +141,18 @@ useHead({
     {
       type: 'application/ld+json',
       innerHTML: structuredData
+    },
+    {
+      type: 'application/ld+json',
+      innerHTML: computed(() => JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '首页', item: 'https://mirauni.com/' },
+          { '@type': 'ListItem', position: 2, name: '项目广场', item: 'https://mirauni.com/projects' },
+          { '@type': 'ListItem', position: 3, name: project.value?.title || '项目详情', item: `https://mirauni.com/projects/${route.params.id}` }
+        ]
+      }))
     }
   ]
 })

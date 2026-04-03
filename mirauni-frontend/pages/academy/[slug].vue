@@ -5,7 +5,7 @@
         <div class="container mx-auto px-4 h-20 flex items-center justify-between">
             <NuxtLink to="/academy" class="flex items-center gap-2 text-black hover:text-indie-primary transition-colors font-black uppercase">
                 <UIcon name="i-heroicons-arrow-left" class="w-6 h-6" />
-                <span>BACK_TO_ACADEMY</span>
+                <span>返回学院</span>
             </NuxtLink>
             <div class="flex items-center gap-4">
                <button class="p-2 border-2 border-black hover:bg-black hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:translate-x-1 active:shadow-none bg-white">
@@ -58,11 +58,11 @@
 
         <!-- Footer -->
         <div class="mt-20 pt-10 border-t-4 border-black text-center">
-             <p class="text-black font-black uppercase mb-6 tracking-widest text-lg">SHARE THIS WISDOM</p>
+             <p class="text-black font-black uppercase mb-6 tracking-widest text-lg">分享这篇文章</p>
              <div class="flex justify-center gap-6">
                  <button class="bg-[#07c160] text-white px-8 py-3 font-black flex items-center gap-3 hover:opacity-90 transition-all border-3 border-black shadow-brutal hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] uppercase">
                      <UIcon name="i-heroicons-chat-bubble-oval-left-ellipsis" class="w-6 h-6" />
-                     SHARE ON WECHAT
+                     微信分享
                  </button>
              </div>
         </div>
@@ -70,8 +70,8 @@
     </div>
 
     <div v-else class="text-center py-24 border-3 border-dashed border-gray-400 m-8">
-        <h2 class="text-3xl font-black uppercase mb-4 text-gray-400">ARTICLE NOT FOUND</h2>
-        <NuxtLink to="/academy" class="text-black underline font-bold uppercase hover:bg-black hover:text-white px-2">BACK TO LIST</NuxtLink>
+        <h2 class="text-3xl font-black uppercase mb-4 text-gray-400">文章不存在</h2>
+        <NuxtLink to="/academy" class="text-black underline font-bold uppercase hover:bg-black hover:text-white px-2">返回列表</NuxtLink>
     </div>
   </div>
 </template>
@@ -100,11 +100,13 @@ const formatDate = (dateStr: string) => {
 useSeoMeta({
   title: () => article.value ? `${article.value.title} - ${t('common.appName')}` : t('academy.detail.title'),
   description: () => article.value?.summary || article.value?.content?.slice(0, 150),
-  keywords: () => article.value ? `indie hacker,${article.value.category},startup,tech` : '',
+  keywords: () => article.value ? `找技术合伙人,招募技术合伙人,创业项目招募开发者,${article.value.category}` : '找技术合伙人,招募技术合伙人',
   ogTitle: () => article.value?.title,
   ogDescription: () => article.value?.summary,
   ogType: 'article'
 })
+
+useCanonical(`/academy/${slug}`)
 
 // 结构化数据 - Article
 const structuredData = computed(() => article.value ? JSON.stringify({
@@ -135,6 +137,18 @@ useHead({
     {
       type: 'application/ld+json',
       innerHTML: structuredData
+    },
+    {
+      type: 'application/ld+json',
+      innerHTML: computed(() => JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '首页', item: 'https://mirauni.com/' },
+          { '@type': 'ListItem', position: 2, name: '学院', item: 'https://mirauni.com/academy' },
+          { '@type': 'ListItem', position: 3, name: article.value?.title || '文章详情', item: `https://mirauni.com/academy/${slug}` }
+        ]
+      }))
     }
   ]
 })

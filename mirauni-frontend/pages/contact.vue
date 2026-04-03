@@ -122,4 +122,6 @@ useSeoMeta({
   title: t('contact.seoTitle'),
   description: t('contact.seoDescription'),
 })
+
+useCanonical('/contact')
 </script>

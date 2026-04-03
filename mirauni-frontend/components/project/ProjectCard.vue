@@ -6,7 +6,8 @@
              <img v-if="project.user?.avatar_url" :src="project.user.avatar_url" class="w-full h-full object-cover border-2 border-black" />
              <span v-else>{{ project.user?.username?.[0]?.toUpperCase() || 'U' }}</span>
         </div>
-        <div class="bg-black text-white px-2 py-0.5 text-xs font-bold font-mono">ID:{{ project.id.toString().padStart(3, '0') }}</div>
+        <div v-if="String(project.id).startsWith('demo-')" class="bg-black text-white px-2 py-0.5 text-xs font-bold">样板项目</div>
+        <div v-else class="bg-black text-white px-2 py-0.5 text-xs font-bold font-mono">ID:{{ project.id.toString().slice(0, 8) }}</div>
     </div>
 
     <!-- Title -->
@@ -32,7 +33,7 @@
     <!-- Action Button (Absolute Bottom) -->
     <div class="absolute bottom-5 left-5 right-5">
         <button class="w-full border-3 border-black py-2 font-black text-sm hover:bg-indie-primary hover:shadow-brutal-hover transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none bg-white uppercase">
-            VIEW_DETAILS
+            查看详情
         </button>
     </div>
   </div>

@@ -166,4 +166,6 @@ useSeoMeta({
   title: t('privacy.seoTitle'),
   description: t('privacy.seoDescription'),
 })
+
+useCanonical('/privacy')
 </script>

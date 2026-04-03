@@ -1,4 +1,6 @@
 import { serverSupabaseClient } from '#supabase/server'
+import { SAMPLE_PROJECTS } from '~/server/utils/sample-projects'
+import { SAMPLE_ARTICLES } from '~/server/utils/sample-articles'
 
 interface SitemapUrl {
     loc: string
@@ -13,15 +15,14 @@ export default defineEventHandler(async (event) => {
     const siteUrl = config.public.siteUrl || 'https://mirauni.com'
 
     // 并行获取所有数据
-    const [projectsRes, developersRes, articlesRes] = await Promise.all([
+    const [projectsRes, articlesRes] = await Promise.all([
         supabase.from('projects').select('id, updated_at').eq('status', 'active'),
-        supabase.from('users').select('id, updated_at').not('username', 'is', null),
         supabase.from('articles').select('slug, updated_at').eq('status', 'published')
     ])
 
     const projects = projectsRes.data || []
-    const developers = developersRes.data || []
     const articles = articlesRes.data || []
+    const articleSlugs = new Set(articles.map(a => a.slug))
 
     // 构建 URL 列表
     const urls: SitemapUrl[] = [
@@ -30,25 +31,37 @@ export default defineEventHandler(async (event) => {
         { loc: `${siteUrl}/projects`, priority: '0.9', changefreq: 'daily' },
         { loc: `${siteUrl}/developers`, priority: '0.8', changefreq: 'daily' },
         { loc: `${siteUrl}/academy`, priority: '0.8', changefreq: 'weekly' },
+        { loc: `${siteUrl}/about`, priority: '0.3', changefreq: 'monthly' },
+        { loc: `${siteUrl}/contact`, priority: '0.3', changefreq: 'monthly' },
+        { loc: `${siteUrl}/privacy`, priority: '0.2', changefreq: 'monthly' },
+        { loc: `${siteUrl}/terms`, priority: '0.2', changefreq: 'monthly' },
 
         // 动态项目页面
         ...projects.map(p => ({
-            loc: `${siteUrl}/projects/detail/${p.id}`,
+            loc: `${siteUrl}/projects/${p.id}`,
             lastmod: p.updated_at?.split('T')[0],
             priority: '0.7',
             changefreq: 'weekly'
         })),
 
-        // 开发者主页
-        ...developers.map(d => ({
-            loc: `${siteUrl}/developers/${d.id}`,
-            lastmod: d.updated_at?.split('T')[0],
-            priority: '0.6',
+        // 冷启动样板项目页（无真实项目时也保留可抓取资产）
+        ...SAMPLE_PROJECTS.map(p => ({
+            loc: `${siteUrl}/projects/${p.id}`,
+            lastmod: p.updated_at?.split('T')[0],
+            priority: '0.7',
             changefreq: 'weekly'
         })),
 
         // 学院文章
         ...articles.map(a => ({
+            loc: `${siteUrl}/academy/${a.slug}`,
+            lastmod: a.updated_at?.split('T')[0],
+            priority: '0.7',
+            changefreq: 'monthly'
+        })),
+
+        // 冷启动样板文章页
+        ...SAMPLE_ARTICLES.filter(a => !articleSlugs.has(a.slug)).map(a => ({
             loc: `${siteUrl}/academy/${a.slug}`,
             lastmod: a.updated_at?.split('T')[0],
             priority: '0.7',

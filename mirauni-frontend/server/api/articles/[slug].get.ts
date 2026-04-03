@@ -1,5 +1,6 @@
 
 import { serverSupabaseClient } from '#supabase/server'
+import { getSampleArticleBySlug } from '~/server/utils/sample-articles'
 
 export default defineEventHandler(async (event) => {
     const slug = getRouterParam(event, 'slug')
@@ -19,10 +20,17 @@ export default defineEventHandler(async (event) => {
     }
 
     if (!data) {
-        throw createError({
-            statusCode: 404,
-            message: 'Article not found'
-        })
+        const sample = getSampleArticleBySlug(String(slug || ''))
+        if (!sample) {
+            throw createError({
+                statusCode: 404,
+                message: 'Article not found'
+            })
+        }
+        return {
+            success: true,
+            data: sample
+        }
     }
 
     // Increment view count (optional, doing it simple here, ideally use RPC or specialized endpoint to avoid auth issue if user is anon)

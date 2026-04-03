@@ -1,9 +1,25 @@
 import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server'
+import { getSampleProjectById } from '~/server/utils/sample-projects'
 
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
     const client = await serverSupabaseClient(event)
     const user = await serverSupabaseUser(event) // Optional
+
+    // 冷启动样板项目详情
+    if (id) {
+        const sample = getSampleProjectById(id)
+        if (sample) {
+            return {
+                success: true,
+                data: {
+                    ...sample,
+                    is_owner: false,
+                    is_unlocked: true
+                }
+            }
+        }
+    }
 
     // 1. Fetch Project + Author Public Info
     const { data: project, error } = await client

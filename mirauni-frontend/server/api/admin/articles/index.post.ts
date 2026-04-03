@@ -3,6 +3,7 @@
  * POST /api/admin/articles
  */
 import { requireAdmin, createAdminSupabaseClient } from '~/server/utils/admin-auth'
+import { pushUrlsToBaidu } from '~/server/utils/baidu-push'
 
 export default defineEventHandler(async (event) => {
     const admin = await requireAdmin(event)
@@ -38,6 +39,12 @@ export default defineEventHandler(async (event) => {
             statusCode: 500,
             data: { code: 'DB_ERROR', message: error.message }
         })
+    }
+
+    if (data.status === 'published') {
+        const config = useRuntimeConfig()
+        const siteUrl = (config.public.siteUrl || 'https://mirauni.com').replace(/\/+$/, '')
+        await pushUrlsToBaidu([`${siteUrl}/academy/${data.slug}`])
     }
 
     return { success: true, data }

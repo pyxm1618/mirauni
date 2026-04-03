@@ -164,4 +164,6 @@ useSeoMeta({
   title: t('terms.seoTitle'),
   description: t('terms.seoDescription'),
 })
+
+useCanonical('/terms')
 </script>

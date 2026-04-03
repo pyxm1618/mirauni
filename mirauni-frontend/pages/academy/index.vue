@@ -3,12 +3,12 @@
     <div class="bg-white border-b-4 border-black mb-12">
         <div class="container mx-auto px-4 py-16">
             <div class="max-w-4xl">
-                <div class="inline-block bg-black text-white px-4 py-1 font-black mb-4 uppercase text-sm transform -rotate-1">LEARN & GROW</div>
-                <h1 class="text-6xl md:text-8xl font-black font-display mb-8 uppercase tracking-tighter leading-none">
-                    INDIE <span class="text-indie-primary text-stroke-black">ACADEMY</span>
+                <div class="inline-block bg-black text-white px-4 py-1 font-black mb-4 text-sm transform -rotate-1">招募指南</div>
+                <h1 class="text-5xl md:text-7xl font-black font-display mb-8 tracking-tight leading-tight">
+                    技术合伙人招募学院
                 </h1>
-                <p class="text-2xl font-bold text-gray-800 max-w-2xl border-l-8 border-indie-secondary pl-6 py-2 uppercase">
-                    Resources, guides, and wisdom for independent developers sailing from 0 to 1.
+                <p class="text-2xl font-bold text-gray-800 max-w-2xl border-l-8 border-indie-secondary pl-6 py-2">
+                    围绕“找技术合伙人、发布项目、招募开发者”沉淀可直接实操的模板与方法。
                 </p>
             </div>
         </div>
@@ -41,9 +41,9 @@
 
       <div v-else class="text-center py-24 bg-white border-3 border-dashed border-gray-400">
         <div class="text-6xl mb-6 grayscale font-black">/</div>
-        <div class="text-3xl font-black uppercase text-gray-400 mb-4">NO ARTICLES FOUND</div>
+        <div class="text-3xl font-black text-gray-400 mb-4">暂无文章</div>
         <button @click="filters.category = 'all'" class="text-black font-bold uppercase underline hover:bg-black hover:text-white px-2 transition-colors">
-            VIEW ALL CATEGORIES
+            查看全部分类
         </button>
       </div>
       
@@ -55,7 +55,7 @@
                 :disabled="filters.page <= 1"
                 class="px-6 py-3 bg-white border-3 border-black font-black uppercase hover:shadow-brutal hover:-translate-y-1 disabled:opacity-50 disabled:shadow-none disabled:translate-y-0"
             >
-                PREV PAGE
+                上一页
             </button>
              <span class="px-6 py-3 font-black text-xl border-3 border-black bg-indie-secondary shadow-brutal">
                 {{ filters.page }} / {{ Math.ceil(meta.total / meta.pageSize) }}
@@ -65,7 +65,7 @@
                 :disabled="filters.page * meta.pageSize >= meta.total"
                 class="px-6 py-3 bg-white border-3 border-black font-black uppercase hover:shadow-brutal hover:-translate-y-1 disabled:opacity-50 disabled:shadow-none disabled:translate-y-0"
             >
-                NEXT PAGE
+                下一页
             </button>
         </div>
       </div>
@@ -120,8 +120,10 @@ watch(() => filters.value.category, () => {
 const { t } = useI18n()
 
 useSeoMeta({
-  title: () => `${t('nav.academy')} - ${t('common.appName')}`,
-  description: 'Indie Developer Academy',
-  keywords: 'indie hacker,startup,code,marketing',
+  title: () => `技术合伙人招募学院 - ${t('common.appName')}`,
+  description: '学习怎么找技术合伙人、如何发布项目招募开发者、如何设计合作方案与项目页文案。',
+  keywords: '怎么找技术合伙人,如何招募技术合伙人,创业项目招募开发者,技术合伙人合作方式',
 })
+
+useCanonical('/academy')
 </script>

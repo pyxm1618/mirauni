@@ -101,4 +101,6 @@ useSeoMeta({
   title: t('about.seoTitle'),
   description: t('about.seoDescription'),
 })
+
+useCanonical('/about')
 </script>

@@ -8,14 +8,14 @@
         <!-- Header -->
         <div class="flex justify-between items-start mb-4 border-b-3 border-black pb-4">
             <div>
-                <h2 class="text-2xl font-black uppercase leading-none mb-1">{{ developer.username }}</h2>
+            <h2 class="text-2xl font-black leading-none mb-1">{{ developer.username }}</h2>
                 <div class="text-indie-primary font-black bg-black text-white inline-block px-1 text-xs uppercase">{{ developer.profession || 'DEV' }}</div>
             </div>
-            <div class="text-xl font-bold font-mono">{{ developer.experience_years ? `${developer.experience_years}Y EXP` : 'NEW' }}</div>
+            <div class="text-xl font-bold font-mono">{{ developer.experience_years ? `${developer.experience_years}年经验` : '新加入' }}</div>
         </div>
         
         <!-- Bio -->
-        <p class="font-bold text-gray-600 mb-6 flex-grow line-clamp-3">"{{ developer.bio || 'Ready to build something amazing.' }}"</p>
+        <p class="font-bold text-gray-600 mb-6 flex-grow line-clamp-3">"{{ developer.bio || '欢迎交流项目合作。' }}"</p>
         
         <!-- Skills -->
         <div class="flex flex-wrap gap-2 mb-6">
@@ -25,8 +25,8 @@
         </div>
         
         <!-- Action -->
-        <button class="w-full border-3 border-black py-3 font-black text-lg transition-all flex items-center justify-center gap-2 bg-indie-secondary hover:bg-indie-accent active:translate-y-1 active:translate-x-1 uppercase">
-            VIEW PROFILE
+        <button class="w-full border-3 border-black py-3 font-black text-lg transition-all flex items-center justify-center gap-2 bg-indie-secondary hover:bg-indie-accent active:translate-y-1 active:translate-x-1">
+            查看资料
         </button>
     </div>
   </div>

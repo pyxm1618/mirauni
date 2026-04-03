@@ -9,7 +9,7 @@
         class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
       />
       <div v-else class="w-full h-full flex items-center justify-center text-gray-300 bg-indie-bg pattern-grid">
-        <span class="text-4xl opacity-50 font-black">ACADEMY</span>
+        <span class="text-4xl opacity-50 font-black">学院</span>
       </div>
       <div v-if="article.category" class="absolute top-0 right-0 bg-black text-white px-3 py-1 text-sm font-black uppercase border-l-3 border-b-3 border-black">
         {{ categoryLabel(article.category) }}
@@ -22,7 +22,7 @@
         {{ article.title }}
       </h3>
       <p class="text-gray-600 font-bold text-sm line-clamp-3 mb-6 leading-relaxed font-mono">
-        {{ article.summary || 'NO_SUMMARY' }}
+        {{ article.summary || '暂无摘要' }}
       </p>
       
       <div class="flex items-center justify-between text-xs font-bold uppercase border-t-2 border-black pt-4">
@@ -31,7 +31,7 @@
             <span>{{ formatDate(article.created_at) }}</span>
         </div>
         <div class="flex items-center gap-1">
-            <span>READ MORE -></span>
+            <span>阅读全文 -></span>
         </div>
       </div>
     </div>

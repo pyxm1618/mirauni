@@ -69,22 +69,21 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'zh-CN' },
-      title: '小概率 - 独立开发者找合伙人的第一站',
+      title: '小概率 - 找技术合伙人与招募开发者的平台',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: '帮助独立开发者发布项目、寻找技术合伙人，找到靠谱的创业伙伴' },
-        { name: 'keywords', content: '独立开发者,技术合伙人,找合伙人,创业项目,程序员副业' },
+        { name: 'description', content: '发布创业项目，快速招募前端、后端、全栈与 Flutter 技术合伙人。' },
+        { name: 'keywords', content: '找技术合伙人,招募技术合伙人,创业项目招募开发者,找程序员合伙做项目' },
         { name: 'author', content: '小概率' },
         { property: 'og:site_name', content: '小概率' },
         { property: 'og:locale', content: 'zh_CN' },
         { property: 'og:type', content: 'website' },
-        { property: 'og:title', content: '小概率 - 独立开发者找合伙人的第一站' },
-        { property: 'og:description', content: '帮助独立开发者发布项目、寻找技术合伙人，找到靠谱的创业伙伴' },
+        { property: 'og:title', content: '小概率 - 找技术合伙人与招募开发者的平台' },
+        { property: 'og:description', content: '发布项目，快速找到靠谱技术合伙人。' },
         { name: 'robots', content: 'index,follow' }
       ],
       link: [
-        { rel: 'canonical', href: 'https://mirauni.com' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap' }

@@ -1,4 +1,5 @@
 import { serverSupabaseClient } from '#supabase/server'
+import { filterSampleProjects } from '~/server/utils/sample-projects'
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
@@ -46,6 +47,27 @@ export default defineEventHandler(async (event) => {
             statusCode: 500,
             message: error.message
         })
+    }
+
+    // 冷启动兜底：当真实项目为空时返回样板项目，确保公开页可抓取和可浏览
+    if (!data || data.length === 0) {
+        const samples = filterSampleProjects({
+            category: query.category ? String(query.category) : undefined,
+            role: query.role ? String(query.role) : undefined,
+            work_mode: query.work_mode ? String(query.work_mode) : undefined,
+            keyword: query.keyword ? String(query.keyword) : undefined
+        })
+        const paged = samples.slice(from, to + 1)
+
+        return {
+            success: true,
+            data: paged,
+            meta: {
+                total: samples.length,
+                page,
+                pageSize
+            }
+        }
     }
 
     return {
