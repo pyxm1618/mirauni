@@ -1,3 +1,9 @@
+> ⚠️ 早期方案归档与定位说明
+> 本文件属于钱途工具相关的早期 RAG 路径推荐设计方案，尚未确认接入当前的 `plan/` (钱途工具) 线上业务。
+> 本文件不属于「小概率独立开发者匹配平台」的主线 MVP 范围，不应将其与主线平台混淆。
+> 另外，经审计，本方案设计的 `path_templates` 表 (使用 UUID 主键) 与种子数据 `path_templates_seed.sql` 中普通字符串 ID ('p001' 等) 存在类型冲突，直接执行会导致导入失败。
+> 该 RAG 方案目前不作为当前已上线 `plan/` 业务的既有投产功能；未来如需启用，应作为钱途工具的独立迭代重新评审 schema、seed、API 与前端接入。
+
 # RAG 知识库功能开发交接文档
 
 > 本文档用于交接给另一个 AI 进行开发
@@ -14,23 +20,26 @@
 
 请按顺序阅读以下文档：
 
-1. **[RAG.md](file:///Users/pyxm1618/Downloads/大排期/docs/RAG.md)** - 完整技术设计，1000+ 行，包含：
+1. **[docs/RAG.md](./docs/RAG.md)** - 完整技术设计，1000+ 行，包含：
    - 数据库 Schema（第 95-200 行）
    - 检索算法设计（第 326-560 行）
    - API 改造方案（第 560-700 行）
    - 验证测试方案（第 780-900 行）
 
-2. **[path_templates_seed.sql](file:///Users/pyxm1618/Downloads/大排期/server/db/seeds/path_templates_seed.sql)** - 50 条完整种子数据（539 行）
+2. **[path_templates_seed.sql](./path_templates_seed.sql)** - 50 条完整种子数据
 
-3. **[PRD.md](file:///Users/pyxm1618/Downloads/大排期/docs/PRD.md)** - 产品需求文档（背景参考）
+3. **[plan/docs/PRD.md](./plan/docs/PRD.md)** - 钱途产品需求文档（背景参考）
 
 ## 三、开发步骤
+
+> ⚠️ **禁止执行警示**  
+> 以下步骤为历史规划的开发方案，因本方案尚未确认接入当前已上线的 plan 线上业务，目前禁止直接执行。
 
 ### Step 1: 创建数据库表
 在 Supabase 执行 `docs/RAG.md` 中的建表 SQL（第 102-139 行）。
 
 ### Step 2: 导入种子数据
-执行 `server/db/seeds/path_templates_seed.sql`。
+执行根目录 `path_templates_seed.sql`。
 
 ### Step 3: 创建工具函数
 新建 `server/utils/path-retrieval.ts`，实现检索逻辑（参考 RAG.md 第 410-446 行）。
@@ -61,4 +70,4 @@
 
 ---
 
-**开始开发时，请先完整阅读 `docs/RAG.md` 文档。**
+**本文件仅作历史参考，当前不得据此启动 RAG 开发。**
