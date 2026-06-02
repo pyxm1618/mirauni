@@ -1,0 +1,23 @@
+# 原生启动图配置
+# 在 Flutter 引擎加载期间显示此画面，取代白屏
+
+flutter_native_splash:
+  # 背景色 - 使用黑色（与 SplashPage 一致）
+  color: "#000000"
+  
+  # 中心图片（可选，暂时不使用）
+  # image: assets/splash.png
+  
+  # iOS 配置
+  ios: true
+  
+  # Android 配置
+  android: true
+  
+  # 保持启动图直到手动移除
+  # 这样可以确保 Flutter 完全加载后才切换
+  fullscreen: true
+  
+  # 在 Flutter 加载完成后自动移除
+  # 设置 false 需要手动调用 FlutterNativeSplash.remove()
+  # android_12 模式下这个设置会被忽略

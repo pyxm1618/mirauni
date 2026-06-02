@@ -1,0 +1,27 @@
+/**
+ * 审核通过项目 API
+ * POST /api/admin/projects/[id]/approve
+ */
+import { requireAdmin, createAdminSupabaseClient } from '~/server/utils/admin-auth'
+
+export default defineEventHandler(async (event) => {
+    await requireAdmin(event)
+
+    const projectId = getRouterParam(event, 'id')
+
+    const supabase = createAdminSupabaseClient()
+
+    const { error } = await supabase
+        .from('projects')
+        .update({ status: 'active' })
+        .eq('id', projectId)
+
+    if (error) {
+        throw createError({
+            statusCode: 500,
+            data: { code: 'DB_ERROR', message: error.message }
+        })
+    }
+
+    return { success: true, message: '项目已审核通过' }
+})

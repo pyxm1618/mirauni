@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://mirauni.com/sitemap.xml
+
+# Disallow admin and private pages
+Disallow: /me/
+Disallow: /api/

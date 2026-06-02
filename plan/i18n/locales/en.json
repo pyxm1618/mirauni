@@ -1,0 +1,36 @@
+{
+    "common": {
+        "days": "Days",
+        "wan": "W",
+        "loading": "Loading..."
+    },
+    "dashboard": {
+        "sections": {
+            "goal_card_label": "2026 GOAL",
+            "year_end_label": "YEAR END",
+            "distance_goal": "Remaining Goal",
+            "distance_goal_suffix": ", wake up!",
+            "progress": "Progress",
+            "collected": "Saved",
+            "monitor_room": "Monitor Room",
+            "live": "LIVE",
+            "watching": "Watching",
+            "streak_prefix": "Streak",
+            "streak_suffix": "Days",
+            "dont_break_chain": "Don't break the chain.",
+            "alert_in": "Alert in 23h",
+            "alert_now": "Check in NOW!",
+            "invite_title": "Invite Supervisors",
+            "todays_mission": "TODAY'S MISSION",
+            "view_all": "View All",
+            "mission_clear": "Mission Clear! (or just lazy)"
+        },
+        "actions": {
+            "quick_record": "Quick Task",
+            "record_income": "Add Income",
+            "project_analysis": "Analysis",
+            "invite_friend": "Invite"
+        },
+        "currency": "USD"
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "common": {
+        "days": "天",
+        "wan": "万元",
+        "loading": "加载中..."
+    },
+    "dashboard": {
+        "sections": {
+            "goal_card_label": "2026 年度目标",
+            "year_end_label": "距离年底",
+            "distance_goal": "距离目标还差",
+            "distance_goal_suffix": "，别睡了！",
+            "progress": "进度",
+            "collected": "已存",
+            "monitor_room": "监控室",
+            "live": "直播中",
+            "watching": "人正在围观",
+            "streak_prefix": "已连续打卡",
+            "streak_suffix": "天",
+            "dont_break_chain": "别断了连击。",
+            "alert_in": "23小时后全网通报",
+            "alert_now": "立即打卡保平安!",
+            "invite_title": "邀请好友监督",
+            "todays_mission": "今日任务",
+            "view_all": "查看全部",
+            "mission_clear": "任务清空！(或者只是单纯偷懒)"
+        },
+        "actions": {
+            "quick_record": "快速记录任务",
+            "record_income": "记一笔收入",
+            "project_analysis": "项目分析",
+            "invite_friend": "邀请好友"
+        },
+        "currency": "人民币"
+    }
+}
