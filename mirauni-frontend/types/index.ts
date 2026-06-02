@@ -21,7 +21,9 @@ export const userProfileSchema = z.object({
     experience_years: z.number().min(0).max(50).optional(),
     work_preference: z.enum(['fulltime', 'parttime']).optional(),
     wechat_id: z.string().min(6).max(20).optional(),
-    email: z.string().email('邮箱格式不正确').optional()
+    email: z.string().email('邮箱格式不正确').optional(),
+    avatar_url: z.string().url('头像链接格式不正确').optional().or(z.literal('')),
+    social_links: z.record(z.string()).optional()
 })
 
 export const projectSchema = z.object({

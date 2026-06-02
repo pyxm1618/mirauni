@@ -2,6 +2,13 @@
 import { serverSupabaseUser, serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
+    if (!process.dev) {
+        throw createError({
+            statusCode: 404,
+            message: 'Not Found'
+        })
+    }
+
     const user = await serverSupabaseUser(event)
 
     if (!user) {

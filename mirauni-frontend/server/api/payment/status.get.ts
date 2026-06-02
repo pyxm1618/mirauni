@@ -1,4 +1,4 @@
-import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseUser, serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
     const user = await serverSupabaseUser(event)
@@ -13,9 +13,9 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, message: 'Order No required' })
     }
 
-    const client = await serverSupabaseClient(event)
+    const supabaseAdmin = serverSupabaseServiceRole(event)
 
-    const { data, error } = await client
+    const { data, error } = await supabaseAdmin
         .from('orders')
         .select('status, credits, amount')
         .eq('order_no', orderNo)

@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseUser, serverSupabaseServiceRole } from '#supabase/server'
 import { sign, generateNonceStr, buildXml, unifiedOrderUrl, parseXml } from '~/server/utils/wechat'
 
 export default defineEventHandler(async (event) => {
@@ -22,11 +22,11 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, message: 'Invalid package' })
     }
 
-    const client = await serverSupabaseClient(event)
+    const supabaseAdmin = serverSupabaseServiceRole(event)
     const config = useRuntimeConfig()
 
-    // 2. 检查首充优惠
-    const { data: userData } = await client
+    // 2. 检查首充优惠 (改用 service_role 以应对收紧的 users RLS)
+    const { data: userData } = await supabaseAdmin
         .from('users')
         .select('is_first_charge, wechat_openid')
         .eq('id', user.id)
@@ -43,10 +43,10 @@ export default defineEventHandler(async (event) => {
 
     const totalCredits = pkg.credits + bonusCredits
 
-    // 3. 创建订单
+    // 3. 创建订单 (改用 service_role，完全绕过 RLS 导致的写入阻碍)
     const randomStr = crypto.randomBytes(4).toString('hex')
     const orderNo = `MRA_${Date.now()}_${randomStr}`
-    const { data: order, error } = await client
+    const { data: order, error } = await supabaseAdmin
         .from('orders')
         .insert({
             user_id: user.id,

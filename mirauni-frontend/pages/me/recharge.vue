@@ -129,6 +129,7 @@
     <ClientOnly>
       <PaymentModal 
         v-model="showPaymentModal" 
+        :package-id="selectedPackage"
         @success="handlePaymentSuccess" 
       />
     </ClientOnly>

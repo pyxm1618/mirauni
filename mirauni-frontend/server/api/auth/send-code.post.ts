@@ -1,9 +1,5 @@
-/**
- * 发送短信验证码 API
- * POST /api/auth/send-code
- * Body: { phone: string }
- */
-import { serverSupabaseClient } from '#supabase/server'
+import crypto from 'crypto'
+import { serverSupabaseServiceRole } from '#supabase/server'
 import { sendTencentSms, checkSmsRateLimit } from '~/server/utils/tencent-sms'
 
 export default defineEventHandler(async (event) => {
@@ -17,10 +13,10 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const supabase = await serverSupabaseClient(event)
+    const supabaseAdmin = serverSupabaseServiceRole(event)
 
-    // 检查发送频率限制（60秒一次）
-    const rateCheck = await checkSmsRateLimit(phone, supabase)
+    // 检查发送频率限制（60秒一次，改用 service_role 以应对 sms_codes 的物理 RLS）
+    const rateCheck = await checkSmsRateLimit(phone, supabaseAdmin)
     if (!rateCheck.canSend) {
         throw createError({
             statusCode: 429,
@@ -28,13 +24,13 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 生成 6 位随机验证码
-    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    // 使用加密安全随机数生成 6 位随机验证码
+    const code = crypto.randomInt(100000, 1000000).toString()
 
     // 存储验证码（5分钟有效）
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString()
 
-    const { error: saveError } = await supabase
+    const { error: saveError } = await supabaseAdmin
         .from('sms_codes')
         .upsert({
             phone,

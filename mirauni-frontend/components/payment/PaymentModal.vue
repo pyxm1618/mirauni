@@ -3,6 +3,7 @@ import QRCode from 'qrcode'
 
 const props = defineProps<{
   modelValue: boolean
+  packageId?: string
 }>()
 
 const emit = defineEmits(['update:modelValue', 'success'])
@@ -110,7 +111,9 @@ onUnmounted(() => {
 
 // Reset state when modal closes
 watch(() => props.modelValue, (val) => {
-    if (!val) {
+    if (val) {
+        selectedPackage.value = props.packageId || 'standard'
+    } else {
         // Delay reset to avoid UI flicker
         setTimeout(() => {
             qrCodeUrl.value = ''

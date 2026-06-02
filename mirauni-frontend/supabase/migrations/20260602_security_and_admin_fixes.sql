@@ -122,6 +122,7 @@ DROP POLICY IF EXISTS "Users can update own profile" ON users;
 DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON users;
 
 -- 仅允许用户本人 SELECT 自身的 users 物理行，杜绝敏感微信、手机号越权泄露
+DROP POLICY IF EXISTS "Users can select own profile" ON users;
 CREATE POLICY "Users can select own profile"
   ON users FOR SELECT
   USING (auth.uid() = id);
@@ -135,6 +136,14 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_password_hash VARCHAR(255);
 
 -- 用户密码明文遗留字段在生产安全审计中不允许保留，如有旧 admin_password 则废弃
 ALTER TABLE users DROP COLUMN IF EXISTS admin_password;
+
+-- 为 unlocks 表增加联合唯一键，确保并发防重逻辑成立
+-- 在引入联合唯一约束之前，先物理清洗去重 unlocks 历史重复数据，确保 migration 100% 成功
+DELETE FROM unlocks a 
+USING unlocks b 
+WHERE a.id < b.id 
+  AND a.user_id = b.user_id 
+  AND a.target_user_id = b.target_user_id;
 
 -- 为 unlocks 表增加联合唯一键，确保并发防重逻辑成立
 DO $$
@@ -153,40 +162,49 @@ END $$;
 CREATE OR REPLACE FUNCTION unlock_user_contact(p_user_id UUID, p_target_user_id UUID)
 RETURNS BOOLEAN AS $$
 DECLARE
+    v_inserted_id UUID;
     v_rows INT;
-    v_exists INT;
 BEGIN
+    -- 0. 安全防线：仅允许 service_role 提权执行，封死客户端直连路由提权漏洞
+    IF auth.role() <> 'service_role' THEN
+        RAISE EXCEPTION 'Forbidden';
+    END IF;
+
     -- 1. 拦截自我解锁的异常行为，避免刷点
     IF p_user_id = p_target_user_id THEN
         RAISE EXCEPTION 'Cannot unlock yourself';
     END IF;
 
-    -- 2. 幂等拦截：查询是否已达成解锁记录
-    SELECT COUNT(1) INTO v_exists FROM unlocks 
-    WHERE user_id = p_user_id AND target_user_id = p_target_user_id;
-    
-    IF v_exists > 0 THEN
+    -- 2. 先尝试插入权益记录。已存在则直接返回成功，不扣费。
+    INSERT INTO unlocks(user_id, target_user_id)
+    VALUES (p_user_id, p_target_user_id)
+    ON CONFLICT (user_id, target_user_id) DO NOTHING
+    RETURNING id INTO v_inserted_id;
+
+    IF v_inserted_id IS NULL THEN
         RETURN TRUE;
     END IF;
 
-    -- 3. 原子并发扣减扣费：强行限制扣减余额必须大于 0
-    UPDATE users 
-    SET unlock_credits = unlock_credits - 1 
+    -- 3. 只有本次真正新增 unlock 记录，才扣费。
+    UPDATE users
+    SET unlock_credits = unlock_credits - 1
     WHERE id = p_user_id AND unlock_credits > 0;
-    
-    -- 4. 状态检验，判定扣减余额是否切实发生
+
+    -- 4. 状态检验，判定扣费是否切实发生 (若余额不足则抛错触发整个事务及 unlocks 写入回滚)
     GET DIAGNOSTICS v_rows = ROW_COUNT;
     IF v_rows = 0 THEN
         RAISE EXCEPTION 'Insufficient credits';
     END IF;
 
-    -- 5. 写入 unlocks 解锁记录（得益于 unique_user_target_unlock 并发时会自动被 Postgres 排他锁截断）
-    INSERT INTO unlocks(user_id, target_user_id) 
-    VALUES (p_user_id, p_target_user_id);
-
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+
+-- 极严防线：撤销公共及普通角色对高权 RPC 的执行许可，仅供服务端 service_role 使用
+REVOKE EXECUTE ON FUNCTION unlock_user_contact(UUID, UUID) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION unlock_user_contact(UUID, UUID) FROM anon;
+REVOKE EXECUTE ON FUNCTION unlock_user_contact(UUID, UUID) FROM authenticated;
+GRANT EXECUTE ON FUNCTION unlock_user_contact(UUID, UUID) TO service_role;
 
 -- ==============================================================================
 -- 6. IP 脱敏加盐埋点 events 表及复合索引的建设
@@ -211,3 +229,24 @@ ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at);
 CREATE INDEX IF NOT EXISTS idx_events_ip_hash_created_at ON events(ip_hash, created_at);
 CREATE INDEX IF NOT EXISTS idx_events_user_id_created_at ON events(user_id, created_at);
+
+-- ==============================================================================
+-- 7. 核心表 RLS 安全加固 (orders, unlocks, sms_codes)
+-- ==============================================================================
+
+-- orders 表 RLS 开启及自查 SELECT 限制 (INSERT/UPDATE 限制只能由 service_role 或服务端进行)
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own orders" ON orders;
+CREATE POLICY "Users can view own orders"
+  ON orders FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- unlocks 表 RLS 开启及自查 SELECT 限制
+ALTER TABLE unlocks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own unlocks" ON unlocks;
+CREATE POLICY "Users can view own unlocks"
+  ON unlocks FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- sms_codes 表 RLS 开启 (无公开/用户策略，客户端完全封死，仅限服务端 service_role)
+ALTER TABLE sms_codes ENABLE ROW LEVEL SECURITY;

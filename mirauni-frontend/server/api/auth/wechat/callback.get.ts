@@ -9,6 +9,7 @@
  * 3. 查找已绑定的用户或跳转到绑定手机号页面
  * 4. 登录成功后跳转到首页
  */
+import crypto from 'crypto'
 import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
 import { getWechatAccessToken, getWechatUserInfo } from '~/server/utils/wechat'
 
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event) => {
                 fromPlan = stateData.from === 'plan'
             }
         } catch (e) {
-            console.log('[微信登录] state 解析失败，使用默认跳转')
+            if (process.dev) console.log('[微信登录] state 解析失败，使用默认跳转')
         }
     }
 
@@ -40,27 +41,26 @@ export default defineEventHandler(async (event) => {
 
     // 开发环境且未配置微信，模拟登录
     if (process.dev && !config.wechatAppId) {
-        console.log('[DEV] 微信登录未配置，跳转到绑定手机号页面')
+        if (process.dev) console.log('[DEV] 微信登录未配置，跳转到绑定手机号页面')
         return sendRedirect(event, `/bindphone?openid=dev_test_openid_${Date.now()}`)
     }
 
     try {
-        console.log('[微信登录] 开始处理回调，code:', code.substring(0, 10) + '...')
+        if (process.dev) console.log('[微信登录] 开始处理回调，code:', code.substring(0, 10) + '...')
 
         // 1. 用 code 换取 access_token
         const tokenData = await getWechatAccessToken(code)
-        console.log('[微信登录] 获取 access_token 成功，openid:', tokenData.openid)
+        if (process.dev) console.log('[微信登录] 获取 access_token 成功，openid:', tokenData.openid)
 
         // 2. 获取微信用户信息
         const wxUserInfo = await getWechatUserInfo(tokenData.access_token, tokenData.openid)
-        console.log('[微信登录] 获取用户信息成功，nickname:', wxUserInfo.nickname)
+        if (process.dev) console.log('[微信登录] 获取用户信息成功，nickname:', wxUserInfo.nickname)
 
-        const supabase = await serverSupabaseClient(event)
         const supabaseAdmin = serverSupabaseServiceRole(event)
 
-        // 3. 查找已绑定微信的用户
-        console.log('[微信登录] 查询数据库，openid:', tokenData.openid)
-        const { data: existingUser, error: queryError } = await supabase
+        // 3. 查找已绑定微信的用户 (改用 service_role 绕过 RLS 限制)
+        if (process.dev) console.log('[微信登录] 查询数据库，openid:', tokenData.openid)
+        const { data: existingUser, error: queryError } = await supabaseAdmin
             .from('users')
             .select('*')
             .eq('wechat_openid', tokenData.openid)
@@ -68,42 +68,58 @@ export default defineEventHandler(async (event) => {
 
         // 忽略 PGRST116 错误（未找到记录）
         if (queryError && queryError.code !== 'PGRST116') {
-            console.error('[微信登录] 数据库查询错误:', queryError)
             throw new Error('数据库查询失败')
         }
 
-        console.log('[微信登录] 用户查询结果:', existingUser ? '找到已绑定用户' : '新用户')
+        if (process.dev) console.log('[微信登录] 用户查询结果:', existingUser ? '找到已绑定用户' : '新用户')
+
+        // 辅助函数：使用 crypto.randomBytes 生成高强度的强随机密码，绝不用 Math.random()
+        const generateSafePassword = () => {
+            return crypto.randomBytes(32).toString('base64url') + 'Aa1!'
+        }
 
         if (existingUser) {
-            console.log('[微信登录] 老用户登录流程，user_id:', existingUser.id)
+            if (process.dev) console.log('[微信登录] 老用户登录流程，user_id:', existingUser.id)
 
-            // 根据用户是否有手机号，使用不同的登录凭证
-            let email: string
-            let password: string
+            // 从 user_secrets 查找专属的高安全随机密码，禁止 deterministic 派生
+            const { data: secret } = await supabaseAdmin
+                .from('user_secrets')
+                .select('supabase_password')
+                .eq('user_id', existingUser.id)
+                .single()
 
-            if (existingUser.phone) {
-                // 手机号用户
-                email = `${existingUser.phone}@phone.mirauni.com`
-                password = `mirauni_${existingUser.phone}_secure_pwd`
-            } else {
-                // 纯微信用户（临时方案创建的用户）
-                email = `wx_${tokenData.openid}@wechat.mirauni.com`
-                password = `mirauni_wx_${tokenData.openid}_secure`
+            let supabasePassword = secret?.supabase_password
+
+            if (!supabasePassword) {
+                if (process.dev) console.log(`[微信登录] 迁移老用户 ${existingUser.id} 凭证体系`)
+                supabasePassword = generateSafePassword()
+                
+                // 更新 Auth 密码
+                await supabaseAdmin.auth.admin.updateUserById(existingUser.id, { password: supabasePassword })
+                
+                // 插入 Secret
+                await supabaseAdmin.from('user_secrets').upsert({
+                    user_id: existingUser.id,
+                    supabase_password: supabasePassword
+                })
             }
+
+            const email = existingUser.phone
+                ? `${existingUser.phone}@phone.mirauni.com`
+                : `wx_${tokenData.openid}@wechat.mirauni.com`
 
             const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
                 email,
-                password
+                password: supabasePassword
             })
 
             if (signInError) {
-                console.error('微信登录失败:', signInError)
-                return sendRedirect(event, '/login?error=登录失败，请重试')
+                throw new Error('登录失败')
             }
 
-            // 更新用户头像（如果微信头像有更新）
+            // 更新用户头像（如果微信头像有更新，使用 service_role 代理更新）
             if (wxUserInfo.headimgurl && wxUserInfo.headimgurl !== existingUser.avatar_url) {
-                await supabase
+                await supabaseAdmin
                     .from('users')
                     .update({
                         avatar_url: wxUserInfo.headimgurl,
@@ -112,7 +128,8 @@ export default defineEventHandler(async (event) => {
                     .eq('id', existingUser.id)
             }
 
-            // 使用客户端 supabase 设置 session（这会自动设置 cookie）
+            // 使用客户端 supabase 设置 session（由于此时有 JWT_SECRET，在后端直接 setSession 并写入 Cookie）
+            const supabase = await serverSupabaseClient(event)
             if (signInData.session) {
                 await supabase.auth.setSession({
                     access_token: signInData.session.access_token,
@@ -125,7 +142,7 @@ export default defineEventHandler(async (event) => {
                         const targetUrl = new URL(redirectUrl)
                         return sendRedirect(event, targetUrl.origin)
                     } catch (e) {
-                        console.error('[微信登录] redirect URL 解析失败:', e)
+                        if (process.dev) console.error('[微信登录] redirect URL 解析失败:', e)
                     }
                 }
             }
@@ -133,15 +150,12 @@ export default defineEventHandler(async (event) => {
             return sendRedirect(event, redirectUrl)
         }
 
-        // 4. 新用户，临时跳过手机绑定（短信审核期间的临时方案）
-        // TODO: 短信审核通过后，恢复跳转到绑定手机号页面
-        console.log('[微信登录] 新用户，临时直接创建账号（跳过手机绑定）')
-        console.log('[微信登录] OpenID:', tokenData.openid)
-        console.log('[微信登录] 用户信息:', wxUserInfo.nickname)
+        // 4. 新用户，临时直接创建账号（跳过手机绑定）
+        if (process.dev) console.log('[微信登录] 新用户，直接创建账号')
 
         // 使用 openid 生成账号凭证
         const newUserEmail = `wx_${tokenData.openid}@wechat.mirauni.com`
-        const newUserPassword = `mirauni_wx_${tokenData.openid}_secure`
+        const newUserPassword = generateSafePassword()
 
         // 4.1 创建 Supabase Auth 用户
         const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
@@ -156,11 +170,10 @@ export default defineEventHandler(async (event) => {
         })
 
         if (signUpError) {
-            console.error('[微信登录] 创建用户失败:', signUpError)
             throw new Error('创建账号失败')
         }
 
-        console.log('[微信登录] Auth 用户创建成功:', signUpData.user.id)
+        if (process.dev) console.log('[微信登录] Auth 用户创建成功:', signUpData.user.id)
 
         // 4.2 在 users 表创建记录
         const { error: insertError } = await supabaseAdmin
@@ -171,32 +184,39 @@ export default defineEventHandler(async (event) => {
                 wechat_unionid: tokenData.unionid || wxUserInfo.unionid,
                 username: wxUserInfo.nickname || `wx_${tokenData.openid.substring(0, 8)}`,
                 avatar_url: wxUserInfo.headimgurl,
-                // phone 留空，后续可补绑定
             })
 
         if (insertError) {
-            console.error('[微信登录] 创建用户记录失败:', insertError)
-            // 不影响登录，继续执行
+            if (process.dev) console.error('[微信登录] 创建用户记录失败:', insertError)
+            // 回滚：安全删除刚刚创建的 Auth 用户以防悬挂脏数据
+            await supabaseAdmin.auth.admin.deleteUser(signUpData.user.id)
+            throw new Error('注册失败，请稍后重试')
         }
 
-        // 4.3 登录新用户
+        // 4.3 写入安全凭据 secret
+        await supabaseAdmin.from('user_secrets').insert({
+            user_id: signUpData.user.id,
+            supabase_password: newUserPassword
+        })
+
+        // 4.4 登录新用户
         const { data: newSignInData, error: newSignInError } = await supabaseAdmin.auth.signInWithPassword({
             email: newUserEmail,
             password: newUserPassword
         })
 
         if (newSignInError || !newSignInData.session) {
-            console.error('[微信登录] 新用户登录失败:', newSignInError)
             throw new Error('登录失败')
         }
 
         // 设置 session
+        const supabase = await serverSupabaseClient(event)
         await supabase.auth.setSession({
             access_token: newSignInData.session.access_token,
             refresh_token: newSignInData.session.refresh_token
         })
 
-        console.log('[微信登录] 新用户创建并登录成功')
+        if (process.dev) console.log('[微信登录] 新用户创建并登录成功')
 
         // 如果来自钱途，安全降级直接跳转
         if (fromPlan && redirectUrl !== '/') {
@@ -211,10 +231,13 @@ export default defineEventHandler(async (event) => {
         return sendRedirect(event, redirectUrl)
 
     } catch (error: any) {
-        console.error('[微信登录] 异常捕获:', error)
-        console.error('[微信登录] 错误堆栈:', error.stack)
-        const errorMsg = error.message || '微信登录失败'
-        console.error('[微信登录] 跳转到登录页，错误信息:', errorMsg)
+        if (process.dev) {
+            console.error('[微信登录] 异常捕获:', error)
+            console.error('[微信登录] 错误堆栈:', error.stack)
+        } else {
+            console.error('[微信登录] 登录失败')
+        }
+        const errorMsg = '微信登录失败'
         return sendRedirect(event, `/login?error=${encodeURIComponent(errorMsg)}`)
     }
 })

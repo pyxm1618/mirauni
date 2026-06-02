@@ -5,6 +5,7 @@
  * 
  * 用于微信首次登录时绑定手机号
  */
+import crypto from 'crypto'
 import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
@@ -41,8 +42,8 @@ export default defineEventHandler(async (event) => {
     const supabase = await serverSupabaseClient(event)
     const supabaseAdmin = serverSupabaseServiceRole(event)
 
-    // 1. 验证验证码
-    const { data: smsData, error: smsError } = await supabase
+    // 1. 验证验证码 (使用 supabaseAdmin，因为 sms_codes 已启用严格 RLS)
+    const { data: smsData, error: smsError } = await supabaseAdmin
         .from('sms_codes')
         .select()
         .eq('phone', phone)
@@ -57,18 +58,18 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 删除验证码
-    await supabase.from('sms_codes').delete().eq('phone', phone)
+    // 删除验证码 (使用 supabaseAdmin)
+    await supabaseAdmin.from('sms_codes').delete().eq('phone', phone)
 
-    // 2. 检查手机号是否已被其他账号使用
-    const { data: existingPhoneUser } = await supabase
+    // 2. 检查手机号是否已被其他账号使用 (使用 supabaseAdmin 绕过 RLS 限制)
+    const { data: existingPhoneUser } = await supabaseAdmin
         .from('users')
-        .select('id, wechat_openid')
+        .select('id, username, wechat_openid')
         .eq('phone', phone)
         .single()
 
-    // 3. 检查微信是否已绑定其他账号
-    const { data: existingWxUser } = await supabase
+    // 3. 检查微信是否已绑定其他账号 (使用 supabaseAdmin 绕过 RLS 限制)
+    const { data: existingWxUser } = await supabaseAdmin
         .from('users')
         .select('id, phone')
         .eq('wechat_openid', wechatOpenid)
@@ -81,8 +82,12 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    const generateSafePassword = () => {
+        return crypto.randomBytes(32).toString('base64url') + 'Aa1!'
+    }
+
     const email = `${phone}@phone.mirauni.com`
-    const password = `mirauni_${phone}_secure_pwd`
+    let supabasePassword
     let user
 
     if (existingPhoneUser) {
@@ -94,7 +99,25 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        // 更新用户的微信信息 (改用 supabaseAdmin 以便无视收紧的 users RLS)
+        // 从 user_secrets 查找专属的高安全随机密码，禁止 deterministic 派生
+        const { data: secret } = await supabaseAdmin
+            .from('user_secrets')
+            .select('supabase_password')
+            .eq('user_id', existingPhoneUser.id)
+            .single()
+
+        supabasePassword = secret?.supabase_password
+
+        if (!supabasePassword) {
+            supabasePassword = generateSafePassword()
+            await supabaseAdmin.auth.admin.updateUserById(existingPhoneUser.id, { password: supabasePassword })
+            await supabaseAdmin.from('user_secrets').upsert({
+                user_id: existingPhoneUser.id,
+                supabase_password: supabasePassword
+            })
+        }
+
+        // 更新用户的微信信息
         const { data: updatedUser, error: updateError } = await supabaseAdmin
             .from('users')
             .update({
@@ -117,11 +140,13 @@ export default defineEventHandler(async (event) => {
 
         user = updatedUser
     } else {
-        // 新用户，创建账号
+        // 新用户，生成强随机密码并创建账号
+        supabasePassword = generateSafePassword()
+
         // 4.1 创建 Supabase Auth 用户
         const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
             email,
-            password,
+            password: supabasePassword,
             email_confirm: true,
             user_metadata: { phone }
         })
@@ -134,7 +159,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        // 4.2 创建 users 表记录 (改用 supabaseAdmin 以便无视收紧的 users RLS)
+        // 4.2 创建 users 表记录
         const { data: newUser, error: insertError } = await supabaseAdmin
             .from('users')
             .insert({
@@ -159,13 +184,19 @@ export default defineEventHandler(async (event) => {
             })
         }
 
+        // 4.3 写入安全凭据 secret
+        await supabaseAdmin.from('user_secrets').insert({
+            user_id: authUser.user.id,
+            supabase_password: supabasePassword
+        })
+
         user = newUser
     }
 
     // 5. 登录用户
     const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
         email,
-        password
+        password: supabasePassword
     })
 
     if (signInError) {

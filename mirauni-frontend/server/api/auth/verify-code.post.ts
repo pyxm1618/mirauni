@@ -9,6 +9,7 @@
  * 3. 使用 Supabase Auth 创建/登录用户
  * 4. 返回 session
  */
+import crypto from 'crypto'
 import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
@@ -37,7 +38,7 @@ export default defineEventHandler(async (event) => {
 
     let smsData = null
     if (!isDevMasterCode) {
-        const { data, error: smsError } = await supabase
+        const { data, error: smsError } = await supabaseAdmin
             .from('sms_codes')
             .select()
             .eq('phone', phone)
@@ -56,9 +57,9 @@ export default defineEventHandler(async (event) => {
         console.log(`[DEV] 使用万能验证码登录: ${phone}`)
     }
 
-    // 2. 删除已使用的验证码（仅非万能验证码时）
+    // 2. 删除已使用的验证码（仅非万能验证码时，使用 supabaseAdmin）
     if (!isDevMasterCode) {
-        await supabase.from('sms_codes').delete().eq('phone', phone)
+        await supabaseAdmin.from('sms_codes').delete().eq('phone', phone)
     }
 
     // 3. 查找现有用户
@@ -73,11 +74,9 @@ export default defineEventHandler(async (event) => {
     let supabasePassword
     let authUser
 
-    // 辅助函数：生成安全的随机密码
+    // 辅助函数：使用 crypto.randomBytes 生成高强度的强随机密码，绝不用 Math.random()
     const generateSafePassword = () => {
-        return Math.random().toString(36).slice(-8) + 
-               Math.random().toString(36).slice(-8) + 
-               'Aa1!' // 确保包含大小写和数字/符号
+        return crypto.randomBytes(32).toString('base64url') + 'Aa1!'
     }
 
     if (existingUser) {

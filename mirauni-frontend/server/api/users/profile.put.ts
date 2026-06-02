@@ -29,14 +29,15 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    const parsed = validationResult.data as Record<string, any>
     const supabaseAdmin = serverSupabaseServiceRole(event)
 
     // 检查用户名是否已被占用 (从公开的 public_profiles 物理表中查，防泄露)
-    if (body.username) {
+    if (parsed.username) {
         const { data: existingUser } = await supabaseAdmin
             .from('public_profiles')
             .select('id')
-            .eq('username', body.username)
+            .eq('username', parsed.username)
             .neq('id', user.id)
             .single()
 
@@ -57,12 +58,12 @@ export default defineEventHandler(async (event) => {
     const allowedFields = [
         'username', 'bio', 'profession', 'position', 'location',
         'skills', 'experience_years', 'work_preference',
-        'wechat_id', 'email', 'social_links'
+        'wechat_id', 'email', 'social_links', 'avatar_url'
     ]
 
     for (const field of allowedFields) {
-        if (body[field] !== undefined) {
-            updateData[field] = body[field]
+        if (parsed[field] !== undefined) {
+            updateData[field] = parsed[field]
         }
     }
 
@@ -71,7 +72,7 @@ export default defineEventHandler(async (event) => {
         .from('users')
         .update(updateData)
         .eq('id', user.id)
-        .select()
+        .select('id, username, avatar_url, bio, profession, position, location, skills, experience_years, work_preference, social_links, unlock_credits, is_first_charge')
         .single()
 
     if (error) {
