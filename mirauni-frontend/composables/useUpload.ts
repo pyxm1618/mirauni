@@ -112,17 +112,16 @@ export function useUpload() {
 
         const avatarUrl = urlData.publicUrl
 
-        // 更新用户头像
-        const { error: updateError } = await supabase
-            .from('users')
-            .update({
-                avatar_url: avatarUrl,
-                updated_at: new Date().toISOString()
+        // 更新用户头像 (通过服务端代理 API 更新，应对收紧的 users RLS)
+        try {
+            await $fetch('/api/users/profile', {
+                method: 'PUT',
+                body: {
+                    avatar_url: avatarUrl
+                }
             })
-            .eq('id', user.value.id)
-
-        if (updateError) {
-            console.error('更新头像URL失败:', updateError)
+        } catch (err) {
+            console.error('更新头像URL失败:', err)
             throw new Error(t('upload.updateFailed'))
         }
 

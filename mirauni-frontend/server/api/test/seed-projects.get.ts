@@ -47,7 +47,10 @@ export default defineEventHandler(async (event) => {
             view_count: 345,
             description: '一个专注于数字艺术品的交易平台...',
             description_visible: true,
-            background_visible: true
+            background_visible: true,
+            vision_visible: true,
+            team_visible: true,
+            demo_visible: true
         },
         {
             title: '智能家居中枢 (SmartHub)',
@@ -61,7 +64,11 @@ export default defineEventHandler(async (event) => {
             user_id: user.id,
             view_count: 89,
             description: '让智能家居更安全，更私密...',
-            description_visible: true
+            description_visible: true,
+            background_visible: true,
+            vision_visible: true,
+            team_visible: true,
+            demo_visible: true
         }
     ]
 

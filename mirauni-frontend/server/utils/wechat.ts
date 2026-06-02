@@ -54,14 +54,13 @@ export async function getWechatAccessToken(code: string): Promise<{
     const config = useRuntimeConfig()
     const url = `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${config.wechatAppId}&secret=${config.wechatAppSecret}&code=${code}&grant_type=authorization_code`
 
-    console.log('[微信API] 请求 access_token')
-    console.log('[微信API] AppID:', config.wechatAppId)
-    console.log('[微信API] Code:', code ? code.substring(0, 10) + '...' : 'undefined')
+    if (process.dev) {
+        console.log('[微信API] 请求 access_token')
+        console.log('[微信API] AppID:', config.wechatAppId)
+        console.log('[微信API] Code:', code ? code.substring(0, 10) + '...' : 'undefined')
+    }
 
     const response = await $fetch<any>(url)
-
-    // 输出完整响应用于调试
-    console.log('[微信API] access_token 完整响应:', JSON.stringify(response, null, 2))
 
     // 如果响应是字符串，手动解析
     const data = typeof response === 'string' ? JSON.parse(response) : response
@@ -70,7 +69,9 @@ export async function getWechatAccessToken(code: string): Promise<{
         throw new Error(`微信授权失败: ${data.errmsg}`)
     }
 
-    console.log('[微信API] 准备返回，openid:', data.openid, 'access_token 前20位:', data.access_token?.substring(0, 20))
+    if (process.dev) {
+        console.log('[微信API] 准备返回，openid:', data.openid ? data.openid.substring(0, 5) + '***' : 'undefined')
+    }
 
     return data
 }
@@ -89,14 +90,11 @@ export async function getWechatUserInfo(accessToken: string, openid: string): Pr
 }> {
     const url = `https://api.weixin.qq.com/sns/userinfo?access_token=${accessToken}&openid=${openid}&lang=zh_CN`
 
-    console.log('[微信API] 请求用户信息')
-    console.log('[微信API] access_token:', accessToken ? accessToken.substring(0, 20) + '...' : 'undefined')
-    console.log('[微信API] openid:', openid)
+    if (process.dev) {
+        console.log('[微信API] 请求用户信息')
+    }
 
     const response = await $fetch<any>(url)
-
-    // 输出完整响应用于调试
-    console.log('[微信API] 用户信息完整响应:', JSON.stringify(response, null, 2))
 
     // 如果响应是字符串，手动解析
     const data = typeof response === 'string' ? JSON.parse(response) : response

@@ -1,9 +1,9 @@
-import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { serverSupabaseUser, serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
     const targetUserId = getRouterParam(event, 'id')
     const user = await serverSupabaseUser(event)
-    const supabase = await serverSupabaseClient(event)
+    const supabaseAdmin = serverSupabaseServiceRole(event)
 
     if (!user) {
         throw createError({
@@ -12,9 +12,10 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 2. 检查是否是自己
+    // 1. 检查是否是自己
     if (user.id === targetUserId) {
-        const { data, error } = await supabase
+        // 使用 service_role 读取自己本人的敏感字段以应对收紧的 users RLS
+        const { data, error } = await supabaseAdmin
             .from('users')
             .select('wechat_id, email, phone')
             .eq('id', targetUserId)
@@ -24,8 +25,8 @@ export default defineEventHandler(async (event) => {
         return { success: true, data }
     }
 
-    // 3. 检查是否已解锁
-    const { data: unlock } = await supabase
+    // 2. 检查是否已解锁
+    const { data: unlock } = await supabaseAdmin
         .from('unlocks')
         .select('id')
         .eq('user_id', user.id)
@@ -40,10 +41,10 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 4. 返回联系方式
-    const { data, error } = await supabase
+    // 3. 安全获取：使用 service_role 提取已解锁的联系方式并返回
+    const { data, error } = await supabaseAdmin
         .from('users')
-        .select('wechat_id, email')
+        .select('wechat_id, email, phone')
         .eq('id', targetUserId)
         .single()
 

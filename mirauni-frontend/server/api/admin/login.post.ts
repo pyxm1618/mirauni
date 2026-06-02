@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
     // 查询管理员账号
     const { data: admin, error } = await supabase
         .from('users')
-        .select('id, username, admin_role, admin_password')
+        .select('id, username, admin_role, admin_password_hash')
         .eq('username', username)
         .not('admin_role', 'is', null)
         .single()
@@ -47,14 +47,9 @@ export default defineEventHandler(async (event) => {
     }
 
     // 验证密码
-    // 如果没有设置 admin_password，则使用简单密码验证（仅用于初始化）
     let passwordValid = false
-    if (admin.admin_password) {
-        passwordValid = await verifyPassword(password, admin.admin_password)
-    } else {
-        // 初始化阶段，使用明文密码比对（建议后续更新为加密密码）
-        // 这里假设初始密码为 admin123
-        passwordValid = password === 'admin123'
+    if (admin.admin_password_hash) {
+        passwordValid = await verifyPassword(password, admin.admin_password_hash)
     }
 
     if (!passwordValid) {
@@ -62,7 +57,7 @@ export default defineEventHandler(async (event) => {
             statusCode: 401,
             data: {
                 code: 'UNAUTHORIZED',
-                message: '密码错误'
+                message: '密码错误或无管理员权限'
             }
         })
     }

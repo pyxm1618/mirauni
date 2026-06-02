@@ -126,28 +126,10 @@ const { unreadCount, fetchUnreadCount } = useMessages()
 const isDev = import.meta.dev
 const planBaseUrl = isDev ? 'http://localhost:3001' : 'https://plan.mirauni.com'
 
-// SSO: 点击钱途链接时动态获取 token 并跳转
+// SSO: 点击钱途链接时直接跳转 (安全降级，不携带任何 token)
 async function navigateToPlan(e: Event) {
     e.preventDefault()
-    
-    let url = planBaseUrl
-    
-    if (user.value) {
-        try {
-            const { data } = await supabase.auth.getSession()
-            if (data.session?.access_token && data.session?.refresh_token) {
-                const params = new URLSearchParams({
-                    sso_access: data.session.access_token,
-                    sso_refresh: data.session.refresh_token
-                })
-                url = `${planBaseUrl}?${params.toString()}`
-            }
-        } catch (e) {
-            console.error('[SSO] Error getting session:', e)
-        }
-    }
-    
-    window.location.href = url
+    window.location.href = planBaseUrl
 }
 
 onMounted(() => {

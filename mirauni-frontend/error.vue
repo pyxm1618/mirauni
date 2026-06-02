@@ -2,12 +2,12 @@
   <div class="min-h-screen bg-indie-bg flex flex-col items-center justify-center p-4">
     <div class="max-w-md w-full text-center">
       <div class="text-9xl mb-4 animate-bounce">
-        {{ error.statusCode === 404 ? '🛸' : '🔧' }}
+        {{ safeError.statusCode === 404 ? '🛸' : '🔧' }}
       </div>
       
       <div class="bg-white border-3 border-black p-8 shadow-brutal relative overflow-hidden">
         <div class="absolute top-0 right-0 p-2 opacity-10 text-4xl font-black">
-           {{ error.statusCode }}
+           {{ safeError.statusCode }}
         </div>
 
         <h1 class="text-3xl font-black uppercase mb-4">
@@ -35,19 +35,24 @@ const props = defineProps({
 
 const { t } = useI18n()
 
+// 安全转换防止 TS possibly undefined 报错
+const safeError = computed(() => {
+  const err = props.error as any
+  return err || { statusCode: 500, message: 'Unknown Error' }
+})
+
 const errorTitle = computed(() => {
-  if (props.error.statusCode === 404) return 'Oops!'
+  if (safeError.value.statusCode === 404) return 'Oops!'
   return 'Houston, we have a problem'
 })
 
 const errorMessage = computed(() => {
-  if (props.error.statusCode === 404) return t('common.errors.not_found')
-  if (props.error.statusCode === 403) return t('common.errors.forbidden')
-  if (props.error.statusCode === 401) return t('common.errors.unauthorized')
+  if (safeError.value.statusCode === 404) return t('common.errors.not_found')
+  if (safeError.value.statusCode === 403) return t('common.errors.forbidden')
+  if (safeError.value.statusCode === 401) return t('common.errors.unauthorized')
   
-  // Custom message if passed
-  if (props.error.message && props.error.message !== 'FetchError') {
-      return props.error.message
+  if (safeError.value.message && safeError.value.message !== 'FetchError') {
+      return safeError.value.message
   }
 
   return t('common.errors.server')

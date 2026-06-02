@@ -20,7 +20,6 @@ export default defineNuxtConfig({
       { code: 'en', name: 'English', file: 'en.json' }
     ],
     defaultLocale: 'zh',
-    lazy: true,
     langDir: 'locales',
     strategy: 'prefix_except_default',
     detectBrowserLanguage: {
@@ -56,6 +55,9 @@ export default defineNuxtConfig({
 
     // 百度推送令牌（仅服务端可用）
     baiduPushToken: process.env.BAIDU_PUSH_TOKEN,
+
+    // IP 脱敏加盐密钥（仅服务端可用）
+    ipHashSecret: process.env.IP_HASH_SECRET,
 
     // 公开配置（客户端可用）
     public: {

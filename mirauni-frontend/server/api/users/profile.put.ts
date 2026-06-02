@@ -3,7 +3,7 @@
  * PUT /api/users/profile
  * Body: Partial<UserProfile>
  */
-import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { serverSupabaseClient, serverSupabaseUser, serverSupabaseServiceRole } from '#supabase/server'
 import { userProfileSchema } from '~/types'
 
 export default defineEventHandler(async (event) => {
@@ -29,12 +29,12 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const supabase = await serverSupabaseClient(event)
+    const supabaseAdmin = serverSupabaseServiceRole(event)
 
-    // 检查用户名是否已被占用
+    // 检查用户名是否已被占用 (从公开的 public_profiles 物理表中查，防泄露)
     if (body.username) {
-        const { data: existingUser } = await supabase
-            .from('users')
+        const { data: existingUser } = await supabaseAdmin
+            .from('public_profiles')
             .select('id')
             .eq('username', body.username)
             .neq('id', user.id)
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
         updated_at: new Date().toISOString()
     }
 
-    // 只更新提交的字段
+    // 严格字段白名单过滤，彻底屏蔽篡改 credits、role、admin_role 的可能性
     const allowedFields = [
         'username', 'bio', 'profession', 'position', 'location',
         'skills', 'experience_years', 'work_preference',
@@ -66,8 +66,8 @@ export default defineEventHandler(async (event) => {
         }
     }
 
-    // 更新数据库
-    const { data, error } = await supabase
+    // 更新数据库 (以 service_role 身份，安全更新被客户端 RLS 完全锁死的基础 users 行)
+    const { data, error } = await supabaseAdmin
         .from('users')
         .update(updateData)
         .eq('id', user.id)

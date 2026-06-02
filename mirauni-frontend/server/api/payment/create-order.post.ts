@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server'
 import { sign, generateNonceStr, buildXml, unifiedOrderUrl, parseXml } from '~/server/utils/wechat'
 
@@ -43,7 +44,8 @@ export default defineEventHandler(async (event) => {
     const totalCredits = pkg.credits + bonusCredits
 
     // 3. 创建订单
-    const orderNo = `${Date.now()}${Math.random().toString().slice(-6)}`
+    const randomStr = crypto.randomBytes(4).toString('hex')
+    const orderNo = `MRA_${Date.now()}_${randomStr}`
     const { data: order, error } = await client
         .from('orders')
         .insert({
@@ -64,20 +66,27 @@ export default defineEventHandler(async (event) => {
     // 4. 调用微信支付统一下单
     // Mock mode check
     if (!config.wechatMchId || !config.wechatApiKey) {
-        // Return Mock Data
-        return {
-            success: true,
-            data: {
-                orderNo: orderNo,
-                codeUrl: 'weixin://wxpay/bizpayurl?pr=mock',
-                mock: true
-            },
-            discount: {
-                isFirstCharge: userData?.is_first_charge,
-                originalAmount: pkg.amount,
-                finalAmount,
-                bonusCredits
+        if (process.dev) {
+            // Return Mock Data (仅开发环境允许)
+            return {
+                success: true,
+                data: {
+                    orderNo: orderNo,
+                    codeUrl: 'weixin://wxpay/bizpayurl?pr=mock',
+                    mock: true
+                },
+                discount: {
+                    isFirstCharge: userData?.is_first_charge,
+                    originalAmount: pkg.amount,
+                    finalAmount,
+                    bonusCredits
+                }
             }
+        } else {
+            throw createError({
+                statusCode: 500,
+                message: 'WeChat Pay configuration is missing in production.'
+            })
         }
     }
 

@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     const supabaseAdmin = serverSupabaseServiceRole(event)
 
     // 1. 验证用户登录状态 - 优先使用 Cookie，其次使用 Authorization header
-    let user = await serverSupabaseUser(event)
+    let user: any = await serverSupabaseUser(event)
 
     if (!user) {
         // 尝试从 Authorization header 获取

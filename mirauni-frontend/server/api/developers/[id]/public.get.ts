@@ -13,9 +13,9 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // Fetch public profile info by ID
+    // Fetch public profile info by ID from public_profiles physical table
     const { data, error } = await supabase
-        .from('users')
+        .from('public_profiles')
         .select('id, username, avatar_url, bio, profession, position, location, skills, experience_years, work_preference, social_links, created_at')
         .eq('id', id)
         .single()

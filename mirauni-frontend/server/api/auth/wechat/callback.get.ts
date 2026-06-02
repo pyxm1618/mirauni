@@ -119,13 +119,11 @@ export default defineEventHandler(async (event) => {
                     refresh_token: signInData.session.refresh_token
                 })
 
-                // 如果来自钱途，携带 SSO tokens 跳转回去
+                // 如果来自钱途，安全降级直接跳转
                 if (fromPlan && redirectUrl !== '/') {
                     try {
                         const targetUrl = new URL(redirectUrl)
-                        targetUrl.searchParams.set('sso_access', signInData.session.access_token)
-                        targetUrl.searchParams.set('sso_refresh', signInData.session.refresh_token)
-                        return sendRedirect(event, targetUrl.toString())
+                        return sendRedirect(event, targetUrl.origin)
                     } catch (e) {
                         console.error('[微信登录] redirect URL 解析失败:', e)
                     }
@@ -200,13 +198,11 @@ export default defineEventHandler(async (event) => {
 
         console.log('[微信登录] 新用户创建并登录成功')
 
-        // 如果来自钱途，携带 SSO tokens 跳转回去
+        // 如果来自钱途，安全降级直接跳转
         if (fromPlan && redirectUrl !== '/') {
             try {
                 const targetUrl = new URL(redirectUrl)
-                targetUrl.searchParams.set('sso_access', newSignInData.session.access_token)
-                targetUrl.searchParams.set('sso_refresh', newSignInData.session.refresh_token)
-                return sendRedirect(event, targetUrl.toString())
+                return sendRedirect(event, targetUrl.origin)
             } catch (e) {
                 console.error('[微信登录] redirect URL 解析失败:', e)
             }

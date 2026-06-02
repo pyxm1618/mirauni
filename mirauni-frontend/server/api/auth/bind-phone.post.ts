@@ -94,8 +94,8 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        // 更新用户的微信信息
-        const { data: updatedUser, error: updateError } = await supabase
+        // 更新用户的微信信息 (改用 supabaseAdmin 以便无视收紧的 users RLS)
+        const { data: updatedUser, error: updateError } = await supabaseAdmin
             .from('users')
             .update({
                 wechat_openid: wechatOpenid,
@@ -134,8 +134,8 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        // 4.2 创建 users 表记录
-        const { data: newUser, error: createError } = await supabase
+        // 4.2 创建 users 表记录 (改用 supabaseAdmin 以便无视收紧的 users RLS)
+        const { data: newUser, error: insertError } = await supabaseAdmin
             .from('users')
             .insert({
                 id: authUser.user.id,
@@ -150,7 +150,7 @@ export default defineEventHandler(async (event) => {
             .select()
             .single()
 
-        if (createError) {
+        if (insertError) {
             // 回滚
             await supabaseAdmin.auth.admin.deleteUser(authUser.user.id)
             throw createError({

@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
         .from('orders')
         .select('status, credits, amount')
         .eq('order_no', orderNo)
+        .eq('user_id', user.id) // 越权防范：强行校验订单所有权
         .single()
 
     if (error) {

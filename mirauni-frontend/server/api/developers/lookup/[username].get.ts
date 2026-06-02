@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const { data, error } = await supabase
-        .from('users')
+        .from('public_profiles')
         .select('id')
         .eq('username', username)
         .single()

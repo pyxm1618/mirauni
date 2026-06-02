@@ -1,4 +1,4 @@
-import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseUser, serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
     const user = await serverSupabaseUser(event)
@@ -8,18 +8,25 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, message: 'ID required' })
     }
 
-    const client = await serverSupabaseClient(event)
+    const supabaseAdmin = serverSupabaseServiceRole(event)
 
     // 1. Check if self
     if (user && user.id === id) {
-        const { data } = await client.from('users').select('phone, wechat_id, email').eq('id', id).single()
+        // 使用 service_role 提取自己本人的敏感信息，绕过 RLS 自查限制
+        const { data, error } = await supabaseAdmin
+            .from('users')
+            .select('phone, wechat_id, email')
+            .eq('id', id)
+            .single()
+            
+        if (error) throw error
         return { success: true, data }
     }
 
     // 2. Check if unlocked
     let isUnlocked = false
     if (user) {
-        const { data } = await client
+        const { data } = await supabaseAdmin
             .from('unlocks')
             .select('id')
             .eq('user_id', user.id)
@@ -29,13 +36,11 @@ export default defineEventHandler(async (event) => {
     }
 
     if (!isUnlocked) {
-        // Return masked data or 403
-        // Requirements say "Pay to Unlock". So likely we return 403 or specific code.
         throw createError({ statusCode: 403, message: 'Contact info locked' })
     }
 
-    // 3. Return contact info
-    const { data, error } = await client
+    // 3. Return contact info (以 service_role 身份，安全读取被解锁者的敏感字段)
+    const { data, error } = await supabaseAdmin
         .from('users')
         .select('phone, wechat_id, email')
         .eq('id', id)

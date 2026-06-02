@@ -6,7 +6,13 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import type { H3Event } from 'h3'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'mirauni-admin-secret-key-2025'
+const JWT_SECRET = process.env.JWT_SECRET
+
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required in production!')
+}
+
+const SECRET_KEY = JWT_SECRET || 'mirauni-admin-secret-key-2025'
 
 // 创建 Supabase 管理员客户端
 export function createAdminSupabaseClient() {
@@ -23,7 +29,7 @@ export function signAdminToken(payload: { userId: string; role: string }) {
             isAdmin: true,
             iat: Math.floor(Date.now() / 1000)
         },
-        JWT_SECRET,
+        SECRET_KEY,
         { expiresIn: '7d' }
     )
 }
@@ -31,7 +37,7 @@ export function signAdminToken(payload: { userId: string; role: string }) {
 // 验证管理员 JWT Token
 export function verifyAdminToken(token: string) {
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as {
+        const decoded = jwt.verify(token, SECRET_KEY) as {
             userId: string
             role: string
             isAdmin: boolean

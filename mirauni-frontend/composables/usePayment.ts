@@ -49,7 +49,8 @@ export function usePayment() {
             .eq('id', user.value.id)
             .single()
 
-        return data?.unlock_credits || 0
+        const userData = data as any
+        return userData?.unlock_credits || 0
     }
 
     /**

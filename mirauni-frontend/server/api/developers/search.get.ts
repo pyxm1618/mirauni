@@ -4,11 +4,10 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const supabase = await serverSupabaseClient(event)
 
-    // Base query: select users who have filled in key profile info
+    // Base query: select users from public_profiles
     let request = supabase
-        .from('users')
+        .from('public_profiles')
         .select('id, username, avatar_url, bio, profession, position, skills, experience_years, work_preference, location', { count: 'exact' })
-        .not('username', 'is', null) // Only users with usernames (completed basic profile)
         .order('created_at', { ascending: false })
 
     // Dynamic filters

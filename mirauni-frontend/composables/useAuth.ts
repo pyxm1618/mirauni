@@ -29,7 +29,9 @@ export function useAuth() {
      * 验证码登录
      */
     async function loginWithCode(phone: string, code: string) {
-        console.log('[useAuth] loginWithCode called. Fetching /api/auth/verify-code...')
+        if (process.dev) {
+            console.log('[useAuth] loginWithCode called. Fetching /api/auth/verify-code...')
+        }
         const response = await $fetch<{
             success: boolean
             user: any
@@ -44,7 +46,6 @@ export function useAuth() {
             body: { phone, code },
             timeout: 15000 // 15s timeout
         })
-        console.log('[useAuth] /api/auth/verify-code response:', response)
 
         if (response.success && response.session) {
             // 设置 Supabase session
@@ -67,12 +68,10 @@ export function useAuth() {
             const fromPlan = route.query.from === 'plan'
 
             if (fromPlan && redirect) {
-                // 来自钱途的登录请求，跳转回钱途并携带 SSO tokens
+                // 来自钱途的登录请求，安全降级：直接跳转，不传任何 bearer token
                 try {
                     const targetUrl = new URL(decodeURIComponent(redirect))
-                    targetUrl.searchParams.set('sso_access', response.session.access_token)
-                    targetUrl.searchParams.set('sso_refresh', response.session.refresh_token)
-                    window.location.href = targetUrl.toString()
+                    window.location.href = targetUrl.origin
                     return response
                 } catch (e) {
                     console.error('[useAuth] Invalid redirect URL:', e)
@@ -126,7 +125,9 @@ export function useAuth() {
      * 密码登录
      */
     async function loginWithPassword(phone: string, password: string) {
-        console.log('[useAuth] loginWithPassword called. Fetching /api/auth/login-password...')
+        if (process.dev) {
+            console.log('[useAuth] loginWithPassword called. Fetching /api/auth/login-password...')
+        }
         const response = await $fetch<{
             success: boolean
             user: any
@@ -140,7 +141,6 @@ export function useAuth() {
             body: { phone, password },
             timeout: 15000
         })
-        console.log('[useAuth] /api/auth/login-password response:', response)
 
         if (response.success && response.session) {
             // 设置 Supabase session
@@ -159,9 +159,7 @@ export function useAuth() {
             if (fromPlan && redirect) {
                 try {
                     const targetUrl = new URL(decodeURIComponent(redirect))
-                    targetUrl.searchParams.set('sso_access', response.session.access_token)
-                    targetUrl.searchParams.set('sso_refresh', response.session.refresh_token)
-                    window.location.href = targetUrl.toString()
+                    window.location.href = targetUrl.origin
                     return response
                 } catch (e) {
                     console.error('[useAuth] Invalid redirect URL:', e)
