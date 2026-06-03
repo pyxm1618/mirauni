@@ -47,14 +47,15 @@
                 {{ countdown > 0 ? `${countdown}s` : $t('auth.sendCode') }}
               </button>
             </div>
-            <p class="text-xs text-gray-500 mt-2">提示：验证码将在最后一步提交重置时，由服务端进行最终的安全校验。</p>
+            <p class="text-xs text-gray-500 mt-2">{{ $t('auth.forgot.codeFinalVerifyTip') }}</p>
           </div>
 
           <button 
             @click="handleNextStep"
-            :disabled="!phone || code.length !== 6"
-            class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="!phone || code.length !== 6 || isCheckingCode"
+            class="w-full px-6 py-4 bg-black text-white border-2 border-black shadow-brutal hover:bg-indie-primary hover:text-black hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-brutal-active transition-all font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
+            <span v-if="isCheckingCode" class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             {{ $t('auth.forgot.nextStep') }}
           </button>
         </div>
@@ -120,6 +121,7 @@ const confirmPassword = ref('')
 const error = ref('')
 const success = ref(false)
 const isSending = ref(false)
+const isCheckingCode = ref(false)
 const isResetting = ref(false)
 const countdown = ref(0)
 
@@ -146,13 +148,32 @@ async function handleSendCode() {
 }
 
 // 下一步
-function handleNextStep() {
+async function handleNextStep() {
+  if (phone.value.length !== 11) {
+    error.value = t('auth.error.phone')
+    return
+  }
   if (code.value.length !== 6) {
     error.value = t('auth.error.code')
     return
   }
   error.value = ''
-  step.value = 2
+  isCheckingCode.value = true
+
+  try {
+    await $fetch('/api/auth/check-reset-code', {
+      method: 'POST',
+      body: { 
+        phone: phone.value, 
+        code: code.value 
+      }
+    })
+    step.value = 2
+  } catch (e: any) {
+    error.value = e.data?.message || e.message || t('auth.error.code')
+  } finally {
+    isCheckingCode.value = false
+  }
 }
 
 // 重置密码

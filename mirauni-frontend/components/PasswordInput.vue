@@ -2,7 +2,7 @@
   <div class="relative w-full">
     <input 
       :value="modelValue"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      @input="handleInput"
       :type="showPassword ? 'text' : 'password'" 
       :placeholder="placeholder"
       class="w-full bg-gray-50 px-4 py-4 pr-12 border-2 border-indie-border font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
@@ -12,7 +12,8 @@
       type="button"
       @click="toggleShow"
       class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none flex items-center justify-center p-1 border-2 border-transparent hover:border-black hover:bg-gray-100 transition-all"
-      :title="showPassword ? $t('auth.forgot.hidePassword') || '隐藏密码' : $t('auth.forgot.showPassword') || '显示密码'"
+      :title="showPassword ? $t('auth.passwordInput.hide') : $t('auth.passwordInput.show')"
+      :aria-label="showPassword ? $t('auth.passwordInput.hide') : $t('auth.passwordInput.show')"
     >
       <!-- 使用 SVG 适配以防万一组件库 Icon 未能加载，也保证完美的 Brutalist 手工质感 -->
       <svg v-if="showPassword" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -40,12 +41,16 @@ defineProps({
   }
 })
 
-defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
 
 const showPassword = ref(false)
 
 function toggleShow() {
   showPassword.value = !showPassword.value
+}
+
+function handleInput(event: Event) {
+  emit('update:modelValue', (event.target as HTMLInputElement).value)
 }
 </script>
 
