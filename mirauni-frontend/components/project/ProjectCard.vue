@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border-3 border-black p-5 shadow-brutal hover:shadow-brutal-lg transition-all hover:-translate-y-1 flex flex-col h-full group pb-16 relative" @click="navigateTo(`/projects/${project.id}`)">
+  <NuxtLink :to="localePath('/projects/' + project.id)" class="bg-white border-3 border-black p-5 shadow-brutal hover:shadow-brutal-lg transition-all hover:-translate-y-1 flex flex-col h-full group pb-16 relative">
     <!-- Header -->
     <div class="flex justify-between items-start mb-4">
         <div class="w-10 h-10 border-3 border-black flex items-center justify-center font-bold bg-indie-primary">
@@ -32,11 +32,11 @@
 
     <!-- Action Button (Absolute Bottom) -->
     <div class="absolute bottom-5 left-5 right-5">
-        <button class="w-full border-3 border-black py-2 font-black text-sm hover:bg-indie-primary hover:shadow-brutal-hover transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none bg-white uppercase">
+        <div class="w-full border-3 border-black py-2 font-black text-sm hover:bg-indie-primary hover:shadow-brutal-hover transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none bg-white uppercase text-center">
             查看详情
-        </button>
+        </div>
     </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <script setup lang="ts">
