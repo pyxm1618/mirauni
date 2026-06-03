@@ -58,16 +58,17 @@ export default defineEventHandler(async (event) => {
     }
 
     // 4. 更新 users.has_password
-    const { error: userError } = await supabaseAdmin
+    const { data: userData, error: userError } = await supabaseAdmin
         .from('users')
         .update({ has_password: true })
         .eq('id', user.id)
+        .select('id')
 
-    if (userError) {
-        console.error('更新用户状态失败:', userError)
+    if (userError || !userData || userData.length === 0) {
+        console.error('更新用户状态失败:', userError, userData)
         throw createError({
             statusCode: 500,
-            message: '设置密码失败'
+            message: '密码已修改，但账户状态同步失败，请尝试重新登录'
         })
     }
 

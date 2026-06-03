@@ -28,6 +28,7 @@ export default defineEventHandler(async (event) => {
     // 1. 验证验证码
     // 开发模式支持万能验证码
     const isDevMasterCode = process.dev && code === '888888'
+    let isCodeVerified = false
 
     if (!isDevMasterCode) {
         const { data: smsData, error: smsError } = await supabaseAdmin
@@ -44,9 +45,7 @@ export default defineEventHandler(async (event) => {
                 message: '验证码错误或已过期'
             })
         }
-
-        // 删除验证码
-        await supabaseAdmin.from('sms_codes').delete().eq('phone', phone)
+        isCodeVerified = true
     }
 
     // 2. 查找用户
@@ -83,17 +82,23 @@ export default defineEventHandler(async (event) => {
     }
 
     // 4. 更新 users.has_password
-    const { error: userError } = await supabaseAdmin
+    const { data: userData, error: userError } = await supabaseAdmin
         .from('users')
         .update({ has_password: true })
         .eq('id', user.id)
+        .select('id')
 
-    if (userError) {
-        console.error('更新用户状态失败:', userError)
+    if (userError || !userData || userData.length === 0) {
+        console.error('更新用户状态失败:', userError, userData)
         throw createError({
             statusCode: 500,
-            message: '重置密码失败'
+            message: '密码已修改，但账户状态同步失败，请尝试重新登录'
         })
+    }
+
+    // 5. 成功后删除验证码
+    if (isCodeVerified) {
+        await supabaseAdmin.from('sms_codes').delete().eq('phone', phone)
     }
 
     return {
