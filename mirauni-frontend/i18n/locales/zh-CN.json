@@ -105,6 +105,9 @@
             "empty": "暂无符合条件的项目",
             "emptyHint": "试着调整筛选条件，或者",
             "launchFirst": "发布第一个项目",
+            "emptyNoProjects": "暂无公开项目",
+            "emptyNoProjectsHint": "成为第一个发布项目的人",
+            "emptyNoProjectsAction": "立即发布",
             "seoTitle": "创业项目招募开发者 - 小概率",
             "seoDesc": "发布项目招募前端、后端、全栈和 Flutter 技术合伙人"
         },

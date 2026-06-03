@@ -104,6 +104,9 @@
             "empty": "No projects found",
             "emptyHint": "Try adjusting filters, or",
             "launchFirst": "Launch first project",
+            "emptyNoProjects": "No public projects yet",
+            "emptyNoProjectsHint": "Be the first to launch a project",
+            "emptyNoProjectsAction": "Launch Now",
             "seoTitle": "Projects Square - Mirauni",
             "seoDesc": "Find indie developer projects"
         },

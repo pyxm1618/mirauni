@@ -10,7 +10,7 @@
               <span class="text-2xl">+</span> {{ $t('project.square.launch') }}
           </NuxtLink>
         </div>
-        
+
         <!-- Brutalist Search & Filter -->
         <div class="flex flex-col gap-6">
             <!-- Search -->
@@ -18,7 +18,7 @@
                 <div class="absolute inset-0 bg-black translate-x-2 translate-y-2"></div>
                 <input
                   v-model.lazy="filters.keyword"
-                  type="text" 
+                  type="text"
                   :placeholder="$t('project.square.search')"
                   class="relative w-full bg-white border-3 border-black p-4 font-bold text-xl focus:outline-none placeholder-gray-400"
                 />
@@ -55,7 +55,7 @@
       <ProjectCard v-for="p in projects" :key="p.id" :project="p" />
     </div>
     <div v-else class="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-300">
-        <!-- 有筛选条件时：暂无符合条件的项目 -->
+        <!-- 有筛选条件时 -->
         <template v-if="isFiltered">
             <div class="text-xl text-gray-500 mb-4">{{ $t('project.square.empty') }}</div>
             <p class="text-gray-400">
@@ -65,12 +65,12 @@
                 </NuxtLink>
             </p>
         </template>
-        <!-- 无筛选条件时：生产空状态 -->
+        <!-- 无筛选条件时（生产环境无项目） -->
         <template v-else>
-            <div class="text-xl text-gray-500 mb-4">暂无公开项目</div>
+            <div class="text-xl text-gray-500 mb-4">{{ $t('project.square.emptyNoProjects') }}</div>
             <p class="text-gray-400">
-                成为第一个发布项目的人
-                <NuxtLink to="/projects/create" class="text-indie-primary underline ml-1">立即发布</NuxtLink>
+                {{ $t('project.square.emptyNoProjectsHint') }}
+                <NuxtLink to="/projects/create" class="text-indie-primary underline ml-1">{{ $t('project.square.emptyNoProjectsAction') }}</NuxtLink>
             </p>
         </template>
     </div>
@@ -119,7 +119,7 @@ const { t } = useI18n()
 
 useSeoMeta({
   title: '创业项目招募开发者｜找技术合伙人 - 小概率',
-  description: '发布创业项目，招募前端、后端、全栈和 Flutter 开发者。在小概率平台快速找到技术合伙人。',
+  description: '发布创业项目，招募前端、后端、全栈和 Flutter 开发者，快速找到技术合伙人。',
   keywords: '创业项目招募开发者,找技术合伙人,招募技术合伙人,找程序员合伙做项目',
   ogTitle: '创业项目招募开发者 - 小概率',
   ogDescription: '发布项目，快速找到靠谱技术合伙人。'
