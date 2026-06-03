@@ -114,8 +114,11 @@ function handleLogout() {
 }
 
 async function confirmLogout() {
-  await logout()
-  showLogoutModal.value = false
+  try {
+    await logout()
+  } finally {
+    showLogoutModal.value = false
+  }
 }
 
 // 获取我的项目列表

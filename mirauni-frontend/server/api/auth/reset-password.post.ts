@@ -4,6 +4,7 @@
  * Body: { phone: string, code: string, newPassword: string }
  */
 import { serverSupabaseServiceRole } from '#supabase/server'
+import { getRequestIP } from 'h3'
 import { hashPassword } from '../../utils/password'
 
 export default defineEventHandler(async (event) => {
@@ -26,6 +27,9 @@ export default defineEventHandler(async (event) => {
     const supabaseAdmin = serverSupabaseServiceRole(event)
 
     // 1. 验证验证码
+    const ip = getRequestIP(event, { xForwardedFor: true }) || '127.0.0.1'
+    checkResetCodeRateLimit(phone, ip)
+
     // 开发模式支持万能验证码
     const isDevMasterCode = process.dev && code === '888888'
     let isCodeVerified = false
@@ -37,13 +41,10 @@ export default defineEventHandler(async (event) => {
             .eq('phone', phone)
             .eq('code', code)
             .gt('expires_at', new Date().toISOString())
-            .single()
+            .maybeSingle()
 
         if (smsError || !smsData) {
-            throw createError({
-                statusCode: 400,
-                message: '验证码错误或已过期'
-            })
+            incrementResetCodeAttempts(phone, ip)
         }
         isCodeVerified = true
     }
@@ -96,10 +97,11 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 5. 成功后删除验证码
+    // 5. 成功后删除验证码并清除频率限制尝试次数
     if (isCodeVerified) {
         await supabaseAdmin.from('sms_codes').delete().eq('phone', phone)
     }
+    clearResetCodeAttempts(phone, ip)
 
     return {
         success: true,

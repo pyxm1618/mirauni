@@ -166,8 +166,11 @@ function handleLogout() {
 }
 
 async function confirmLogout() {
-  await logout()
-  showLogoutModal.value = false
+  try {
+    await logout()
+  } finally {
+    showLogoutModal.value = false
+  }
 }
 
 async function handlePaymentSuccess() {
