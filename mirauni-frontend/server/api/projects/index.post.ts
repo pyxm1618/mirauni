@@ -28,10 +28,11 @@ export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient(event)
 
     const { data, error } = await client
-        .from('projects')
+        .from('mirauni_projects')
         .insert({
             ...result.data,
-            user_id: user.id
+            user_id: user.id,
+            status: 'pending' // 强制设置为待审核状态
         })
         .select()
         .single()

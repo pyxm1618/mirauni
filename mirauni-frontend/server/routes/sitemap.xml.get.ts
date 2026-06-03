@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
 
     // 并行获取所有数据
     const [projectsRes, articlesRes] = await Promise.all([
-        supabase.from('projects').select('id, updated_at').eq('status', 'active'),
+        supabase.from('mirauni_projects').select('id, updated_at').eq('status', 'active'),
         supabase.from('articles').select('slug, updated_at').eq('status', 'published')
     ])
 

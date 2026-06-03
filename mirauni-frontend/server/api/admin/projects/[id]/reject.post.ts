@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     const supabase = createAdminSupabaseClient()
 
     const { error } = await supabase
-        .from('projects')
+        .from('mirauni_projects')
         .update({
             status: 'rejected',
             reject_reason: reason

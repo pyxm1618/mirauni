@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
 
     // Verify ownership
     const { data: existing, error: fetchError } = await client
-        .from('projects')
+        .from('mirauni_projects')
         .select('user_id')
         .eq('id', id)
         .single()
@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
 
     // Update
     const { data, error } = await client
-        .from('projects')
+        .from('mirauni_projects')
         .update(result.data)
         .eq('id', id)
         .select()
