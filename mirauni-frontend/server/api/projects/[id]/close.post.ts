@@ -1,4 +1,4 @@
-import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseUser, serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
@@ -9,9 +9,9 @@ export default defineEventHandler(async (event) => {
 
     const client = await serverSupabaseClient(event)
 
-    // Verify ownership
+    // Verify ownership using user client
     const { data: existing, error: fetchError } = await client
-        .from('projects')
+        .from('mirauni_projects')
         .select('user_id')
         .eq('id', id)
         .single()
@@ -24,9 +24,10 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 403, message: 'Forbidden' })
     }
 
-    // Soft Delete (change status to closed)
-    const { data, error } = await client
-        .from('projects')
+    // Soft Delete (change status to closed) using adminClient
+    const adminClient = serverSupabaseServiceRole(event)
+    const { data, error } = await adminClient
+        .from('mirauni_projects')
         .update({ status: 'closed' })
         .eq('id', id)
         .select()

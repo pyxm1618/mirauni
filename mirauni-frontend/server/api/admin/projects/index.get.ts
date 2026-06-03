@@ -16,8 +16,8 @@ export default defineEventHandler(async (event) => {
     const supabase = createAdminSupabaseClient()
 
     let request = supabase
-        .from('projects')
-        .select('*, users:user_id(username, avatar_url)', { count: 'exact' })
+        .from('mirauni_projects')
+        .select('*', { count: 'exact' })
         .order('created_at', { ascending: false })
 
     // 状态筛选
@@ -43,9 +43,29 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    // 内存合并 public_profiles 物理表中的公开用户信息，保证数据合规不越权
+    const userIds = [...new Set((data || []).map(p => p.user_id).filter(Boolean))]
+
+    const { data: profiles } = userIds.length
+        ? await supabase
+            .from('public_profiles')
+            .select('id, username, avatar_url')
+            .in('id', userIds)
+        : { data: [] }
+
+    const profileMap = new Map((profiles || []).map(p => [p.id, p]))
+
+    const enriched = (data || []).map(p => ({
+        ...p,
+        users: profileMap.get(p.user_id) || {
+            username: '用户',
+            avatar_url: null
+        }
+    }))
+
     return {
         success: true,
-        data,
+        data: enriched,
         meta: { total: count, page, pageSize }
     }
 })

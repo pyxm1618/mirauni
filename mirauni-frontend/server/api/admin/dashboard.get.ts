@@ -25,9 +25,9 @@ export default defineEventHandler(async (event) => {
         supabase.from('users').select('*', { count: 'exact', head: true })
             .gte('created_at', `${today}T00:00:00`),
         // 总项目数
-        supabase.from('projects').select('*', { count: 'exact', head: true }),
+        supabase.from('mirauni_projects').select('*', { count: 'exact', head: true }),
         // 待审核项目
-        supabase.from('projects').select('*', { count: 'exact', head: true })
+        supabase.from('mirauni_projects').select('*', { count: 'exact', head: true })
             .eq('status', 'pending'),
         // 已支付订单总数
         supabase.from('orders').select('*', { count: 'exact', head: true })

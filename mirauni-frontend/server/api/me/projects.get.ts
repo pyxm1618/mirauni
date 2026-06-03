@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient(event)
 
     const { data, error } = await client
-        .from('projects')
+        .from('mirauni_projects')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })

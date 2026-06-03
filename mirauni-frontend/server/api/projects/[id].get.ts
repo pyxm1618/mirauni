@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
 
     // 1. Fetch Project
     const { data: project, error } = await client
-        .from('projects')
+        .from('mirauni_projects')
         .select('*')
         .eq('id', id)
         .single()
