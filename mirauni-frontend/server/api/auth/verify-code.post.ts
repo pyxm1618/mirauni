@@ -10,7 +10,9 @@
  * 4. 返回 session
  */
 import crypto from 'crypto'
+import { getRequestIP } from 'h3'
 import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
+import { checkVerifyCodeRateLimit, incrementVerifyCodeAttempts, clearVerifyCodeAttempts } from '~/server/utils/reset-code-rate-limit'
 
 export default defineEventHandler(async (event) => {
     const { phone, code } = await readBody(event)
@@ -33,11 +35,15 @@ export default defineEventHandler(async (event) => {
     const supabase = await serverSupabaseClient(event)
     const supabaseAdmin = serverSupabaseServiceRole(event)
 
-    // 1. 验证验证码（开发模式支持万能验证码 888888）
+    const ip = getRequestIP(event, { xForwardedFor: true }) || '127.0.0.1'
     const isDevMasterCode = process.dev && code === '888888'
 
+    // 1. 验证验证码
     let smsData = null
     if (!isDevMasterCode) {
+        // 非万能验证码，检查频率限制
+        checkVerifyCodeRateLimit(phone, ip)
+
         const { data, error: smsError } = await supabaseAdmin
             .from('sms_codes')
             .select()
@@ -47,29 +53,22 @@ export default defineEventHandler(async (event) => {
             .single()
 
         if (smsError || !data) {
-            throw createError({
-                statusCode: 400,
-                message: '验证码错误或已过期'
-            })
+            // 校验失败，增加错误尝试次数并抛出 400/429 错误中断流程
+            incrementVerifyCodeAttempts(phone, ip)
         }
         smsData = data
     } else {
         console.log(`[DEV] 使用万能验证码登录: ${phone}`)
     }
 
-    // 2. 删除已使用的验证码（仅非万能验证码时，使用 supabaseAdmin）
-    if (!isDevMasterCode) {
-        await supabaseAdmin.from('sms_codes').delete().eq('phone', phone)
-    }
-
-    // 3. 查找现有用户
+    // 2. 查找现有用户
     let { data: existingUser } = await supabaseAdmin
         .from('users')
         .select('*')
         .eq('phone', phone)
         .single()
 
-    // 4. 处理认证逻辑
+    // 3. 处理认证逻辑
     const email = `${phone}@phone.mirauni.com`
     let supabasePassword
     let authUser
@@ -102,15 +101,25 @@ export default defineEventHandler(async (event) => {
             
             if (updateError) {
                 console.error('迁移更新密码失败:', updateError)
-                // 尝试创建 Auth 用户（如果之前的逻辑删除了 Auth 用户但保留了 public.users）
-                // 这里简化处理，假设 update 失败通常是因为 Auth 用户不存在
+                throw createError({
+                    statusCode: 500,
+                    message: '用户迁移更新密码失败，请稍后重试'
+                })
             }
 
             // 插入 Secret
-            await supabaseAdmin.from('user_secrets').insert({
+            const { error: secretError } = await supabaseAdmin.from('user_secrets').insert({
                 user_id: existingUser.id,
                 supabase_password: supabasePassword
             })
+
+            if (secretError) {
+                console.error('迁移保存用户密码密文失败:', secretError)
+                throw createError({
+                    statusCode: 500,
+                    message: '保存用户登录密钥失败，请稍后重试'
+                })
+            }
         }
     } else {
         // 新用户注册
@@ -157,15 +166,47 @@ export default defineEventHandler(async (event) => {
         }
 
         // 创建 Secret
-        await supabaseAdmin.from('user_secrets').insert({
+        const { error: secretError } = await supabaseAdmin.from('user_secrets').insert({
             user_id: userId,
             supabase_password: supabasePassword
         })
 
+        if (secretError) {
+            console.error('创建用户密码密文失败:', secretError)
+            
+            // 回滚：1. 先尝试删除 public.users 记录
+            try {
+                const { error: deleteUserError } = await supabaseAdmin
+                    .from('users')
+                    .delete()
+                    .eq('id', userId)
+                if (deleteUserError) {
+                    console.error('回滚删除 public.users 记录失败:', deleteUserError)
+                }
+            } catch (err) {
+                console.error('回滚删除 public.users 记录捕获到异常:', err)
+            }
+
+            // 回滚：2. 再尝试删除 Auth 用户
+            try {
+                const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+                if (deleteAuthError) {
+                    console.error('回滚删除 Auth 用户失败:', deleteAuthError)
+                }
+            } catch (err) {
+                console.error('回滚删除 Auth 用户捕获到异常:', err)
+            }
+
+            throw createError({
+                statusCode: 500,
+                message: '创建用户登录密钥失败，请稍后重试'
+            })
+        }
+
         existingUser = newUser
     }
 
-    // 5. 登录
+    // 4. 登录
     const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
         email,
         password: supabasePassword
@@ -180,7 +221,26 @@ export default defineEventHandler(async (event) => {
     }
     authUser = signInData
 
-    // 6. 返回用户信息和 session
+    // 只有全部成功登录后，才删除已使用的验证码并清空限频计数
+    if (!isDevMasterCode) {
+        try {
+            const { error: deleteError } = await supabaseAdmin
+                .from('sms_codes')
+                .delete()
+                .eq('phone', phone)
+            
+            if (deleteError) {
+                console.error('删除已使用验证码失败:', deleteError)
+            }
+        } catch (err) {
+            console.error('删除已使用验证码时发生异常:', err)
+        }
+
+        // 清空错误次数限制
+        clearVerifyCodeAttempts(phone, ip)
+    }
+
+    // 5. 返回用户信息和 session
     return {
         success: true,
         user: {
