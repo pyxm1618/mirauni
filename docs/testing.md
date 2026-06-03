@@ -1,6 +1,6 @@
 # 小概率独立开发者匹配平台 - 测试计划
 
-> 更新时间: 2025-12-26
+> 更新时间: 2026-06-02
 
 ---
 
@@ -122,6 +122,28 @@
 3. **UAT 测试**: 邀请真实用户测试
 4. **灰度发布**: 小流量验证
 5. **正式上线**
+
+---
+
+## 自动化检查
+
+| 子项目 | 命令 | 说明 |
+|--------|------|------|
+| Web 前台 | `cd mirauni-frontend && npm run typecheck` | Nuxt 类型检查 |
+| Web 前台 | `cd mirauni-frontend && npm run build` | Nuxt 生产构建 |
+| 管理后台 | `cd mirauni-admin && npm run build` | Vite 生产构建 |
+| Flutter App | `cd mirauni_app && flutter analyze` | Dart 静态检查 |
+| Flutter App | `cd mirauni_app && flutter test` | Flutter 单元/组件测试 |
+
+## 冒烟检查
+
+| 范围 | 检查项 |
+|------|--------|
+| Web 前台 | `/`、`/projects`、`/developers`、`/academy`、`/login` 可访问 |
+| Web API | `/api/projects`、`/api/developers/search`、`/api/articles` 返回结构化数据 |
+| 管理后台 | `/login` 可打开，登录后可进入仪表盘、用户、项目、文章、订单、分析页面 |
+| Flutter App | `/splash` 后能进入主 Shell，项目/开发者/消息/我的页面可切换 |
+| RAG | [早期方案非当前线上验收项] 参见 `docs/RAG.md` 历史方案 |
 
 ---
 

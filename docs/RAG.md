@@ -1,3 +1,9 @@
+> ⚠️ 早期方案归档与定位说明
+> 本文件属于钱途工具相关的早期 RAG 路径推荐设计方案，尚未确认接入当前的 `plan/` (钱途工具) 线上业务。
+> 本文件不属于「小概率独立开发者匹配平台」的主线 MVP 范围，不应将其与主线平台混淆。
+> 另外，经审计，本方案设计的 `path_templates` 表 (使用 UUID 主键) 与种子数据 `path_templates_seed.sql` 中普通字符串 ID ('p001' 等) 存在类型冲突，直接执行会导致导入失败。
+> 该 RAG 方案目前不作为当前已上线 `plan/` 业务的既有投产功能；未来如需启用，应作为钱途工具的独立迭代重新评审 schema、seed、API 与前端接入。
+
 # 路径知识库 RAG 系统设计文档
 
 > 版本：v1.2 (Final)  
@@ -1020,8 +1026,8 @@ curl -X POST http://localhost:3000/api/wizard/ai/recommend \
 
 ### 8.2 相关文档
 
-- [PRD.md](file:///Users/pyxm1618/Downloads/大排期/docs/PRD.md)
-- [technical-design.md](file:///Users/pyxm1618/Downloads/大排期/docs/technical-design.md)
+- [钱途 PRD](../plan/docs/PRD.md)
+- [钱途技术设计](../plan/docs/technical-design.md)
 
 ---
 
