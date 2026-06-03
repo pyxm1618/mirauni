@@ -25,10 +25,10 @@ export default defineEventHandler(async (event) => {
         }
     }
 
-    if (!user) {
+    if (!user || !user.id || user.id === 'undefined') {
         throw createError({
             statusCode: 401,
-            message: '未登录'
+            message: '未登录或登录失效'
         })
     }
 
@@ -43,34 +43,32 @@ export default defineEventHandler(async (event) => {
     const hashedPassword = await hashPassword(password)
 
     // 3. 更新 user_secrets
-    const { error: secretError } = await supabaseAdmin
+    const { data: secretData, error: secretError } = await supabaseAdmin
         .from('user_secrets')
         .update({ password_hash: hashedPassword })
         .eq('user_id', user.id)
+        .select('user_id')
 
-    if (secretError) {
-        console.error('更新密码哈希失败:', secretError)
-        // 如果 update 失败可能是因为没有记录（理论上 login-password 保证了有记录，但 verify-code 可能刚刚创建了用户但没创建 secrets? No, verify-code creates secrets now.）
-        // 双保险：upsert
-        // 但 upsert 需要 supabase_password...
-        // 假设 verify-code 逻辑正确，这里直接抛错
+    if (secretError || !secretData || secretData.length === 0) {
+        console.error('更新密码哈希失败或记录不存在:', secretError, secretData)
         throw createError({
             statusCode: 500,
-            message: '设置密码失败'
+            message: '设置密码失败，用户凭证不存在或不可更新'
         })
     }
 
     // 4. 更新 users.has_password
-    const { error: userError } = await supabaseAdmin
+    const { data: userData, error: userError } = await supabaseAdmin
         .from('users')
         .update({ has_password: true })
         .eq('id', user.id)
+        .select('id')
 
-    if (userError) {
-        console.error('更新用户状态失败:', userError)
+    if (userError || !userData || userData.length === 0) {
+        console.error('更新用户状态失败:', userError, userData)
         throw createError({
             statusCode: 500,
-            message: '设置密码失败'
+            message: '密码已修改，但账户状态同步失败，请尝试重新登录'
         })
     }
 

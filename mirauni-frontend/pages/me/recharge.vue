@@ -133,6 +133,9 @@
         @success="handlePaymentSuccess" 
       />
     </ClientOnly>
+
+    <!-- 退出登录确认模态弹窗 -->
+    <LogoutConfirmModal v-model="showLogoutModal" @confirm="confirmLogout" />
   </div>
 </template>
 
@@ -155,11 +158,18 @@ const unlockCredits = computed(() => info.value?.unlock_credits ?? 0)
 const lifetimeUnlocks = computed(() => info.value?.lifetime_unlocks ?? 0)
 const historyList = computed(() => info.value?.history ?? [])
 
+const showLogoutModal = ref(false)
 const showPaymentModal = ref(false)
 
-async function handleLogout() {
-  if (confirm(t('me.profile.logoutConfirm'))) {
+function handleLogout() {
+  showLogoutModal.value = true
+}
+
+async function confirmLogout() {
+  try {
     await logout()
+  } finally {
+    showLogoutModal.value = false
   }
 }
 

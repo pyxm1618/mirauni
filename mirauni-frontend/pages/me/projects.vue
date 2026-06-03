@@ -95,19 +95,29 @@
         </div>
       </main>
     </div>
+
+    <!-- 退出登录确认模态弹窗 -->
+    <LogoutConfirmModal v-model="showLogoutModal" @confirm="confirmLogout" />
   </div>
 </template>
 
 <script setup lang="ts">
+const { logout } = useAuth()
 definePageMeta({
   middleware: 'auth'
 })
 const { t } = useI18n()
-const { logout } = useAuth()
+const showLogoutModal = ref(false)
 
-async function handleLogout() {
-  if (confirm(t('me.profile.logoutConfirm'))) {
+function handleLogout() {
+  showLogoutModal.value = true
+}
+
+async function confirmLogout() {
+  try {
     await logout()
+  } finally {
+    showLogoutModal.value = false
   }
 }
 

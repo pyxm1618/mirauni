@@ -4,6 +4,7 @@
  * Body: { phone: string, code: string, newPassword: string }
  */
 import { serverSupabaseServiceRole } from '#supabase/server'
+import { getRequestIP } from 'h3'
 import { hashPassword } from '../../utils/password'
 
 export default defineEventHandler(async (event) => {
@@ -26,8 +27,12 @@ export default defineEventHandler(async (event) => {
     const supabaseAdmin = serverSupabaseServiceRole(event)
 
     // 1. 验证验证码
+    const ip = getRequestIP(event, { xForwardedFor: true }) || '127.0.0.1'
+    checkResetCodeRateLimit(phone, ip)
+
     // 开发模式支持万能验证码
     const isDevMasterCode = process.dev && code === '888888'
+    let isCodeVerified = false
 
     if (!isDevMasterCode) {
         const { data: smsData, error: smsError } = await supabaseAdmin
@@ -36,17 +41,12 @@ export default defineEventHandler(async (event) => {
             .eq('phone', phone)
             .eq('code', code)
             .gt('expires_at', new Date().toISOString())
-            .single()
+            .maybeSingle()
 
         if (smsError || !smsData) {
-            throw createError({
-                statusCode: 400,
-                message: '验证码错误或已过期'
-            })
+            incrementResetCodeAttempts(phone, ip)
         }
-
-        // 删除验证码
-        await supabaseAdmin.from('sms_codes').delete().eq('phone', phone)
+        isCodeVerified = true
     }
 
     // 2. 查找用户
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
         .eq('phone', phone)
         .single()
 
-    if (!user) {
+    if (!user || !user.id || user.id === 'undefined') {
         throw createError({
             statusCode: 400,
             message: '用户不存在'
@@ -66,30 +66,42 @@ export default defineEventHandler(async (event) => {
     // 3. 更新密码哈希
     const hashedPassword = await hashPassword(newPassword)
     
-    // 确保 secret 存在 (如果用户存在但 secret 不存在，这里是修复的好时机，但需要 supabase_password)
-    // 简单起见，只更新存在的 secret
-    const { error: secretError } = await supabaseAdmin
+    // 确保 secret 存在
+    // 仅更新存在的 secret 并确认受影响行数
+    const { data: secretData, error: secretError } = await supabaseAdmin
         .from('user_secrets')
         .update({ password_hash: hashedPassword })
         .eq('user_id', user.id)
+        .select('user_id')
     
-    if (secretError) {
-        // 如果更新失败（例如无记录），尝试插入？
-        // 这需要生成 supabase_password，比较复杂。
-        // 假设 verify-code/login 流程已经保证了 secret 存在。
-        // 如果这里失败，可能是数据不一致。
-        console.error('重置密码失败 (user_secrets):', secretError)
+    if (secretError || !secretData || secretData.length === 0) {
+        console.error('重置密码失败 (user_secrets):', secretError, secretData)
         throw createError({
             statusCode: 500,
-            message: '重置密码失败'
+            message: '重置密码失败，用户凭证不存在或不可更新'
         })
     }
 
     // 4. 更新 users.has_password
-    await supabaseAdmin
+    const { data: userData, error: userError } = await supabaseAdmin
         .from('users')
         .update({ has_password: true })
         .eq('id', user.id)
+        .select('id')
+
+    if (userError || !userData || userData.length === 0) {
+        console.error('更新用户状态失败:', userError, userData)
+        throw createError({
+            statusCode: 500,
+            message: '密码已修改，但账户状态同步失败，请尝试重新登录'
+        })
+    }
+
+    // 5. 成功后删除验证码并清除频率限制尝试次数
+    if (isCodeVerified) {
+        await supabaseAdmin.from('sms_codes').delete().eq('phone', phone)
+    }
+    clearResetCodeAttempts(phone, ip)
 
     return {
         success: true,

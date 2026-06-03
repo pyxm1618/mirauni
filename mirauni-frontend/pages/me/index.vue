@@ -243,6 +243,9 @@
         </div>
       </main>
     </div>
+
+    <!-- 退出登录确认模态弹窗 -->
+    <LogoutConfirmModal v-model="showLogoutModal" @confirm="confirmLogout" />
   </div>
 </template>
 
@@ -383,9 +386,17 @@ async function saveProfile() {
 }
 
 // 退出登录
-async function handleLogout() {
-  if (confirm(t('me.profile.logoutConfirm'))) {
+const showLogoutModal = ref(false)
+
+function handleLogout() {
+  showLogoutModal.value = true
+}
+
+async function confirmLogout() {
+  try {
     await logout()
+  } finally {
+    showLogoutModal.value = false
   }
 }
 
@@ -410,3 +421,8 @@ useSeoMeta({
   robots: 'noindex'
 })
 </script>
+
+<style scoped>
+/* 样式保留 */
+</style>
+

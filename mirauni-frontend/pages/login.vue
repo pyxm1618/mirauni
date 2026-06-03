@@ -40,11 +40,9 @@
         </div>
         <div>
           <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.passwordLabel') }}</label>
-          <input 
+          <PasswordInput 
             v-model="password"
-            type="password" 
             :placeholder="$t('auth.passwordPlaceholder')"
-            class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
             @keyup.enter="handlePasswordLogin"
           />
         </div>
