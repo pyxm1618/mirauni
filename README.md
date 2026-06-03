@@ -77,3 +77,20 @@ npm run dev
 - [项目进度](./docs/progress.md)
 - [测试计划](./docs/testing.md)
 - [钱途早期 RAG 方案设计](./docs/RAG.md) (早期方案，目前未接入线上业务)
+
+---
+
+## 测试与持续集成 (CI/CD)
+
+项目已配置 GitHub Actions 自动化工作流与上线验收工具链：
+
+1. **持续集成 (CI)**：每次提交或发起 Pull Request 会自动运行：
+   - 前端 (`mirauni-frontend`)：静态类型检查 (`npm run typecheck`) 及生产环境构建 (`npm run build`)。
+   - 管理后台 (`mirauni-admin`)：生产构建验证 (`npm run build`)。
+2. **只读冒烟测试**：支持通过 `scripts/smoke-test.js` 进行公开只读接口快速验证。
+   - 本地运行：`node scripts/smoke-test.js`
+   - 生产环境运行（受安全拦截保护，需显式授权）：`TARGET_URL=https://mirauni.com ENABLE_PRODUCTION_SMOKE=true node scripts/smoke-test.js`
+3. **部署与上线验收文档**：
+   - 详见 [P1 生产环境冒烟测试指南](./docs/production-smoke-test.md) 了解手动与自动验证细节。
+   - 详见 [生产部署与上线操作手册](./docs/deployment-runbook.md) 了解环境变量检查、Supabase schema 重载及回滚步骤。
+
