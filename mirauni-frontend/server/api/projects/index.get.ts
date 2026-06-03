@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient(event)
 
     let request = client
-        .from('mirauni_projects')
+        .from('projects')
         .select('*', { count: 'exact' })
         .eq('status', 'active')
         .order('created_at', { ascending: false })

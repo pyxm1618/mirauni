@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient(event)
 
     const { data, error } = await client
-        .from('mirauni_projects')
+        .from('projects')
         .insert({
             ...result.data,
             user_id: user.id
