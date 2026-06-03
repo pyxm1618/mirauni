@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
         .eq('phone', phone)
         .single()
 
-    if (!user) {
+    if (!user || !user.id || user.id === 'undefined') {
         throw createError({
             statusCode: 400,
             message: '用户不存在'
@@ -66,30 +66,35 @@ export default defineEventHandler(async (event) => {
     // 3. 更新密码哈希
     const hashedPassword = await hashPassword(newPassword)
     
-    // 确保 secret 存在 (如果用户存在但 secret 不存在，这里是修复的好时机，但需要 supabase_password)
-    // 简单起见，只更新存在的 secret
-    const { error: secretError } = await supabaseAdmin
+    // 确保 secret 存在
+    // 仅更新存在的 secret 并确认受影响行数
+    const { data: secretData, error: secretError } = await supabaseAdmin
         .from('user_secrets')
         .update({ password_hash: hashedPassword })
         .eq('user_id', user.id)
+        .select('user_id')
     
-    if (secretError) {
-        // 如果更新失败（例如无记录），尝试插入？
-        // 这需要生成 supabase_password，比较复杂。
-        // 假设 verify-code/login 流程已经保证了 secret 存在。
-        // 如果这里失败，可能是数据不一致。
-        console.error('重置密码失败 (user_secrets):', secretError)
+    if (secretError || !secretData || secretData.length === 0) {
+        console.error('重置密码失败 (user_secrets):', secretError, secretData)
+        throw createError({
+            statusCode: 500,
+            message: '重置密码失败，用户凭证不存在或不可更新'
+        })
+    }
+
+    // 4. 更新 users.has_password
+    const { error: userError } = await supabaseAdmin
+        .from('users')
+        .update({ has_password: true })
+        .eq('id', user.id)
+
+    if (userError) {
+        console.error('更新用户状态失败:', userError)
         throw createError({
             statusCode: 500,
             message: '重置密码失败'
         })
     }
-
-    // 4. 更新 users.has_password
-    await supabaseAdmin
-        .from('users')
-        .update({ has_password: true })
-        .eq('id', user.id)
 
     return {
         success: true,

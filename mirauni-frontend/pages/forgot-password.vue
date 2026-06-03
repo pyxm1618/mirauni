@@ -47,6 +47,7 @@
                 {{ countdown > 0 ? `${countdown}s` : $t('auth.sendCode') }}
               </button>
             </div>
+            <p class="text-xs text-gray-500 mt-2">提示：验证码将在最后一步提交重置时，由服务端进行最终的安全校验。</p>
           </div>
 
           <button 
@@ -64,21 +65,17 @@
           
           <div>
             <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.forgot.newPassword') }}</label>
-            <input 
+            <PasswordInput 
               v-model="newPassword"
-              type="password" 
               :placeholder="$t('auth.forgot.newPasswordPlaceholder')"
-              class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
             />
           </div>
 
           <div>
             <label class="block font-bold mb-2 uppercase text-sm tracking-wider">{{ $t('auth.forgot.confirmPassword') }}</label>
-            <input 
+            <PasswordInput 
               v-model="confirmPassword"
-              type="password" 
               :placeholder="$t('auth.forgot.confirmPasswordPlaceholder')"
-              class="w-full bg-gray-50 px-4 py-4 border-2 border-indie-border font-bold text-lg focus:outline-none focus:shadow-brutal focus:bg-indie-secondary/20 transition-all placeholder-gray-400"
             />
           </div>
 

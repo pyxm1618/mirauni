@@ -83,21 +83,48 @@
         </div>
       </main>
     </div>
+
+    <!-- 退出登录确认模态弹窗 -->
+    <UModal v-model="showLogoutModal">
+      <div class="p-8 bg-white border-3 border-black shadow-brutal text-center">
+        <h3 class="text-2xl font-black mb-6 uppercase">{{ $t('me.profile.logoutConfirm') || '确定要退出登录吗？' }}</h3>
+        <div class="flex gap-4 justify-center">
+          <button 
+            type="button"
+            @click="showLogoutModal = false" 
+            class="px-6 py-3 border-3 border-black font-bold uppercase hover:bg-gray-100 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
+          >
+            {{ $t('common.cancel') || '取消' }}
+          </button>
+          <button 
+            type="button"
+            @click="confirmLogout" 
+            class="px-6 py-3 bg-red-500 text-white border-3 border-black font-black uppercase hover:bg-red-600 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
+          >
+            {{ $t('common.confirm') || '确定' }}
+          </button>
+        </div>
+      </div>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
+const { logout } = useAuth()
+const { t } = useI18n()
 definePageMeta({
   middleware: 'auth'
 })
 
-const { logout } = useAuth()
-const { t } = useI18n()
+const showLogoutModal = ref(false)
 
-async function handleLogout() {
-  if (confirm(t('me.profile.logoutConfirm'))) {
-    await logout()
-  }
+function handleLogout() {
+  showLogoutModal.value = true
+}
+
+async function confirmLogout() {
+  showLogoutModal.value = false
+  await logout()
 }
 
 interface Message {
