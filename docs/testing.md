@@ -143,7 +143,7 @@
 | Web API | `/api/projects`、`/api/developers/search`、`/api/articles` 返回结构化数据 |
 | 管理后台 | `/login` 可打开，登录后可进入仪表盘、用户、项目、文章、订单、分析页面 |
 | Flutter App | `/splash` 后能进入主 Shell，项目/开发者/消息/我的页面可切换 |
-| RAG | 按 `docs/RAG.md` 验证检索结果来自 `path_templates`，且过滤用户约束 |
+| RAG | [早期方案非当前线上验收项] 参见 `docs/RAG.md` 历史方案 |
 
 ---
 

@@ -9,7 +9,8 @@ mirauni/
 ├── docs/                    # 📚 项目文档（包含需求、设计、进度、测试）
 │   ├── README.md            # 文档索引
 │   ├── requirements.md      # 需求文档
-│   ├── technical-design.md  # 当前架构说明与代码索引
+│   ├── architecture-current.md # 当前真实架构说明与代码索引
+│   ├── technical-design.md  # 历史技术方案（立项时期的全量设计方案，仅供参考）
 │   ├── progress.md          # 开发进度清单
 │   ├── testing.md           # 测试计划
 │   └── RAG.md               # [早期方案] 钱途路径知识库 RAG 设计方案
@@ -72,9 +73,10 @@ mirauni/
 
 1. **docs/README.md** - 了解项目概览
 2. **docs/requirements.md** - 理解需求
-3. **docs/technical-design.md** - 技术实现细节（区分小概率主线与钱途独立业务）
-4. **docs/progress.md** - 查看任务清单，确定当前任务
-5. **docs/RAG.md & RAG-HANDOFF.md** - ⚠️ 仅供了解钱途 RAG 早期设计方案历史参考，不可作为当前开发任务。
+3. **docs/architecture-current.md** - 当前真实系统架构说明与代码索引（区分小概率主线与钱途独立业务）
+4. **docs/technical-design.md** - 历史技术方案（立项时期的 3400+ 行全量设计方案，仅供参考）
+5. **docs/progress.md** - 查看任务清单，确定当前任务
+6. **docs/RAG.md & RAG-HANDOFF.md** - ⚠️ 仅供了解钱途 RAG 早期设计方案历史参考，不可作为当前开发任务。
 
 ## 🔧 环境变量模板
 

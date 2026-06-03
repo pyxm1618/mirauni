@@ -2,7 +2,7 @@
 
 > 文档定位：基于真实代码整理的当前系统架构说明与代码索引。明确区分同仓库并存的「小概率」匹配平台主线与「钱途工具」独立上线业务。  
 > 更新时间：2026-06-03  
-> 当前状态：Web 前台、管理后台、Flutter App 均已有基础开发；钱途工具为独立上线业务；早期 RAG 设计另见 `docs/RAG.md`。立项时期的原始历史方案请参见 [technical-design.md](file:///Users/pyxm1618/Documents/mirauni/docs/technical-design.md)。
+> 当前状态：Web 前台、管理后台、Flutter App 均已有基础开发；钱途工具为独立上线业务；早期 RAG 设计另见 `docs/RAG.md`。立项时期的原始历史方案请参见 [technical-design.md](./technical-design.md)。
 
 ---
 

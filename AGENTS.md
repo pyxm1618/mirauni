@@ -2,7 +2,7 @@
 
 ## 项目规则
 
-- 先读 `docs/DEVELOPMENT.md`、`docs/progress.md` 以及 [architecture-current.md](file:///Users/pyxm1618/Documents/mirauni/docs/architecture-current.md)，再改代码。明确小概率主线业务与钱途上线业务的物理边界。
+- 先读 `docs/DEVELOPMENT.md`、`docs/progress.md` 以及 [architecture-current.md](./docs/architecture-current.md)，再改代码。明确小概率主线业务与钱途上线业务的物理边界。
 - Web 前台在 `mirauni-frontend/`，管理后台在 `mirauni-admin/`，Flutter App 在 `mirauni_app/`，钱途工具在 `plan/`。
 - 未经明确指令，严禁在小概率开发任务中修改 `plan/` 下的任何代码。
 - 管理后台前端调用的 API 实现在 `mirauni-frontend/server/api/admin/**`，不要在 `mirauni-admin/` 里另起后端。

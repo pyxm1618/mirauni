@@ -1,5 +1,5 @@
 > ⚠️ 当前状态说明 / 多业务边界说明
-> 1. 本文件为立项时期的历史技术设计方案。当前真实系统架构与代码索引请参阅 [architecture-current.md](file:///Users/pyxm1618/Documents/mirauni/docs/architecture-current.md)。系统实现应以真实代码与 Supabase 物理 Schema 为准。
+> 1. 本文件为立项时期的历史技术设计方案。当前真实系统架构与代码索引请参阅 [architecture-current.md](./architecture-current.md)。系统实现应以真实代码与 Supabase 物理 Schema 为准。
 > 2. 仓库中存在两个并存的独立上线业务模块：主线业务「小概率独立开发者匹配平台」（包含 `mirauni-frontend/`、`mirauni-admin/`、`mirauni_app/`）与独立业务「钱途工具」（`plan/`）。两者有严格的业务边界，不应相互混淆。
 > 3. 本文件中提及的钱途 RAG 路径推荐系统属于早期设计方案，目前尚未确认接入 `plan/` 的线上业务，且种子数据的 ID 类型与 UUID 表结构存在设计冲突，不作为当前的匹配平台 MVP 及钱途已上线投产功能。
 
