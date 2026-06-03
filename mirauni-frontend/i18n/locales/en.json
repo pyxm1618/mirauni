@@ -185,6 +185,10 @@
         }
     },
     "auth": {
+        "passwordInput": {
+            "show": "Show Password",
+            "hide": "Hide Password"
+        },
         "title": "Login / Register",
         "tabPassword": "Password Login",
         "tabCode": "Code Login",
@@ -222,6 +226,7 @@
             "registering": "Registering..."
         },
         "forgot": {
+            "codeFinalVerifyTip": "Tip: The code will be securely verified by the server when you submit the final reset request.",
             "title": "Reset Password",
             "step1": "Verify Phone",
             "step2": "Set New Password",

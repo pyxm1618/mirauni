@@ -54,8 +54,16 @@
       <ProjectCard v-for="p in projects" :key="p.id" :project="p" />
     </div>
     <div v-else class="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-300">
-        <div class="text-xl text-gray-500 mb-4">{{ $t('project.square.empty') }}</div>
-        <p class="text-gray-400">{{ $t('project.square.emptyHint') }}<NuxtLink to="/projects/create" class="text-indie-primary underline">{{ $t('project.square.launchFirst') }}</NuxtLink></p>
+        <template v-if="filters.category || filters.work_mode || filters.role || filters.keyword">
+            <div class="text-xl text-gray-500 mb-4">{{ $t('project.square.empty') }}</div>
+        </template>
+        <template v-else>
+            <div class="text-xl text-gray-500 mb-4">暂无公开项目</div>
+            <p class="text-gray-400">
+                成为第一个发布项目的人，
+                <NuxtLink to="/projects/create" class="text-indie-primary underline ml-1">{{ $t('project.square.launchFirst') }}</NuxtLink>
+            </p>
+        </template>
     </div>
   </div>
 </template>
