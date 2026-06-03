@@ -39,7 +39,7 @@ export interface SampleProject {
 const now = '2026-04-02T00:00:00.000Z'
 const demoUserId = '00000000-0000-0000-0000-000000000001'
 
-export const SAMPLE_PROJECTS: SampleProject[] = [
+const ALL_SAMPLE_PROJECTS: SampleProject[] = [
   {
     id: 'demo-ai-saas-frontend',
     user_id: demoUserId,
@@ -264,8 +264,25 @@ export const SAMPLE_PROJECTS: SampleProject[] = [
   }
 ]
 
-export function getSampleProjectById(id: string) {
-  return SAMPLE_PROJECTS.find((item) => item.id === id)
+/**
+ * 判断当前环境是否允许展示样板项目。
+ * - 本地 dev 环境允许（process.dev 为 true）
+ * - 显式设置 NUXT_ALLOW_SAMPLE_PROJECTS=true 时允许
+ * - Vercel Production 默认不设置，因此生产环境默认禁用
+ */
+export function isSampleProjectsAllowed(): boolean {
+  return process.dev === true || process.env.NUXT_ALLOW_SAMPLE_PROJECTS === 'true'
+}
+
+/**
+ * SAMPLE_PROJECTS 仅在允许时返回数据，供 sitemap 等模块兼容使用。
+ * 建议优先通过 filterSampleProjects / getSampleProjectById 访问。
+ */
+export const SAMPLE_PROJECTS: SampleProject[] = isSampleProjectsAllowed() ? ALL_SAMPLE_PROJECTS : []
+
+export function getSampleProjectById(id: string): SampleProject | null {
+  if (!isSampleProjectsAllowed()) return null
+  return ALL_SAMPLE_PROJECTS.find((item) => item.id === id) ?? null
 }
 
 export function filterSampleProjects(params: {
@@ -273,9 +290,10 @@ export function filterSampleProjects(params: {
   role?: string
   work_mode?: string
   keyword?: string
-}) {
+}): SampleProject[] {
+  if (!isSampleProjectsAllowed()) return []
   const { category, role, work_mode, keyword } = params
-  return SAMPLE_PROJECTS.filter((item) => {
+  return ALL_SAMPLE_PROJECTS.filter((item) => {
     if (category && item.category !== category) return false
     if (work_mode && item.work_mode !== work_mode) return false
     if (role && !item.roles_needed.includes(role)) return false

@@ -1,5 +1,5 @@
 import { serverSupabaseClient } from '#supabase/server'
-import { filterSampleProjects } from '~/server/utils/sample-projects'
+import { filterSampleProjects, isSampleProjectsAllowed } from '~/server/utils/sample-projects'
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
 
     request = request.range(from, to)
 
-    const { data, error, count } = await request
+    const { data: rawData, error, count } = await request
 
     if (error) {
         throw createError({
@@ -49,8 +49,27 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 冷启动兜底：当真实项目为空时返回样板项目，确保公开页可抓取和可浏览
-    if (!data || data.length === 0) {
+    // 内存过滤：绝不返回 id 以 demo- 开头的项目，防止生产数据库被脏注入
+    const data = (rawData || []).filter((p: any) => !String(p.id).startsWith('demo-'))
+    // 若过滤导致数量变化，则取过滤后的实际长度；否则使用数据库返回的 count
+    const totalCount = (rawData || []).length === data.length ? (count ?? 0) : data.length
+
+    // 冷启动兜底：当真实项目为空时，根据环境决定是否返回样板项目
+    if (data.length === 0) {
+        // 生产环境直接返回空，绝不展示样板项目
+        if (!isSampleProjectsAllowed()) {
+            return {
+                success: true,
+                data: [],
+                meta: {
+                    total: 0,
+                    page,
+                    pageSize
+                }
+            }
+        }
+
+        // 开发环境或显式允许时，返回样板项目 fallback
         const samples = filterSampleProjects({
             category: query.category ? String(query.category) : undefined,
             role: query.role ? String(query.role) : undefined,
@@ -94,7 +113,7 @@ export default defineEventHandler(async (event) => {
         success: true,
         data: enriched,
         meta: {
-            total: count,
+            total: totalCount,
             page,
             pageSize
         }
