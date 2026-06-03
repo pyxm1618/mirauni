@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  frontend:
+    name: Frontend (Nuxt 3)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: mirauni-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: mirauni-frontend
+
+      - name: Run typecheck
+        run: npm run typecheck
+        working-directory: mirauni-frontend
+        env:
+          SUPABASE_URL: https://dummy.supabase.co
+          SUPABASE_ANON_KEY: dummy
+
+      - name: Build project
+        run: npm run build
+        working-directory: mirauni-frontend
+        env:
+          SUPABASE_URL: https://dummy.supabase.co
+          SUPABASE_ANON_KEY: dummy
+
+  admin:
+    name: Admin Dashboard (Vue 3)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: mirauni-admin/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: mirauni-admin
+
+      - name: Build project
+        run: npm run build
+        working-directory: mirauni-admin

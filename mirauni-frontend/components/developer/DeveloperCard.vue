@@ -4,7 +4,7 @@
     <div class="absolute inset-0 bg-black translate-x-3 translate-y-3"></div>
     
     <!-- Card Content -->
-    <div class="relative bg-white border-3 border-black p-6 h-full flex flex-col transition-transform group-hover:-translate-y-1 group-hover:-translate-x-1" @click="navigateTo(`/developers/${developer.id}`)">
+    <NuxtLink :to="localePath('/developers/' + developer.id)" class="relative bg-white border-3 border-black p-6 h-full flex flex-col transition-transform group-hover:-translate-y-1 group-hover:-translate-x-1">
         <!-- Header -->
         <div class="flex justify-between items-start mb-4 border-b-3 border-black pb-4">
             <div>
@@ -25,15 +25,16 @@
         </div>
         
         <!-- Action -->
-        <button class="w-full border-3 border-black py-3 font-black text-lg transition-all flex items-center justify-center gap-2 bg-indie-secondary hover:bg-indie-accent active:translate-y-1 active:translate-x-1">
-            查看资料
-        </button>
-    </div>
+        <div class="w-full border-3 border-black py-3 font-black text-lg transition-all flex items-center justify-center gap-2 bg-indie-secondary hover:bg-indie-accent active:translate-y-1 active:translate-x-1">
+             查看资料
+        </div>
+    </NuxtLink>
   </div>
 </template>
 
 <script setup lang="ts">
 const { t } = useI18n()
+const localePath = useLocalePath()
 
 const props = defineProps<{
   developer: any
