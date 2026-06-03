@@ -10,21 +10,18 @@
               <span class="text-2xl">+</span> {{ $t('project.square.launch') }}
           </NuxtLink>
         </div>
-        
+
         <!-- Brutalist Search & Filter -->
         <div class="flex flex-col gap-6">
-            <!-- Search -->
             <div class="relative w-full md:max-w-xl">
                 <div class="absolute inset-0 bg-black translate-x-2 translate-y-2"></div>
                 <input
                   v-model.lazy="filters.keyword"
-                  type="text" 
+                  type="text"
                   :placeholder="$t('project.square.search')"
                   class="relative w-full bg-white border-3 border-black p-4 font-bold text-xl focus:outline-none placeholder-gray-400"
                 />
             </div>
-
-            <!-- Filters -->
             <div class="flex flex-wrap gap-4">
                <select v-model="filters.category" class="px-4 py-2 border-3 border-black bg-white font-bold focus:outline-none hover:shadow-brutal hover:-translate-y-1 transition-all cursor-pointer">
                   <option value="">{{ $t('project.square.category') }}</option>
@@ -42,8 +39,9 @@
         </div>
     </div>
 
-    <div class="mb-8 border-2 border-black bg-yellow-100 p-4 font-bold text-sm">
-      冷启动说明：当前列表包含平台演示样板项目，帮助你参考“如何写一条更容易招到技术合伙人的项目招募信息”。
+    <!-- 冷启动说明：仅在实际返回 demo- 样板项目时显示 -->
+    <div v-if="hasSamples" class="mb-8 border-2 border-black bg-yellow-100 p-4 font-bold text-sm">
+      冷启动说明：当前列表包含平台演示样板项目，帮助你参考"如何写一条更容易招到技术合伙人的项目招募信息"。
     </div>
 
     <!-- 项目列表 -->
@@ -54,8 +52,24 @@
       <ProjectCard v-for="p in projects" :key="p.id" :project="p" />
     </div>
     <div v-else class="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-300">
-        <div class="text-xl text-gray-500 mb-4">{{ $t('project.square.empty') }}</div>
-        <p class="text-gray-400">{{ $t('project.square.emptyHint') }}<NuxtLink to="/projects/create" class="text-indie-primary underline">{{ $t('project.square.launchFirst') }}</NuxtLink></p>
+        <!-- 有筛选条件：暂无符合条件的项目 -->
+        <template v-if="isFiltered">
+            <div class="text-xl text-gray-500 mb-4">{{ $t('project.square.empty') }}</div>
+            <p class="text-gray-400">
+                {{ $t('project.square.emptyHint') }}
+                <NuxtLink to="/projects/create" class="text-indie-primary underline">
+                    {{ $t('project.square.launchFirst') }}
+                </NuxtLink>
+            </p>
+        </template>
+        <!-- 无筛选条件：生产无项目 -->
+        <template v-else>
+            <div class="text-xl text-gray-500 mb-4">暂无公开项目</div>
+            <p class="text-gray-400">
+                成为第一个发布项目的人，
+                <NuxtLink to="/projects/create" class="text-indie-primary underline ml-1">{{ $t('project.square.launchFirst') }}</NuxtLink>
+            </p>
+        </template>
     </div>
   </div>
 </template>
@@ -87,11 +101,22 @@ const { data, pending } = await useFetch<ProjectListResponse>('/api/projects', {
 })
 
 const projects = computed(() => data.value?.data || [])
+
+// 是否有筛选条件
+const isFiltered = computed(() =>
+  !!(filters.value.category || filters.value.work_mode || filters.value.role || filters.value.keyword)
+)
+
+// 是否包含 demo- 样板项目（控制冷启动提示条显示）
+const hasSamples = computed(() =>
+  projects.value.some((p: any) => String(p.id).startsWith('demo-'))
+)
+
 const { t } = useI18n()
 
 useSeoMeta({
   title: '创业项目招募开发者｜找技术合伙人 - 小概率',
-  description: '发布创业项目，招募前端、后端、全栈和 Flutter 开发者。查看样板项目，快速写出高转化的技术合伙人招募页。',
+  description: '发布创业项目，招募前端、后端、全栈和 Flutter 开发者，快速找到技术合伙人。',
   keywords: '创业项目招募开发者,找技术合伙人,招募技术合伙人,找程序员合伙做项目',
   ogTitle: '创业项目招募开发者 - 小概率',
   ogDescription: '发布项目，快速找到靠谱技术合伙人。'
