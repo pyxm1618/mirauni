@@ -14,8 +14,19 @@
     *   用户在生产环境无法收到短信验证码、无法发起支付充值、无法完成微信快捷登录，从而导致核心业务流全线瘫痪。
     *   接口报错 `500 Internal Server Error`，造成极坏的用户体验与负面口碑。
 *   **缓解措施**：
-    *   在 Web 服务启动阶段（Nuxt Server 插件）对敏感的关键环境变量（如 `SUPABASE_SERVICE_KEY`、`WECHAT_API_KEY`、`TENCENT_SECRET_KEY` 等）进行存在性检验，如果缺失则直接主动抛错阻断服务启动，而非在使用时才爆 500。
-    *   严格维护 `mirauni-frontend/.env.example` 和 `mirauni_app/lib/config/env.dart`。任何新加环境变量的任务必须在 implementation plan 中显式声明。
+    *   **环境变量校验分级隔离原则**：
+        *   **核心启动变量**（如 `SUPABASE_URL`、`SUPABASE_ANON_KEY`）：这是平台最底层的基础配置。若缺失将导致所有数据库交互失败，允许在 Web 服务启动阶段校验并直接抛出错误阻断应用启动。
+        *   **服务端关键变量**（如 `SUPABASE_SERVICE_KEY`）：仅当涉及到特权服务端的逻辑时需要。若缺失，相关特权 API 应返回清晰、可识别的错误，同时应在 CI/CD 部署流水线及发布 Checklist 的检查环节进行拦截，阻断上线，但不得直接导致应用进程崩塌。
+        *   **功能型变量**（如 `JWT_SECRET`、`IP_HASH_SECRET`、`WECHAT_API_KEY`、`TENCENT_SECRET_KEY`、`BAIDU_PUSH_TOKEN` 等）：这类变量仅服务于局部独立功能。**严禁在启动阶段因为功能型变量缺失而直接阻断服务启动，或使非相关的公共页面抛出 500 错误**。一旦缺失，必须采用局部降级与禁用逻辑：
+            *   `JWT_SECRET` 缺失：仅影响需要 JWT 校验的管理后台（admin）登录与接口鉴权，绝对不能影响主站公开首页。
+            *   `IP_HASH_SECRET` 缺失：仅导致 `/api/track` 埋点接口上报失败（可打出 error 日志并降级兜底），绝对不能导致公开的 SSR 页面无法渲染。
+            *   `WECHAT_API_KEY` 缺失：仅在用户拉起微信支付下单时进行拦截，返回“支付功能维护中”，绝对不能阻断游客浏览公开项目或开发者列表。
+            *   `TENCENT_SECRET_KEY` 缺失：仅导致短信发送失败，不能导致非登录态游客浏览时报 500。
+            *   `BAIDU_PUSH_TOKEN` 缺失：仅在发布内容时无法向百度推送 URL，不应影响任何用户端的正常交互。
+    *   **架构解耦原则（禁止公共页面加载路径 import 顶层 throw 的功能模块）**：
+        *   在编写公共页面（如 `/`、`/projects`、`/developers` 等 SSR 页面）以及公开 API 的代码时，必须确保其依赖的底层工具包在 import 时是干净的。
+        *   任何在顶层（Top-level scope）读取环境变量并可能直接 throw error 的模块（如初始化某 SDK 并对 key 做强校验的模块，如 admin-auth），绝对不应在公共页面或公开 API 的加载依赖链中被顶层引入。这类抛错模块的加载应限定在需要使用的特定 API/函数内部，或者通过惰性初始化（Lazy Initialization / Dynamic Import）延迟载入，物理限制故障扩散半径。
+    *   **配置规范化**：严格维护 `mirauni-frontend/.env.example` 和 `mirauni_app/lib/config/env.dart`。任何新加环境变量的任务必须在 implementation plan 中显式声明。
 *   **检查方式**：
     *   在 Vercel 每次重新发布后，运行生产环境健康检查脚本，或手动执行登录与模拟支付流程。
     *   在命令行运行 `git status` 确认没有将本地 `.env` 提交到 Git 历史。
