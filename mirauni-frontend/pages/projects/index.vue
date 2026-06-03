@@ -13,7 +13,6 @@
 
         <!-- Brutalist Search & Filter -->
         <div class="flex flex-col gap-6">
-            <!-- Search -->
             <div class="relative w-full md:max-w-xl">
                 <div class="absolute inset-0 bg-black translate-x-2 translate-y-2"></div>
                 <input
@@ -23,8 +22,6 @@
                   class="relative w-full bg-white border-3 border-black p-4 font-bold text-xl focus:outline-none placeholder-gray-400"
                 />
             </div>
-
-            <!-- Filters -->
             <div class="flex flex-wrap gap-4">
                <select v-model="filters.category" class="px-4 py-2 border-3 border-black bg-white font-bold focus:outline-none hover:shadow-brutal hover:-translate-y-1 transition-all cursor-pointer">
                   <option value="">{{ $t('project.square.category') }}</option>
@@ -55,7 +52,7 @@
       <ProjectCard v-for="p in projects" :key="p.id" :project="p" />
     </div>
     <div v-else class="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-300">
-        <!-- 有筛选条件时 -->
+        <!-- 有筛选条件：暂无符合条件的项目 -->
         <template v-if="isFiltered">
             <div class="text-xl text-gray-500 mb-4">{{ $t('project.square.empty') }}</div>
             <p class="text-gray-400">
@@ -65,12 +62,12 @@
                 </NuxtLink>
             </p>
         </template>
-        <!-- 无筛选条件时（生产环境无项目） -->
+        <!-- 无筛选条件：生产无项目 -->
         <template v-else>
-            <div class="text-xl text-gray-500 mb-4">{{ $t('project.square.emptyNoProjects') }}</div>
+            <div class="text-xl text-gray-500 mb-4">暂无公开项目</div>
             <p class="text-gray-400">
-                {{ $t('project.square.emptyNoProjectsHint') }}
-                <NuxtLink to="/projects/create" class="text-indie-primary underline ml-1">{{ $t('project.square.emptyNoProjectsAction') }}</NuxtLink>
+                成为第一个发布项目的人，
+                <NuxtLink to="/projects/create" class="text-indie-primary underline ml-1">{{ $t('project.square.launchFirst') }}</NuxtLink>
             </p>
         </template>
     </div>
@@ -105,12 +102,12 @@ const { data, pending } = await useFetch<ProjectListResponse>('/api/projects', {
 
 const projects = computed(() => data.value?.data || [])
 
-// 是否有筛选条件（决定空状态文案）
+// 是否有筛选条件
 const isFiltered = computed(() =>
   !!(filters.value.category || filters.value.work_mode || filters.value.role || filters.value.keyword)
 )
 
-// 是否包含 demo- 样板项目（开发环境 fallback 时展示冷启动提示）
+// 是否包含 demo- 样板项目（控制冷启动提示条显示）
 const hasSamples = computed(() =>
   projects.value.some((p: any) => String(p.id).startsWith('demo-'))
 )
