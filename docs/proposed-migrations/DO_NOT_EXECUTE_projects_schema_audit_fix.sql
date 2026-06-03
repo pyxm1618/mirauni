@@ -1,5 +1,8 @@
+-- DO NOT EXECUTE.
+-- public.projects belongs to path/tasks/income domain and must not be migrated for Mirauni marketplace projects.
+
 -- ==============================================================================
--- 审计迁移：补齐 projects 表缺失字段
+-- 审计迁移：补齐 projects 表缺失字段 [已废弃 - 严禁执行]
 -- 发现日期：2026-06-03
 -- 背景：生产环境执行 SELECT title FROM projects 报错 "column does not exist"
 --       确认 projects 表字段严重落后于当前 projectSchema 定义
