@@ -1,6 +1,5 @@
 import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server'
 import { projectSchema } from '~/types/index'
-import { pushUrlsToBaidu } from '~/server/utils/baidu-push'
 
 export default defineEventHandler(async (event) => {
     const user = await serverSupabaseUser(event)
@@ -31,8 +30,7 @@ export default defineEventHandler(async (event) => {
         .from('mirauni_projects')
         .insert({
             ...result.data,
-            user_id: user.id,
-            status: 'pending' // 强制设置为待审核状态
+            user_id: user.id
         })
         .select()
         .single()
@@ -43,10 +41,6 @@ export default defineEventHandler(async (event) => {
             message: error.message
         })
     }
-
-    const config = useRuntimeConfig()
-    const siteUrl = (config.public.siteUrl || 'https://mirauni.com').replace(/\/+$/, '')
-    await pushUrlsToBaidu([`${siteUrl}/projects/${data.id}`])
 
     return {
         success: true,
