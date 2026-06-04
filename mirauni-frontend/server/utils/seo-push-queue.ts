@@ -75,6 +75,9 @@ export async function enqueueSeoUrl(params: EnqueueSeoUrlParams) {
       })
 
     if (insertError) {
+      if (insertError.code === '23505') {
+        return { success: true, alreadyExists: true }
+      }
       return { success: false, error: insertError }
     }
 
@@ -145,8 +148,8 @@ export async function processSeoPushQueue(): Promise<ProcessResult> {
         .from('seo_url_push_queue')
         .select('*')
         .eq('status', 'failed')
-        .order('created_at', { ascending: true })
-        .limit(100) // 多拉取部分，以确保过滤后能补足数量
+        .order('updated_at', { ascending: true })
+        .limit(500) // 多拉取部分，以确保过滤后能补足数量
 
       if (failedError) {
         console.error('查询 failed 任务出错:', failedError)
