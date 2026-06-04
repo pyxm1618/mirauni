@@ -114,12 +114,16 @@ const hasSamples = computed(() =>
 
 const { t } = useI18n()
 
+const resolveOgImage = useOgImageResolver()
+const ogImage = resolveOgImage()
+
 useSeoMeta({
   title: '创业项目招募开发者｜找技术合伙人 - 小概率',
   description: '发布创业项目，招募前端、后端、全栈和 Flutter 开发者，快速找到技术合伙人。',
   keywords: '创业项目招募开发者,找技术合伙人,招募技术合伙人,找程序员合伙做项目',
   ogTitle: '创业项目招募开发者 - 小概率',
-  ogDescription: '发布项目，快速找到靠谱技术合伙人。'
+  ogDescription: '发布项目，快速找到靠谱技术合伙人。',
+  ogImage
 })
 
 useCanonical('/projects')

@@ -130,12 +130,16 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
+const resolveOgImage = useOgImageResolver()
+const ogImage = resolveOgImage()
+
 useSeoMeta({
   title: () => `${t('common.appName')} - 找技术合伙人｜创业项目招募开发者平台`,
   description: () => '小概率是找技术合伙人和招募开发者的平台。发布创业项目，快速匹配前端、后端、全栈与 Flutter 技术合伙人。',
   keywords: () => '找技术合伙人,招募技术合伙人,创业项目招募开发者,找程序员合伙做项目,创业找技术合伙人',
   ogTitle: () => `${t('common.appName')} - 找技术合伙人平台`,
   ogDescription: () => '发布项目，招募开发者，快速找到靠谱技术合伙人。',
+  ogImage,
   ogType: 'website'
 })
 

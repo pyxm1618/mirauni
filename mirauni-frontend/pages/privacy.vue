@@ -162,9 +162,15 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
+const resolveOgImage = useOgImageResolver()
+const ogImage = resolveOgImage()
+
 useSeoMeta({
   title: t('privacy.seoTitle'),
   description: t('privacy.seoDescription'),
+  ogTitle: t('privacy.seoTitle'),
+  ogDescription: t('privacy.seoDescription'),
+  ogImage
 })
 
 useCanonical('/privacy')
