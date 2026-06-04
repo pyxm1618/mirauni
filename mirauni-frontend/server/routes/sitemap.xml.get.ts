@@ -1,6 +1,4 @@
 import { serverSupabaseClient } from '#supabase/server'
-import { SAMPLE_PROJECTS } from '~/server/utils/sample-projects'
-import { SAMPLE_ARTICLES } from '~/server/utils/sample-articles'
 
 interface SitemapUrl {
     loc: string
@@ -9,20 +7,69 @@ interface SitemapUrl {
     changefreq: string
 }
 
+function escapeXml(unsafe: string): string {
+    return unsafe.replace(/[<>&'"]/g, (c) => {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+            default: return c;
+        }
+    });
+}
+
 export default defineEventHandler(async (event) => {
     const supabase = await serverSupabaseClient(event)
     const config = useRuntimeConfig()
     const siteUrl = config.public.siteUrl || 'https://mirauni.com'
 
-    // 并行获取所有数据
-    const [projectsRes, articlesRes] = await Promise.all([
+    // 使用 Promise.allSettled 容错并行拉取所有动态数据
+    const [projectsRes, articlesRes, developersRes] = await Promise.allSettled([
         supabase.from('mirauni_projects').select('id, updated_at').eq('status', 'active'),
-        supabase.from('articles').select('slug, updated_at').eq('status', 'published')
+        supabase.from('articles').select('slug, updated_at').eq('status', 'published'),
+        supabase.from('public_profiles').select('id, username, created_at')
     ])
 
-    const projects = projectsRes.data || []
-    const articles = articlesRes.data || []
-    const articleSlugs = new Set(articles.map(a => a.slug))
+    // 处理项目的拉取结果
+    let projects: any[] = []
+    if (projectsRes.status === 'fulfilled') {
+        const val = projectsRes.value
+        if (val.error) {
+            console.warn('Failed to fetch projects for sitemap:', val.error)
+        } else {
+            projects = val.data || []
+        }
+    } else {
+        console.warn('Failed to fetch projects for sitemap:', projectsRes.reason)
+    }
+
+    // 处理文章的拉取结果
+    let articles: any[] = []
+    if (articlesRes.status === 'fulfilled') {
+        const val = articlesRes.value
+        if (val.error) {
+            console.warn('Failed to fetch articles for sitemap:', val.error)
+        } else {
+            articles = val.data || []
+        }
+    } else {
+        console.warn('Failed to fetch articles for sitemap:', articlesRes.reason)
+    }
+
+    // 处理开发者的拉取结果
+    let developers: any[] = []
+    if (developersRes.status === 'fulfilled') {
+        const val = developersRes.value
+        if (val.error) {
+            console.warn('Failed to fetch developers for sitemap:', val.error)
+        } else {
+            developers = val.data || []
+        }
+    } else {
+        console.warn('Failed to fetch developers for sitemap:', developersRes.reason)
+    }
 
     // 构建 URL 列表
     const urls: SitemapUrl[] = [
@@ -44,14 +91,6 @@ export default defineEventHandler(async (event) => {
             changefreq: 'weekly'
         })),
 
-        // 冷启动样板项目页（无真实项目时也保留可抓取资产）
-        ...SAMPLE_PROJECTS.map(p => ({
-            loc: `${siteUrl}/projects/${p.id}`,
-            lastmod: p.updated_at?.split('T')[0],
-            priority: '0.7',
-            changefreq: 'weekly'
-        })),
-
         // 学院文章
         ...articles.map(a => ({
             loc: `${siteUrl}/academy/${a.slug}`,
@@ -60,23 +99,25 @@ export default defineEventHandler(async (event) => {
             changefreq: 'monthly'
         })),
 
-        // 冷启动样板文章页
-        ...SAMPLE_ARTICLES.filter(a => !articleSlugs.has(a.slug)).map(a => ({
-            loc: `${siteUrl}/academy/${a.slug}`,
-            lastmod: a.updated_at?.split('T')[0],
-            priority: '0.7',
-            changefreq: 'monthly'
-        }))
+        // 动态公开开发者主页
+        ...developers
+            .filter(d => d.id && d.username) // 过滤掉没有 id 或 username 的不完整/异常数据
+            .map(d => ({
+                loc: `${siteUrl}/developers/${d.id}`,
+                lastmod: d.created_at?.split('T')[0],
+                priority: '0.7',
+                changefreq: 'weekly'
+            }))
     ]
 
-    // 生成 XML
+    // 生成 XML，对字段内容进行 XML 转义
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `  <url>
-    <loc>${u.loc}</loc>
-    ${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}
-    ${u.priority ? `<priority>${u.priority}</priority>` : ''}
-    ${u.changefreq ? `<changefreq>${u.changefreq}</changefreq>` : ''}
+    <loc>${escapeXml(u.loc)}</loc>
+    ${u.lastmod ? `<lastmod>${escapeXml(u.lastmod)}</lastmod>` : ''}
+    ${u.priority ? `<priority>${escapeXml(u.priority)}</priority>` : ''}
+    ${u.changefreq ? `<changefreq>${escapeXml(u.changefreq)}</changefreq>` : ''}
   </url>`).join('\n')}
 </urlset>`
 
