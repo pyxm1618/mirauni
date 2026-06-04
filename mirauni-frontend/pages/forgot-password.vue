@@ -231,4 +231,5 @@ useSeoMeta({
   title: () => `${t('auth.forgot.title')} - ${t('common.appName')}`,
   description: 'Reset Password'
 })
+useNoindex()
 </script>

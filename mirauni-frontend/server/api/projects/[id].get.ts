@@ -33,6 +33,17 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 404, message: 'Project not found' })
     }
 
+    // 鉴权判断
+    let isOwner = false
+    if (user && user.id === project.user_id) {
+        isOwner = true
+    }
+
+    // 状态边界拦截：非作者所有者，且项目状态不是 active，返回 404
+    if (!isOwner && project.status !== 'active') {
+        throw createError({ statusCode: 404, message: 'Project not found' })
+    }
+
     // 2. Fetch Author Public Info from public_profiles physical table
     const { data: author } = await client
         .from('public_profiles')
@@ -47,12 +58,10 @@ export default defineEventHandler(async (event) => {
     }
 
     // 3. Determine Access (Is Owner? Is Unlocked?)
-    let isOwner = false
     let isUnlocked = false
 
     if (user) {
-        if (user.id === project.user_id) {
-            isOwner = true
+        if (isOwner) {
             isUnlocked = true // Owner sees all
         } else {
             // Check user contact unlock record

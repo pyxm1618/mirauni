@@ -197,7 +197,7 @@ const formatDate = (dateStr: string) => {
 }
 
 useSeoMeta({
-  title: () => `${t('me.recharge.title')} - ${t('common.appName')}`,
-  robots: 'noindex'
+  title: () => `${t('me.recharge.title')} - ${t('common.appName')}`
 })
+useNoindex()
 </script>

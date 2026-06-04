@@ -19,9 +19,17 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    // 状态边界拦截：如果文章状态不是 published，直接返回 404
+    if (data && data.status !== 'published') {
+        throw createError({
+            statusCode: 404,
+            message: 'Article not found'
+        })
+    }
+
     if (!data) {
         const sample = getSampleArticleBySlug(String(slug || ''))
-        if (!sample) {
+        if (!sample || sample.status !== 'published') {
             throw createError({
                 statusCode: 404,
                 message: 'Article not found'
@@ -32,10 +40,6 @@ export default defineEventHandler(async (event) => {
             data: sample
         }
     }
-
-    // Increment view count (optional, doing it simple here, ideally use RPC or specialized endpoint to avoid auth issue if user is anon)
-    // But RLS might prevent update if anon. So we skip update for now or need a service key client (not available here easily without env).
-    // For V1, we just read.
 
     return {
         success: true,

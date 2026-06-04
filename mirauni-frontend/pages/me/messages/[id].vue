@@ -201,4 +201,6 @@ onMounted(() => {
 onUnmounted(() => {
   if (channel) client.removeChannel(channel)
 })
+
+useNoindex()
 </script>

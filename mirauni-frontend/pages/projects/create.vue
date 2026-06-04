@@ -45,4 +45,5 @@ useSeoMeta({
   title: t('project.create.seoTitle'),
   description: t('project.create.seoDesc')
 })
+useNoindex()
 </script>
