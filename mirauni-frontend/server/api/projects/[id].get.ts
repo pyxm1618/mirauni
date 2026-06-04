@@ -1,6 +1,5 @@
 import { serverSupabaseUser, serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
 import { getSampleProjectById } from '~/server/utils/sample-projects'
-import { getAdminFromEvent } from '~/server/utils/admin-auth'
 
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
@@ -36,22 +35,13 @@ export default defineEventHandler(async (event) => {
 
     // 鉴权判断
     let isOwner = false
-    let isAdmin = false
-    if (user) {
-        if (user.id === project.user_id) {
-            isOwner = true
-        }
-    }
-    const admin = await getAdminFromEvent(event)
-    if (admin) {
-        isAdmin = true
+    if (user && user.id === project.user_id) {
+        isOwner = true
     }
 
-    // 状态边界拦截：非作者和非管理员，无法访问 pending/rejected/closed 项目
-    if (!isOwner && !isAdmin) {
-        if (project.status === 'pending' || project.status === 'rejected' || project.status === 'closed') {
-            throw createError({ statusCode: 404, message: 'Project not found' })
-        }
+    // 状态边界拦截：非作者所有者，且项目状态不是 active，返回 404
+    if (!isOwner && project.status !== 'active') {
+        throw createError({ statusCode: 404, message: 'Project not found' })
     }
 
     // 2. Fetch Author Public Info from public_profiles physical table
