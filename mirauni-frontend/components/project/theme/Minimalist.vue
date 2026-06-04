@@ -15,7 +15,7 @@
       
       <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-             <img :src="project.users.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + project.users.username" class="w-10 h-10 rounded-full bg-gray-100" />
+             <img :src="project.users.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + project.users.username" :alt="project.users?.username || ''" width="40" height="40" decoding="async" class="w-10 h-10 rounded-full bg-gray-100" />
              <div>
                 <div class="font-medium text-sm">{{ project.users.username }}</div>
              </div>

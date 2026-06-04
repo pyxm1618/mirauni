@@ -29,7 +29,7 @@
                 <div class="flex items-center gap-4">
                      <div class="relative">
                         <div class="absolute inset-0 bg-green-500 blur opacity-50 rounded-full"></div>
-                        <img :src="project.users.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + project.users.username" class="relative w-12 h-12 rounded-full border border-green-500 bg-gray-900 z-10 grayscale hover:grayscale-0 transition-all" />
+                        <img :src="project.users.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + project.users.username" :alt="project.users?.username || ''" width="48" height="48" decoding="async" class="relative w-12 h-12 rounded-full border border-green-500 bg-gray-900 z-10 grayscale hover:grayscale-0 transition-all" />
                      </div>
                      <div class="flex flex-col">
                         <span class="text-xs text-green-600">USER_HANDLE</span>

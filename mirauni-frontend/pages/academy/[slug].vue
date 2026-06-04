@@ -48,7 +48,7 @@
 
         <!-- Cover -->
         <div v-if="article.cover_url" class="mb-12 border-3 border-black shadow-brutal aspect-video relative group bg-black">
-            <img :src="article.cover_url" :alt="article.title" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+            <img :src="article.cover_url" :alt="article.title" width="800" height="450" decoding="async" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
         </div>
 
         <!-- Content -->
