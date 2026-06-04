@@ -23,7 +23,7 @@ function escapeXml(unsafe: string): string {
 export default defineEventHandler(async (event) => {
     const supabase = await serverSupabaseClient(event)
     const config = useRuntimeConfig()
-    const siteUrl = config.public.siteUrl || 'https://mirauni.com'
+    const siteUrl = (config.public.siteUrl || 'https://mirauni.com').replace(/\/+$/, '')
 
     // 使用 Promise.allSettled 容错并行拉取所有动态数据
     const [projectsRes, articlesRes, developersRes] = await Promise.allSettled([
