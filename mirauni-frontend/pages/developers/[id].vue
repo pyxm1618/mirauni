@@ -189,7 +189,7 @@ useSeoMeta({
   description: () => developer.value?.bio || `${developer.value?.username} 的公开资料页，查看技能背景与合作偏好。`,
   keywords: () => developer.value ? `技术合伙人,招募开发者,${developer.value.skills?.join(',') || ''}` : '技术合伙人,招募开发者',
   ogTitle: () => developer.value?.username,
-  ogDescription: () => developer.value?.bio,
+  ogDescription: () => developer.value?.bio || `${developer.value?.username} 的公开资料页，查看技能背景与合作偏好。`,
   ogImage: () => ogImage.value,
   ogType: 'profile'
 })
