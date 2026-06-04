@@ -3,7 +3,7 @@
  * POST /api/admin/projects/[id]/approve
  */
 import { requireAdmin, createAdminSupabaseClient } from '~/server/utils/admin-auth'
-import { pushUrlsToBaidu } from '~/server/utils/baidu-push'
+import { enqueueSeoUrl } from '~/server/utils/seo-push-queue'
 
 export default defineEventHandler(async (event) => {
     await requireAdmin(event)
@@ -32,19 +32,23 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 获取 siteUrl 并推送百度
+    // 获取 siteUrl 并将项目 URL 写入百度推送队列
     const config = useRuntimeConfig()
     const siteUrl = (config.public.siteUrl || 'https://mirauni.com').replace(/\/+$/, '')
 
     try {
-        const pushResult = await pushUrlsToBaidu([`${siteUrl}/projects/${projectId}`])
-        if (!pushResult.success) {
-            console.warn('Baidu push warning during project approve:', pushResult.error)
+        const enqueueResult = await enqueueSeoUrl({
+            url: `${siteUrl}/projects/${projectId}`,
+            type: 'project',
+            sourceId: projectId
+        })
+        if (!enqueueResult.success) {
+            console.warn('Baidu push queue enqueue warning during project approve:', enqueueResult.error)
         } else {
-            console.log('Baidu push success during project approve:', pushResult.data)
+            console.log('Baidu push queue enqueue success during project approve:', enqueueResult.alreadyExists ? 'Already exists' : 'Enqueued')
         }
-    } catch (pushErr: any) {
-        console.error('Baidu push failed during project approve:', pushErr?.message || pushErr)
+    } catch (enqueueErr: any) {
+        console.warn('Baidu push queue enqueue failed during project approve:', enqueueErr?.message || enqueueErr)
     }
 
     return { success: true, message: '项目已审核通过' }
