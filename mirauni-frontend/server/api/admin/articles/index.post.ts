@@ -3,7 +3,7 @@
  * POST /api/admin/articles
  */
 import { requireAdmin, createAdminSupabaseClient } from '~/server/utils/admin-auth'
-import { pushUrlsToBaidu } from '~/server/utils/baidu-push'
+import { enqueueSeoUrl } from '~/server/utils/seo-push-queue'
 
 export default defineEventHandler(async (event) => {
     const admin = await requireAdmin(event)
@@ -44,7 +44,18 @@ export default defineEventHandler(async (event) => {
     if (data.status === 'published') {
         const config = useRuntimeConfig()
         const siteUrl = (config.public.siteUrl || 'https://mirauni.com').replace(/\/+$/, '')
-        await pushUrlsToBaidu([`${siteUrl}/academy/${data.slug}`])
+        try {
+            const result = await enqueueSeoUrl({
+                url: `${siteUrl}/academy/${data.slug}`,
+                type: 'article',
+                sourceId: data.id
+            })
+            if (!result.success) {
+                console.warn('文章入队百度推送失败:', result.error)
+            }
+        } catch (e: any) {
+            console.warn('文章入队百度推送发生异常:', e)
+        }
     }
 
     return { success: true, data }
