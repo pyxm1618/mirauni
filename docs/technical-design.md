@@ -344,6 +344,26 @@ CREATE TABLE sms_codes (
 );
 ```
 
+#### seo_url_push_queue 百度 URL 推送队列表
+
+```sql
+CREATE TABLE seo_url_push_queue (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  url TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('project', 'article', 'developer')),
+  source_id TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'success', 'failed')),
+  attempts INT NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+  max_attempts INT NOT NULL DEFAULT 5 CHECK (max_attempts >= 1),
+  last_error TEXT,
+  response_body JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  pushed_at TIMESTAMPTZ
+);
+```
+
+
 ### 3.3 枚举值定义
 
 #### 项目分类 (category)
@@ -456,6 +476,12 @@ CREATE POLICY "Active projects are viewable"
 CREATE POLICY "Users can manage own projects"
   ON projects FOR ALL
   USING (auth.uid() = user_id);
+
+-- 百度 URL 推送队列表 RLS 策略 (物理隔离，仅 Service Role 可见)
+ALTER TABLE seo_url_push_queue ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON TABLE seo_url_push_queue FROM anon;
+REVOKE ALL ON TABLE seo_url_push_queue FROM authenticated;
 ```
 
 ---
