@@ -189,6 +189,6 @@ onUnmounted(() => {
 
 useSeoMeta({
   title: t('auth.bind.seoTitle'),
-  robots: 'noindex'
+  robots: 'noindex, nofollow'
 })
 </script>
