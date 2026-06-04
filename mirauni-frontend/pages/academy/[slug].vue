@@ -97,12 +97,16 @@ const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString(t('common.locale') === 'en' ? 'en-US' : 'zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+const resolveOgImage = useOgImageResolver()
+const ogImage = computed(() => resolveOgImage(article.value?.cover_url))
+
 useSeoMeta({
   title: () => article.value ? `${article.value.title} - ${t('common.appName')}` : t('academy.detail.title'),
   description: () => article.value?.summary || article.value?.content?.slice(0, 150),
   keywords: () => article.value ? `找技术合伙人,招募技术合伙人,创业项目招募开发者,${article.value.category}` : '找技术合伙人,招募技术合伙人',
   ogTitle: () => article.value?.title,
   ogDescription: () => article.value?.summary,
+  ogImage: () => ogImage.value,
   ogType: 'article'
 })
 

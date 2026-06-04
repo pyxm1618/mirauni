@@ -97,9 +97,15 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
+const resolveOgImage = useOgImageResolver()
+const ogImage = resolveOgImage()
+
 useSeoMeta({
   title: t('about.seoTitle'),
   description: t('about.seoDescription'),
+  ogTitle: t('about.seoTitle'),
+  ogDescription: t('about.seoDescription'),
+  ogImage
 })
 
 useCanonical('/about')

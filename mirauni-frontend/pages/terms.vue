@@ -160,9 +160,15 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
+const resolveOgImage = useOgImageResolver()
+const ogImage = resolveOgImage()
+
 useSeoMeta({
   title: t('terms.seoTitle'),
   description: t('terms.seoDescription'),
+  ogTitle: t('terms.seoTitle'),
+  ogDescription: t('terms.seoDescription'),
+  ogImage
 })
 
 useCanonical('/terms')

@@ -118,9 +118,15 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
+const resolveOgImage = useOgImageResolver()
+const ogImage = resolveOgImage()
+
 useSeoMeta({
   title: t('contact.seoTitle'),
   description: t('contact.seoDescription'),
+  ogTitle: t('contact.seoTitle'),
+  ogDescription: t('contact.seoDescription'),
+  ogImage
 })
 
 useCanonical('/contact')

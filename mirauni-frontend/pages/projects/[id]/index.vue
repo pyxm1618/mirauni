@@ -106,12 +106,16 @@ const handleRecharge = () => {
     navigateTo('/me/recharge')
 }
 
+const resolveOgImage = useOgImageResolver()
+const ogImage = computed(() => resolveOgImage())
+
 useSeoMeta({
   title: () => project.value ? `${project.value.title}｜创业项目招募开发者 - ${t('common.appName')}` : t('project.title'),
   description: () => project.value?.summary || '创业项目招募开发者，查看项目背景、合作方式与角色需求。',
   keywords: () => project.value ? `找技术合伙人,创业项目招募开发者,${project.value.category},${project.value.roles_needed?.join(',')}` : '找技术合伙人,创业项目招募开发者',
   ogTitle: () => project.value ? `${project.value.title}｜创业项目招募开发者` : t('project.title'),
   ogDescription: () => project.value?.summary,
+  ogImage: () => ogImage.value,
   ogType: 'article'
 })
 

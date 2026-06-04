@@ -119,10 +119,16 @@ watch(() => filters.value.category, () => {
 
 const { t } = useI18n()
 
+const resolveOgImage = useOgImageResolver()
+const ogImage = resolveOgImage()
+
 useSeoMeta({
   title: () => `技术合伙人招募学院 - ${t('common.appName')}`,
   description: '学习怎么找技术合伙人、如何发布项目招募开发者、如何设计合作方案与项目页文案。',
   keywords: '怎么找技术合伙人,如何招募技术合伙人,创业项目招募开发者,技术合伙人合作方式',
+  ogTitle: () => `技术合伙人招募学院 - ${t('common.appName')}`,
+  ogDescription: '学习怎么找技术合伙人、如何发布项目招募开发者、如何设计合作方案与项目页文案。',
+  ogImage
 })
 
 useCanonical('/academy')

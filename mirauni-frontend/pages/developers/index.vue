@@ -123,11 +123,15 @@ const resetFilters = () => {
   refresh()
 }
 
-useHead({
+const resolveOgImage = useOgImageResolver()
+const ogImage = resolveOgImage()
+
+useSeoMeta({
   title: t('developer.square.seoTitle'),
-  meta: [
-    { name: 'description', content: t('developer.square.seoDesc') }
-  ]
+  description: t('developer.square.seoDesc'),
+  ogTitle: t('developer.square.seoTitle'),
+  ogDescription: t('developer.square.seoDesc'),
+  ogImage
 })
 
 useCanonical('/developers')
