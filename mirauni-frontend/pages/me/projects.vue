@@ -126,7 +126,7 @@ const { data, pending } = await useFetch('/api/me/projects')
 const projects = computed(() => data.value?.data || [])
 
 useSeoMeta({
-  title: t('me.nav.projects') + ' - ' + t('home.title'),
-  robots: 'noindex'
+  title: t('me.nav.projects') + ' - ' + t('home.title')
 })
+useNoindex()
 </script>

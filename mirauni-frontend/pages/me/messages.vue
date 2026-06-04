@@ -141,4 +141,6 @@ const formatTime = (isoString?: string) => {
     minute: 'numeric'
   }).format(date)
 }
+
+useNoindex()
 </script>

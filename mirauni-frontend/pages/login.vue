@@ -303,4 +303,5 @@ useSeoMeta({
   title: () => `${t('auth.title')} - ${t('common.appName')}`,
   description: 'Login to Mirauni'
 })
+useNoindex()
 </script>

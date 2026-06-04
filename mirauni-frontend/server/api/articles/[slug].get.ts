@@ -1,10 +1,12 @@
 
-import { serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { getSampleArticleBySlug } from '~/server/utils/sample-articles'
+import { getAdminFromEvent } from '~/server/utils/admin-auth'
 
 export default defineEventHandler(async (event) => {
     const slug = getRouterParam(event, 'slug')
     const client = await serverSupabaseClient(event)
+    const user = await serverSupabaseUser(event) // Optional
 
     const { data, error } = await client
         .from('articles')
@@ -19,9 +21,38 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    // 鉴权判断
+    let isOwner = false
+    let isAdmin = false
+    if (user && data) {
+        if (user.id === data.author_id) {
+            isOwner = true
+        }
+    }
+    const admin = await getAdminFromEvent(event)
+    if (admin) {
+        isAdmin = true
+    }
+
+    // 状态边界拦截：如果文章处于 draft 状态，非作者且非管理员访问直接返回 404
+    if (data && data.status === 'draft') {
+        if (!isOwner && !isAdmin) {
+            throw createError({
+                statusCode: 404,
+                message: 'Article not found'
+            })
+        }
+    }
+
     if (!data) {
         const sample = getSampleArticleBySlug(String(slug || ''))
         if (!sample) {
+            throw createError({
+                statusCode: 404,
+                message: 'Article not found'
+            })
+        }
+        if (sample.status !== 'published' && !isOwner && !isAdmin) {
             throw createError({
                 statusCode: 404,
                 message: 'Article not found'
@@ -32,10 +63,6 @@ export default defineEventHandler(async (event) => {
             data: sample
         }
     }
-
-    // Increment view count (optional, doing it simple here, ideally use RPC or specialized endpoint to avoid auth issue if user is anon)
-    // But RLS might prevent update if anon. So we skip update for now or need a service key client (not available here easily without env).
-    // For V1, we just read.
 
     return {
         success: true,

@@ -417,9 +417,9 @@ function showMessage(msg: string, type: 'success' | 'error' = 'success') {
 }
 
 useSeoMeta({
-  title: t('me.title') + ' - ' + t('home.title'),
-  robots: 'noindex'
+  title: t('me.title') + ' - ' + t('home.title')
 })
+useNoindex()
 </script>
 
 <style scoped>

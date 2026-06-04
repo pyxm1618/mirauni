@@ -224,4 +224,5 @@ useSeoMeta({
   title: () => `${t('auth.register.title')} - ${t('common.appName')}`,
   description: 'Register for Mirauni'
 })
+useNoindex()
 </script>

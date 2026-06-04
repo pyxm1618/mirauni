@@ -64,4 +64,5 @@ const { t } = useI18n()
 useSeoMeta({
   title: t('project.edit.seoTitle')
 })
+useNoindex()
 </script>
