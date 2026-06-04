@@ -22,7 +22,7 @@
           <div class="flex items-center gap-4 w-full md:w-auto">
               <div class="relative">
                 <div class="absolute inset-0 bg-black translate-x-1 translate-y-1 rounded-full"></div>
-                <img :src="project.users.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + project.users.username" class="relative w-16 h-16 rounded-full border-3 border-black bg-white z-10" />
+                <img :src="project.users.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + project.users.username" :alt="project.users?.username || ''" width="64" height="64" decoding="async" class="relative w-16 h-16 rounded-full border-3 border-black bg-white z-10" />
               </div>
               <div>
                 <div class="font-black text-xl uppercase">{{ project.users.username }}</div>

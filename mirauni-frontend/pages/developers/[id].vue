@@ -17,6 +17,10 @@
                 <div class="absolute inset-0 bg-black translate-x-1 translate-y-1 rounded-full"></div>
                 <img 
                 :src="developer.avatar_url || 'https://via.placeholder.com/150'" 
+                :alt="developer.username || ''"
+                width="128"
+                height="128"
+                decoding="async"
                 class="relative w-32 h-32 rounded-full border-3 border-black object-cover bg-white z-10"
                 />
             </div>

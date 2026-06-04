@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex justify-between items-start mb-4">
         <div class="w-10 h-10 border-3 border-black flex items-center justify-center font-bold bg-indie-primary">
-             <img v-if="project.user?.avatar_url" :src="project.user.avatar_url" class="w-full h-full object-cover border-2 border-black" />
+             <img v-if="project.user?.avatar_url" :src="project.user.avatar_url" :alt="project.user?.username || ''" width="40" height="40" loading="lazy" decoding="async" class="w-full h-full object-cover border-2 border-black" />
              <span v-else>{{ project.user?.username?.[0]?.toUpperCase() || 'U' }}</span>
         </div>
         <div v-if="String(project.id).startsWith('demo-')" class="bg-black text-white px-2 py-0.5 text-xs font-bold">样板项目</div>

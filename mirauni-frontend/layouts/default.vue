@@ -7,7 +7,7 @@
           <!-- Logo & Brand -->
           <NuxtLink to="/" class="flex items-center gap-3 group">
             <div class="flex items-center justify-center w-12 h-12 bg-indie-primary border-2 border-indie-border shadow-brutal group-hover:translate-x-[2px] group-hover:translate-y-[2px] group-hover:shadow-brutal-hover group-active:translate-x-[4px] group-active:translate-y-[4px] group-active:shadow-brutal-active transition-all overflow-hidden p-1">
-               <img src="/logo.png" :alt="$t('common.appName')" class="w-full h-full object-contain" />
+               <img src="/logo.png" :alt="$t('common.appName')" width="40" height="40" decoding="async" class="w-full h-full object-contain" />
             </div>
             <span class="text-2xl font-black font-display tracking-wide group-hover:text-indie-secondary transition-colors hidden sm:block">
               {{ $t('common.appName') }}
@@ -98,7 +98,7 @@
     <div class="container mx-auto px-4">
       <div class="flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3">
-           <img src="/logo.png" :alt="$t('common.appName')" class="w-8 h-8 object-contain" />
+           <img src="/logo.png" :alt="$t('common.appName')" width="32" height="32" loading="lazy" decoding="async" class="w-8 h-8 object-contain" />
           <span class="font-bold text-lg">{{ $t('common.appName') }}</span>
           <span class="text-gray-500 text-sm hidden sm:inline-block">{{ $t('footer.slogan') }}</span>
         </div>
