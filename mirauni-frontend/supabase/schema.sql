@@ -163,11 +163,36 @@ CREATE TABLE user_secrets (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 3.10 seo_url_push_queue 百度 URL 推送队列表
+CREATE TABLE seo_url_push_queue (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  url TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('project', 'article', 'developer')),
+  source_id TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'success', 'failed')),
+  attempts INT NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+  max_attempts INT NOT NULL DEFAULT 5 CHECK (max_attempts >= 1),
+  last_error TEXT,
+  response_body JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  pushed_at TIMESTAMPTZ
+);
+
 -- ==============================================================================
 -- 4. Create Indexes
 -- ==============================================================================
 CREATE INDEX idx_messages_conversation ON messages(conversation_id, created_at);
 CREATE INDEX idx_messages_unread ON messages(to_user_id, is_read) WHERE is_read = false;
+
+-- seo_url_push_queue 索引
+CREATE INDEX idx_seo_url_push_queue_status ON seo_url_push_queue(status);
+CREATE INDEX idx_seo_url_push_queue_type ON seo_url_push_queue(type);
+CREATE INDEX idx_seo_url_push_queue_source_id ON seo_url_push_queue(source_id);
+CREATE INDEX idx_seo_url_push_queue_created_at ON seo_url_push_queue(created_at DESC);
+CREATE INDEX idx_seo_url_push_queue_pushed_at ON seo_url_push_queue(pushed_at DESC);
+CREATE INDEX idx_seo_url_push_queue_scan ON seo_url_push_queue(status, attempts, created_at);
+CREATE UNIQUE INDEX idx_seo_url_push_queue_unique_url_pending ON seo_url_push_queue(url) WHERE status IN ('pending', 'processing');
 
 -- ==============================================================================
 -- 5. Enable Row Level Security (RLS)
@@ -231,6 +256,13 @@ CREATE POLICY "Service Role can manage user_secrets"
   -- 这里 USING(false) 意味着任何用户（包括 admin 角色通过 API 访问）都无法直接访问。
   -- 只有通过 supabaseAdmin (Service Role) 客户端才能绕过 RLS。
 
+-- 5.6 seo_url_push_queue RLS & Permissions
+ALTER TABLE seo_url_push_queue ENABLE ROW LEVEL SECURITY;
+
+-- 安全加固：撤销匿名用户与登录用户的所有访问权限
+REVOKE ALL ON TABLE seo_url_push_queue FROM anon;
+REVOKE ALL ON TABLE seo_url_push_queue FROM authenticated;
+
 -- ==============================================================================
 -- 9. Realtime Setup
 -- ==============================================================================
@@ -284,6 +316,20 @@ CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECU
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_articles_updated_at BEFORE UPDATE ON articles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_user_secrets_updated_at BEFORE UPDATE ON user_secrets FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+-- 7.2 Dedicated updated_at trigger for seo_url_push_queue
+CREATE OR REPLACE FUNCTION public.set_seo_url_push_queue_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS set_seo_url_push_queue_updated_at ON seo_url_push_queue;
+CREATE TRIGGER set_seo_url_push_queue_updated_at
+    BEFORE UPDATE ON seo_url_push_queue
+    FOR EACH ROW
+    EXECUTE FUNCTION public.set_seo_url_push_queue_updated_at();
 
 -- ==============================================================================
 -- 8. RPC Functions

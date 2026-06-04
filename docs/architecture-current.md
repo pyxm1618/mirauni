@@ -95,6 +95,7 @@ mirauni-frontend/server/api/**     Supabase
 | `orders` | 充值订单 |
 | `sms_codes` | 手机验证码 |
 | `events` | 自建埋点事件，IP 以 HMAC hash 脱敏 |
+| `seo_url_push_queue` | 百度 URL 推送队列表，记录待推送的页面 URL 与状态 |
 
 重要迁移：
 
@@ -102,6 +103,7 @@ mirauni-frontend/server/api/**     Supabase
 |------|------|
 | `20260108_add_has_password.sql` | 用户密码状态支持 |
 | `20260602_security_and_admin_fixes.sql` | `public_profiles`、RLS 收紧、`admin_role`、`admin_password_hash`、解锁 RPC、events 表等安全修复 |
+| `20260604_create_seo_url_push_queue.sql` | 创建百度 URL 推送队列表及相应的部分唯一索引与安全策略限制 |
 
 `schema.sql` 是初始化基线，安全修复和新增字段要同时看 migrations。后续改表时必须同步迁移、相关 API、测试文档和 `docs/progress.md`。
 
