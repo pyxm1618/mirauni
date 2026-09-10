@@ -45,7 +45,7 @@ export const academyCategories: AcademyCategory[] = [
   },
 ]
 
-export const academyArticles: AcademyArticle[] = [
+const drafts: AcademyArticle[] = [
   ...academyStoryArticles,
   ...academyBusinessArticles,
   ...academyOpportunityArticles,
@@ -53,6 +53,33 @@ export const academyArticles: AcademyArticle[] = [
   ...academyGrowthArticles,
   ...academyOperationsArticles,
 ]
+
+// 第二遍编辑审稿：只保留用户真正会看到的标题/来源修订，正文原始稿仍按栏目文件维护。
+const reviewedOverrides: Record<string, Partial<AcademyArticle>> = {
+  'simple-analytics-from-annoyance-to-product': {
+    title: 'Simple Analytics：不想再装 GA，怎么变成一个产品',
+  },
+  'plausible-324-days-and-one-blog-post': {
+    title: 'Plausible：324 天才到 400 美元 MRR，后来发生了什么',
+  },
+  'buttondown-small-saas-pricing-and-service': {
+    title: 'Buttondown：小团队做邮件 SaaS，为什么还要提供真人服务',
+  },
+  'platform-marketplaces-for-small-products': {
+    title: 'Chrome 扩展、Shopify App：为什么平台生态适合做小产品',
+  },
+  'does-your-mvp-need-login': {
+    sources: [
+      { label: 'Tally Pricing：无需注册也可开始创建表单', url: 'https://tally.so/pricing' },
+      { label: 'Quick I Ching：公开版产品边界', url: 'https://github.com/pyxm1618/quickiching' },
+    ],
+  },
+}
+
+export const academyArticles: AcademyArticle[] = drafts.map((article) => ({
+  ...article,
+  ...(reviewedOverrides[article.slug] || {}),
+}))
 
 export const academyCategoryMap = Object.fromEntries(
   academyCategories.map((category) => [category.id, category]),
