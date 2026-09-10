@@ -1,6 +1,4 @@
-
 import { serverSupabaseClient } from '#supabase/server'
-import { listSampleArticles } from '~/server/utils/sample-articles'
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
@@ -28,29 +26,15 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const dbArticles = data || []
-    const samples = listSampleArticles({
-        category: query.category ? String(query.category) : undefined
-    })
-    const dbSlugs = new Set(dbArticles.map((item: any) => item.slug))
-    const merged = [
-        ...dbArticles,
-        ...samples.filter((item) => !dbSlugs.has(item.slug))
-    ].sort((a: any, b: any) => {
-        const aTs = new Date(a.created_at || 0).getTime()
-        const bTs = new Date(b.created_at || 0).getTime()
-        return bTs - aTs
-    })
-
+    const articles = data || []
     const from = (page - 1) * pageSize
     const to = from + pageSize
-    const paged = merged.slice(from, to)
 
     return {
         success: true,
-        data: paged,
+        data: articles.slice(from, to),
         meta: {
-            total: merged.length,
+            total: articles.length,
             page,
             pageSize
         }
