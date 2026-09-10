@@ -24,6 +24,10 @@ jobs:
         run: npm ci
         working-directory: mirauni-frontend
 
+      - name: Validate academy editorial content
+        run: npm run test:academy
+        working-directory: mirauni-frontend
+
       - name: Run typecheck
         run: npm run typecheck
         working-directory: mirauni-frontend
