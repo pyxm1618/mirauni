@@ -32,6 +32,10 @@ jobs:
         run: npm run test:academy
         working-directory: mirauni-frontend
 
+      - name: Validate project square content
+        run: npm run test:projects
+        working-directory: mirauni-frontend
+
       - name: Run typecheck
         run: npm run typecheck
         working-directory: mirauni-frontend
