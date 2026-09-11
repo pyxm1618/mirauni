@@ -9,32 +9,42 @@ export default defineEventHandler(async (event) => {
         .from('mirauni_projects')
         .select('*', { count: 'exact' })
         .eq('status', 'active')
+        .order('curation_rank', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false })
 
-    // Filters
+    if (query.listing_type) {
+        request = request.eq('listing_type', query.listing_type)
+    }
+
+    if (query.industry) {
+        request = request.eq('industry', query.industry)
+    }
+
     if (query.category) {
         request = request.eq('category', query.category)
     }
 
     if (query.role) {
-        // If role is passed, check if roles_needed contains it.
-        // roles_needed is text[], so .contains should work.
-        request = request.contains('roles_needed', [query.role])
+        request = request
+            .eq('listing_type', 'owner')
+            .eq('is_recruiting', true)
+            .contains('roles_needed', [query.role])
     }
 
     if (query.work_mode) {
-        request = request.eq('work_mode', query.work_mode)
+        request = request
+            .eq('listing_type', 'owner')
+            .eq('is_recruiting', true)
+            .eq('work_mode', query.work_mode)
     }
 
     if (query.keyword) {
-        const kw = query.keyword
-        // search title or summary
-        request = request.or(`title.ilike.%${kw}%,summary.ilike.%${kw}%`)
+        const kw = String(query.keyword).replace(/[,%()]/g, ' ').trim()
+        if (kw) request = request.or(`title.ilike.%${kw}%,summary.ilike.%${kw}%`)
     }
 
-    // Pagination
-    const page = parseInt(query.page as string) || 1
-    const pageSize = parseInt(query.pageSize as string) || 20
+    const page = Math.max(1, parseInt(query.page as string) || 1)
+    const pageSize = Math.min(100, Math.max(1, parseInt(query.pageSize as string) || 30))
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
 
@@ -43,33 +53,17 @@ export default defineEventHandler(async (event) => {
     const { data: rawData, error, count } = await request
 
     if (error) {
-        throw createError({
-            statusCode: 500,
-            message: error.message
-        })
+        throw createError({ statusCode: 500, message: error.message })
     }
 
-    // 内存过滤：绝不返回 id 以 demo- 开头的项目，防止生产数据库被脏注入
-    const data = (rawData || []).filter((p: any) => !String(p.id).startsWith('demo-'))
-    // 若过滤导致数量变化，则取过滤后的实际长度；否则使用数据库返回的 count
+    const data = (rawData || []).filter((project: any) => !String(project.id).startsWith('demo-'))
     const totalCount = (rawData || []).length === data.length ? (count ?? 0) : data.length
 
-    // 冷启动兜底：当真实项目为空时，根据环境决定是否返回样板项目
     if (data.length === 0) {
-        // 生产环境直接返回空，绝不展示样板项目
         if (!isSampleProjectsAllowed()) {
-            return {
-                success: true,
-                data: [],
-                meta: {
-                    total: 0,
-                    page,
-                    pageSize
-                }
-            }
+            return { success: true, data: [], meta: { total: 0, page, pageSize } }
         }
 
-        // 开发环境或显式允许时，返回样板项目 fallback
         const samples = filterSampleProjects({
             category: query.category ? String(query.category) : undefined,
             role: query.role ? String(query.role) : undefined,
@@ -77,20 +71,11 @@ export default defineEventHandler(async (event) => {
             keyword: query.keyword ? String(query.keyword) : undefined
         })
         const paged = samples.slice(from, to + 1)
-
-        return {
-            success: true,
-            data: paged,
-            meta: {
-                total: samples.length,
-                page,
-                pageSize
-            }
-        }
+        return { success: true, data: paged, meta: { total: samples.length, page, pageSize } }
     }
 
-    // 内存合并 public_profiles 物理表中的公开用户信息，保证数据合规不越权
-    const userIds = [...new Set(data.map(p => p.user_id).filter(Boolean))]
+    const ownerRows = data.filter((project: any) => project.listing_type !== 'curated')
+    const userIds = [...new Set(ownerRows.map((project: any) => project.user_id).filter(Boolean))]
 
     const { data: profiles } = userIds.length
         ? await client
@@ -99,24 +84,18 @@ export default defineEventHandler(async (event) => {
             .in('id', userIds)
         : { data: [] }
 
-    const profileMap = new Map((profiles || []).map(p => [p.id, p]))
+    const profileMap = new Map((profiles || []).map(profile => [profile.id, profile]))
 
-    const enriched = data.map(p => ({
-        ...p,
-        user: profileMap.get(p.user_id) || {
-            username: '用户',
-            avatar_url: null
-        }
+    const enriched = data.map((project: any) => ({
+        ...project,
+        user: project.listing_type === 'curated'
+            ? { id: project.user_id, username: '小概率精选', avatar_url: null }
+            : (profileMap.get(project.user_id) || { id: project.user_id, username: '用户', avatar_url: null })
     }))
 
     return {
         success: true,
         data: enriched,
-        meta: {
-            total: totalCount,
-            page,
-            pageSize
-        }
+        meta: { total: totalCount, page, pageSize }
     }
 })
-
