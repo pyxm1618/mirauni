@@ -43,8 +43,7 @@
         {{ article.summary || '暂无摘要' }}
       </p>
 
-      <div class="mt-auto flex items-center justify-between gap-4 text-xs font-black border-t-2 border-black pt-4">
-        <span>{{ formatDate(article.created_at) }}</span>
+      <div class="mt-auto flex items-center justify-end gap-4 text-xs font-black border-t-2 border-black pt-4">
         <span class="whitespace-nowrap group-hover:translate-x-1 transition-transform">阅读全文 →</span>
       </div>
     </div>
@@ -63,9 +62,4 @@ const category = computed(() => academyCategoryMap[props.article.category as key
 const categoryLabel = computed(() => category.value?.label || props.article.category || '学院')
 const eyebrow = computed(() => category.value?.eyebrow || 'ACADEMY')
 const indexLabel = computed(() => String((props.index ?? 0) + 1).padStart(2, '0'))
-
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return ''
-  return new Date(dateStr).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
-}
 </script>
