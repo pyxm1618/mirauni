@@ -1,114 +1,97 @@
 <template>
-  <div class="max-w-5xl mx-auto">
-    <!-- Header -->
-    <div class="mb-12">
-      <NuxtLink to="/projects" class="inline-block mb-6 font-bold uppercase border-b-2 border-black hover:bg-black hover:text-white transition-all px-1">← BACK_TO_LIST</NuxtLink>
-      
-      <div class="flex flex-wrap items-center gap-3 mb-6">
-          <span class="px-3 py-1 bg-indie-secondary border-2 border-black text-sm font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">{{ getCategoryLabel(project.category) }}</span>
-          <span class="px-3 py-1 bg-white border-2 border-black text-sm font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">{{ getWorkModeLabel(project.work_mode) }}</span>
-          <span class="text-gray-500 text-sm font-bold uppercase px-2 border-l-2 border-black ml-2">POSTED: {{ formatDate(project.created_at) }}</span>
-          <span v-if="project.status !== 'active'" class="px-2 py-1 bg-red-500 text-white text-xs border-2 border-black font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-            {{ project.status === 'closed' ? 'CLOSED' : 'PENDING' }}
-          </span>
+  <article class="mx-auto max-w-5xl">
+    <NuxtLink to="/projects" class="mb-7 inline-block border-b-2 border-black px-1 font-black hover:bg-black hover:text-white">← 返回项目广场</NuxtLink>
+
+    <header class="mb-10 border-3 border-black bg-white p-6 shadow-brutal md:p-9">
+      <div class="mb-6 flex flex-wrap items-center gap-3">
+        <span class="border-2 border-black bg-indie-primary px-3 py-1 text-xs font-black shadow-[2px_2px_0_0_#000]">项目方发布</span>
+        <span v-if="project.industry" class="border-2 border-black bg-indie-secondary/30 px-3 py-1 text-xs font-black">{{ getIndustryLabel(project.industry) }}</span>
+        <span class="border-2 border-black bg-white px-3 py-1 text-xs font-black">{{ getCategoryLabel(project.category) }}</span>
+        <span v-if="project.is_recruiting && project.work_mode" class="border-2 border-black bg-white px-3 py-1 text-xs font-black">{{ getWorkModeLabel(project.work_mode) }}</span>
+        <span :class="project.is_recruiting ? 'bg-black text-white' : 'bg-gray-100 text-black'" class="border-2 border-black px-3 py-1 text-xs font-black">
+          {{ project.is_recruiting ? '开放合作' : '项目展示' }}
+        </span>
+        <span v-if="project.status !== 'active'" class="border-2 border-black bg-red-500 px-2 py-1 text-xs font-black text-white">
+          {{ project.status === 'closed' ? '已关闭' : '待审核' }}
+        </span>
       </div>
-      
-      <h1 class="text-5xl md:text-7xl font-black font-display mb-8 uppercase leading-tight tracking-tight">{{ project.title }}</h1>
-      <div class="p-6 bg-white border-3 border-black shadow-brutal mb-8">
-            <p class="text-xl md:text-2xl text-black font-bold font-mono leading-relaxed">"{{ project.summary }}"</p>
-      </div>
-      
-      <div class="flex flex-col md:flex-row items-center justify-between gap-6 border-t-4 border-black pt-8">
-          <div class="flex items-center gap-4 w-full md:w-auto">
-              <div class="relative">
-                <div class="absolute inset-0 bg-black translate-x-1 translate-y-1 rounded-full"></div>
-                <img :src="project.users.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + project.users.username" :alt="project.users?.username || ''" width="64" height="64" decoding="async" class="relative w-16 h-16 rounded-full border-3 border-black bg-white z-10" />
-              </div>
-              <div>
-                <div class="font-black text-xl uppercase">{{ project.users.username }}</div>
-                <div class="text-sm font-bold text-gray-500 uppercase">PROJECT_OWNER</div>
-              </div>
+
+      <h1 class="mb-6 text-4xl font-display font-black leading-tight md:text-7xl">{{ project.title }}</h1>
+      <p class="mb-8 max-w-4xl border-l-4 border-black pl-5 text-lg font-bold leading-8 text-gray-700 md:text-xl">{{ project.summary }}</p>
+
+      <div class="flex flex-col gap-6 border-t-4 border-black pt-7 md:flex-row md:items-center md:justify-between">
+        <div class="flex items-center gap-4">
+          <div class="relative">
+            <div class="absolute inset-0 translate-x-1 translate-y-1 rounded-full bg-black"></div>
+            <img :src="project.users?.avatar_url || fallbackAvatar" :alt="project.users?.username || '项目发布者'" width="64" height="64" decoding="async" class="relative z-10 h-16 w-16 rounded-full border-3 border-black bg-white" />
           </div>
-          
-          <!-- Actions -->
-          <div class="flex gap-4 w-full md:w-auto">
-              <NuxtLink v-if="project.is_owner" :to="`/projects/${project.id}/edit`" class="flex-1 md:flex-none px-6 py-3 bg-white border-3 border-black font-black uppercase hover:shadow-brutal hover:-translate-y-1 transition-all text-center">
-                {{ $t('common.edit') }}
-              </NuxtLink>
-              <button @click="$emit('unlock')" class="flex-1 md:flex-none bg-black text-white border-3 border-black px-6 py-3 font-black uppercase hover:bg-indie-primary hover:text-black hover:shadow-brutal hover:-translate-y-1 transition-all shadow-brutal">
-                {{ project.is_unlocked || project.is_owner ? $t('project.unlock.contactOwner') : $t('project.unlock.unlockContact') }}
-              </button>
-          </div>
-      </div>
-    </div>
-    
-    <!-- Content Cards -->
-    <div class="grid gap-8">
-        <!-- Basic Info -->
-        <div class="bg-white border-3 border-black shadow-brutal p-8 relative overflow-hidden group">
-          <div class="absolute top-0 left-0 w-3 h-full bg-indie-primary group-hover:w-full transition-all duration-500 opacity-20"></div>
-          <h3 class="text-3xl font-black mb-6 uppercase inline-block border-b-4 border-black relative z-10">REQUIREMENTS</h3>
-          
-          <div class="relative z-10">
-              <div class="flex flex-wrap gap-3 mb-6">
-                  <span v-for="role in project.roles_needed" :key="role" class="px-3 py-1 bg-indie-primary text-base font-black border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] uppercase">
-                    NEEDED: {{ getRoleLabel(role) }}
-                  </span>
-              </div>
-              <div v-if="project.skills_required?.length" class="mb-6">
-                  <span class="font-bold block mb-2 uppercase text-sm tracking-wider">REQUIRED SKILLS:</span>
-                  <div class="flex flex-wrap gap-2">
-                      <span v-for="skill in project.skills_required" :key="skill" class="bg-white px-3 py-1 text-sm border-2 border-black font-bold uppercase hover:bg-black hover:text-white transition-colors">
-                          {{ skill }}
-                      </span>
-                  </div>
-              </div>
-              <div class="flex items-center gap-2">
-                  <span class="font-bold uppercase text-sm tracking-wider">COOPERATION TYPE:</span>
-                  <span class="font-black text-lg bg-black text-white px-2 uppercase">{{ getCooperationLabel(project.cooperation_type) }}</span>
-              </div>
-          </div>
-        </div>
-        
-        <!-- Detail (Description) -->
-        <div class="bg-white border-3 border-black shadow-brutal p-8">
-          <h3 class="text-3xl font-black mb-8 border-b-4 border-black inline-block uppercase">DETAILS</h3>
-          <div v-if="project.description" class="prose max-w-none whitespace-pre-wrap leading-relaxed font-medium text-lg text-gray-800 font-mono">
-              {{ project.description }}
-          </div>
-          <div v-else class="text-center py-16 text-gray-500 bg-gray-50 border-3 border-dashed border-gray-400">
-              <p class="mb-6 text-2xl font-black uppercase opacity-50">🔒 {{ $t('project.unlock.lockedContent') }}</p>
-              <button @click="$emit('unlock')" class="bg-white border-3 border-black px-6 py-3 font-black uppercase hover:shadow-brutal hover:-translate-y-1 transition-all">{{ $t('project.unlock.unlockToView') }}</button>
+          <div>
+            <div class="text-xl font-black">{{ project.users?.username || '项目发布者' }}</div>
+            <div class="text-xs font-black tracking-[0.16em] text-gray-500">PROJECT OWNER</div>
           </div>
         </div>
 
-        <!-- Demo Link -->
-        <div class="bg-indie-accent border-3 border-black shadow-brutal p-8 flex flex-col md:flex-row items-center justify-between gap-4" v-if="project.demo_url">
-            <h3 class="text-2xl font-black uppercase">LIVE DEMO</h3>
-            <a :href="project.demo_url" target="_blank" class="bg-white text-black border-3 border-black px-6 py-2 font-black uppercase hover:shadow-brutal hover:-translate-y-1 transition-all truncate max-w-xs md:max-w-md block text-center">
-                {{ project.demo_url }} ↗
-            </a>
+        <div class="flex flex-wrap gap-3">
+          <NuxtLink v-if="project.is_owner" :to="`/projects/${project.id}/edit`" class="border-3 border-black bg-white px-5 py-3 text-center font-black hover:-translate-y-1 hover:shadow-brutal transition-all">编辑项目</NuxtLink>
+          <button v-if="project.is_recruiting && !project.is_owner" type="button" @click="$emit('unlock')" class="border-3 border-black bg-black px-5 py-3 font-black text-white shadow-brutal transition-all hover:-translate-y-1 hover:bg-indie-primary hover:text-black">
+            {{ project.is_unlocked ? '查看项目方联系方式' : '解锁项目方联系方式' }}
+          </button>
         </div>
+      </div>
+    </header>
+
+    <div class="grid gap-7">
+      <section v-if="project.is_recruiting" class="relative overflow-hidden border-3 border-black bg-indie-primary p-6 shadow-brutal md:p-8">
+        <div class="mb-5 text-xs font-black tracking-[0.18em]">COLLABORATION</div>
+        <h2 class="mb-6 inline-block border-b-4 border-black text-2xl font-black md:text-3xl">正在寻找</h2>
+
+        <div v-if="project.roles_needed?.length" class="mb-6 flex flex-wrap gap-3">
+          <span v-for="role in project.roles_needed" :key="role" class="border-2 border-black bg-white px-3 py-2 text-sm font-black shadow-[3px_3px_0_0_#000]">
+            {{ getRoleLabel(role) }}
+          </span>
+        </div>
+
+        <div v-if="project.skills_required?.length" class="mb-6">
+          <div class="mb-2 text-xs font-black tracking-widest">期望技能</div>
+          <div class="flex flex-wrap gap-2">
+            <span v-for="skill in project.skills_required" :key="skill" class="border-2 border-black bg-white px-2 py-1 text-sm font-bold">{{ skill }}</span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 text-sm font-bold">
+          <span v-if="project.work_mode" class="border-2 border-black bg-black px-3 py-2 text-white">{{ getWorkModeLabel(project.work_mode) }}</span>
+          <span v-if="project.cooperation_type" class="border-2 border-black bg-white px-3 py-2">{{ getCooperationLabel(project.cooperation_type) }}</span>
+        </div>
+      </section>
+
+      <section class="border-3 border-black bg-white p-6 shadow-brutal md:p-8">
+        <div class="mb-5 text-xs font-black tracking-[0.18em] text-gray-500">PROJECT DETAILS</div>
+        <h2 class="mb-6 inline-block border-b-4 border-black text-2xl font-black md:text-3xl">项目介绍</h2>
+        <p v-if="project.description" class="whitespace-pre-wrap text-base font-medium leading-8 text-gray-800 md:text-lg">{{ project.description }}</p>
+        <div v-else class="border-2 border-dashed border-black bg-gray-50 p-8 text-center font-bold text-gray-500">项目方暂未公开详细介绍。</div>
+      </section>
+
+      <section v-if="project.demo_url" class="flex flex-col gap-4 border-3 border-black bg-indie-accent p-6 shadow-brutal md:flex-row md:items-center md:justify-between md:p-8">
+        <div>
+          <div class="mb-1 text-xs font-black tracking-[0.18em]">LIVE PRODUCT</div>
+          <h2 class="text-2xl font-black">看看实际产品</h2>
+        </div>
+        <a :href="project.demo_url" target="_blank" rel="noopener noreferrer" class="max-w-full truncate border-3 border-black bg-white px-5 py-3 text-center font-black shadow-[3px_3px_0_0_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none">访问项目 ↗</a>
+      </section>
     </div>
-  </div>
+  </article>
 </template>
 
 <script setup lang="ts">
-import { PROJECT_CATEGORIES, WORK_MODES, ROLES, COOPERATION_TYPES } from '~/types'
+import { PROJECT_CATEGORIES, PROJECT_INDUSTRIES, WORK_MODES, ROLES, COOPERATION_TYPES } from '~/types'
 
-const props = defineProps<{
-  project: any
-}>()
+const props = defineProps<{ project: any }>()
+defineEmits(['unlock'])
 
-const emit = defineEmits(['unlock'])
-
-const { t } = useI18n()
-const localePath = useLocalePath()
-
-const getCategoryLabel = (val: string) => t('project.categories.' + val)
-const getWorkModeLabel = (val: string) => t('project.workModes.' + val)
-const getRoleLabel = (val: string) => t('roles.' + val)
-const getCooperationLabel = (val: string) => t('project.cooperationTypes.' + val)
-
-const formatDate = (date: string) => new Date(date).toLocaleDateString()
+const fallbackAvatar = computed(() => `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(props.project.users?.username || 'project')}`)
+const getCategoryLabel = (value: string) => PROJECT_CATEGORIES.find(item => item.value === value)?.label || value
+const getIndustryLabel = (value: string) => PROJECT_INDUSTRIES.find(item => item.value === value)?.label || value
+const getWorkModeLabel = (value: string) => WORK_MODES.find(item => item.value === value)?.label || value
+const getRoleLabel = (value: string) => ROLES.find(item => item.value === value)?.label || value
+const getCooperationLabel = (value: string) => COOPERATION_TYPES.find(item => item.value === value)?.label || value
 </script>

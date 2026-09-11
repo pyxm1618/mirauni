@@ -9,6 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test:academy": "tsx scripts/validate-academy-content.ts",
+    "test:projects": "tsx scripts/validate-project-square-content.ts",
+    "seed:projects": "tsx scripts/seed-project-square.ts",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {

@@ -3,7 +3,6 @@ import { z } from 'zod'
 // ==================== 验证 Schema ====================
 
 export const phoneSchema = z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号')
-
 export const codeSchema = z.string().regex(/^\d{6}$/, '请输入6位验证码')
 
 export const usernameSchema = z
@@ -26,22 +25,66 @@ export const userProfileSchema = z.object({
     social_links: z.record(z.string()).optional()
 })
 
+export const PROJECT_INDUSTRY_VALUES = [
+    'culture_education',
+    'finance',
+    'productivity',
+    'entertainment',
+    'health_fitness',
+    'events',
+    'food_lifestyle',
+    'business_services',
+    'sustainability',
+    'real_estate',
+    'logistics',
+    'travel',
+    'agriculture',
+    'gaming'
+] as const
+
 export const projectSchema = z.object({
     title: z.string().min(2, '标题至少2个字').max(50, '标题最多50字'),
     summary: z.string().min(10, '简介至少10字').max(200, '简介最多200字'),
     category: z.enum(['saas', 'app', 'game', 'ai', 'ecommerce', 'content', 'hardware', 'other']),
-    roles_needed: z.array(z.string()).min(1, '至少选择一个招募角色').max(5),
+    industry: z.enum(PROJECT_INDUSTRY_VALUES),
+    listing_type: z.enum(['owner', 'curated']).optional(),
+    is_recruiting: z.boolean().default(true),
+    roles_needed: z.array(z.string()).max(5).default([]),
     skills_required: z.array(z.string()).max(10).optional(),
-    work_mode: z.enum(['remote', 'onsite', 'hybrid']),
-    cooperation_type: z.enum(['equity', 'salary', 'revenue_share', 'volunteer']),
+    work_mode: z.enum(['remote', 'onsite', 'hybrid']).nullable().optional(),
+    cooperation_type: z.enum(['equity', 'salary', 'revenue_share', 'volunteer']).nullable().optional(),
     description: z.string().max(5000, '详情最多5000字').optional(),
     background: z.string().max(2000).optional(),
     vision: z.string().max(1000).optional(),
     team_info: z.string().max(1000).optional(),
     demo_url: z.string().url('请输入正确的链接').optional().or(z.literal(''))
+}).superRefine((data, ctx) => {
+    if (!data.is_recruiting) return
+
+    if (data.roles_needed.length < 1) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['roles_needed'], message: '正在招募时至少选择一个招募角色' })
+    }
+    if (!data.work_mode) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['work_mode'], message: '正在招募时请选择工作方式' })
+    }
+    if (!data.cooperation_type) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['cooperation_type'], message: '正在招募时请选择合作方式' })
+    }
 })
 
 // ==================== 类型定义 ====================
+
+export type ProjectListingType = 'owner' | 'curated'
+export type ProjectIndustry = typeof PROJECT_INDUSTRY_VALUES[number]
+
+export interface CuratedProjectMeta {
+    features?: string[]
+    editorial_reason?: string
+    tech_stack?: string[]
+    license?: string
+    official_url?: string
+    source_label?: string
+}
 
 export interface User {
     id: string
@@ -72,25 +115,31 @@ export interface Project {
     title: string
     summary: string
     category: string
+    industry?: ProjectIndustry
+    listing_type: ProjectListingType
+    is_recruiting: boolean
     roles_needed: string[]
     skills_required?: string[]
-    work_mode: string
-    cooperation_type: string
-    description?: string
+    work_mode?: string | null
+    cooperation_type?: string | null
+    source_repo?: string | null
+    source_url?: string | null
+    curated_meta?: CuratedProjectMeta
+    curation_rank?: number | null
+    description?: string | null
     description_visible: boolean
-    background?: string
+    background?: string | null
     background_visible: boolean
-    vision?: string
+    vision?: string | null
     vision_visible: boolean
-    team_info?: string
+    team_info?: string | null
     team_visible: boolean
-    demo_url?: string
+    demo_url?: string | null
     demo_visible: boolean
     status: 'pending' | 'active' | 'closed' | 'rejected'
     view_count: number
     created_at: string
     updated_at: string
-    // 关联
     user?: Pick<User, 'id' | 'username' | 'avatar_url'>
 }
 
@@ -102,7 +151,6 @@ export interface Message {
     content: string
     is_read: boolean
     created_at: string
-    // 关联
     from_user?: Pick<User, 'id' | 'username' | 'avatar_url'>
 }
 
@@ -143,6 +191,23 @@ export const PROJECT_CATEGORIES = [
     { value: 'content', label: '内容/社区' },
     { value: 'hardware', label: '智能硬件' },
     { value: 'other', label: '其他' }
+] as const
+
+export const PROJECT_INDUSTRIES = [
+    { value: 'culture_education', label: '文化教育' },
+    { value: 'finance', label: '金融' },
+    { value: 'productivity', label: '效率工具' },
+    { value: 'entertainment', label: '内容娱乐' },
+    { value: 'health_fitness', label: '健康运动' },
+    { value: 'events', label: '活动票务' },
+    { value: 'food_lifestyle', label: '餐饮生活' },
+    { value: 'business_services', label: '企业服务' },
+    { value: 'sustainability', label: '环保能源' },
+    { value: 'real_estate', label: '房产建筑' },
+    { value: 'logistics', label: '物流供应链' },
+    { value: 'travel', label: '旅游' },
+    { value: 'agriculture', label: '农业' },
+    { value: 'gaming', label: '游戏' }
 ] as const
 
 export const ROLES = [

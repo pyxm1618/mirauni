@@ -1,69 +1,76 @@
 <template>
-  <NuxtLink :to="localePath('/projects/' + project.id)" class="bg-white border-3 border-black p-5 shadow-brutal hover:shadow-brutal-lg transition-all hover:-translate-y-1 flex flex-col h-full group pb-16 relative">
-    <!-- Header -->
-    <div class="flex justify-between items-start mb-4">
-        <div class="w-10 h-10 border-3 border-black flex items-center justify-center font-bold bg-indie-primary">
-             <img v-if="project.user?.avatar_url" :src="project.user.avatar_url" :alt="project.user?.username || ''" width="40" height="40" loading="lazy" decoding="async" class="w-full h-full object-cover border-2 border-black" />
-             <span v-else>{{ project.user?.username?.[0]?.toUpperCase() || 'U' }}</span>
-        </div>
-        <div v-if="String(project.id).startsWith('demo-')" class="bg-black text-white px-2 py-0.5 text-xs font-bold">样板项目</div>
-        <div v-else class="bg-black text-white px-2 py-0.5 text-xs font-bold font-mono">ID:{{ project.id.toString().slice(0, 8) }}</div>
+  <NuxtLink
+    :to="localePath('/projects/' + project.id)"
+    class="group relative flex h-full flex-col border-3 border-black bg-white p-5 pb-16 shadow-brutal transition-all hover:-translate-y-1 hover:shadow-brutal-lg"
+  >
+    <div class="mb-5 flex items-start justify-between gap-4">
+      <div
+        class="flex h-12 w-12 shrink-0 items-center justify-center border-3 border-black text-sm font-black uppercase shadow-[3px_3px_0_0_#000]"
+        :class="markClass"
+        aria-hidden="true"
+      >
+        {{ projectMark }}
+      </div>
+      <span
+        class="border-2 border-black px-2.5 py-1 text-[11px] font-black"
+        :class="isCurated ? 'bg-black text-white' : 'bg-indie-primary text-black'"
+      >
+        {{ isCurated ? '平台精选' : '项目方发布' }}
+      </span>
     </div>
 
-    <!-- Title -->
-    <h3 class="text-xl font-black uppercase leading-tight mb-2 group-hover:underline decoration-4 decoration-indie-accent cursor-pointer line-clamp-2">
-        {{ project.title }}
+    <h3 class="mb-2 text-xl font-black leading-tight group-hover:underline group-hover:decoration-4 group-hover:decoration-indie-accent">
+      {{ project.title }}
     </h3>
 
-    <!-- Description -->
-    <p class="text-sm font-medium text-gray-600 mb-4 flex-grow border-l-2 border-black pl-3 ml-1 line-clamp-3">
-        {{ project.summary }}
+    <p class="mb-5 ml-1 line-clamp-3 flex-grow border-l-2 border-black pl-3 text-sm font-medium leading-6 text-gray-600">
+      {{ project.summary }}
     </p>
 
-    <!-- Tags -->
-    <div class="flex flex-wrap gap-1 mb-4">
-      <span class="border border-black px-1.5 py-0.5 text-[10px] font-bold uppercase bg-gray-100">
+    <div class="mb-4 flex flex-wrap gap-2">
+      <span v-if="project.industry" class="border border-black bg-indie-secondary/30 px-2 py-1 text-[10px] font-black">
+        {{ getIndustryLabel(project.industry) }}
+      </span>
+      <span class="border border-black bg-gray-100 px-2 py-1 text-[10px] font-black">
         {{ getCategoryLabel(project.category) }}
       </span>
-      <span v-for="role in project.roles_needed" :key="role" class="border border-black px-1.5 py-0.5 text-[10px] font-bold uppercase bg-indie-secondary/30">
-        NEEDED: {{ getRoleLabel(role) }}
-      </span>
+      <span v-if="isCurated" class="border border-black bg-white px-2 py-1 text-[10px] font-black">开源项目</span>
+      <span v-if="isRecruitingOwner" class="border border-black bg-indie-primary px-2 py-1 text-[10px] font-black">开放合作</span>
     </div>
 
-    <!-- Action Button (Absolute Bottom) -->
-    <div class="absolute bottom-5 left-5 right-5">
-        <div class="w-full border-3 border-black py-2 font-black text-sm hover:bg-indie-primary hover:shadow-brutal-hover transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none bg-white uppercase text-center">
-            查看详情
-        </div>
+    <div v-if="isRecruitingOwner && project.roles_needed?.length" class="mb-4 text-xs font-bold text-gray-600">
+      寻找：{{ project.roles_needed.map(getRoleLabel).join(' / ') }}
+    </div>
+
+    <div class="absolute bottom-5 left-5 right-5 flex items-center justify-between border-t-2 border-black pt-3 text-xs font-black">
+      <span class="text-gray-500">{{ isCurated ? '来源 GitHub' : (project.is_recruiting ? '正在招募' : '项目展示') }}</span>
+      <span class="transition-transform group-hover:translate-x-1">查看项目 →</span>
     </div>
   </NuxtLink>
 </template>
 
 <script setup lang="ts">
 import type { Project } from '~/types'
-import { PROJECT_CATEGORIES, WORK_MODES, COOPERATION_TYPES, ROLES } from '~/types'
+import { PROJECT_CATEGORIES, PROJECT_INDUSTRIES, ROLES } from '~/types'
 
-const props = defineProps<{
-  project: Project
-}>()
-
-const { t } = useI18n()
+const props = defineProps<{ project: Project }>()
 const localePath = useLocalePath()
 
-const getCategoryLabel = (val: string) => t('project.categories.' + val)
-const getWorkModeLabel = (val: string) => t('project.workModes.' + val)
-const getRoleLabel = (val: string) => t('roles.' + val)
-const getCooperationLabel = (val: string) => t('project.cooperationTypes.' + val)
+const isCurated = computed(() => props.project.listing_type === 'curated')
+const isRecruitingOwner = computed(() => props.project.listing_type === 'owner' && props.project.is_recruiting)
 
-const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diff = (now.getTime() - date.getTime()) / 1000 // seconds
+const projectMark = computed(() => {
+  const words = props.project.title.trim().split(/[\s.\-_]+/).filter(Boolean)
+  if (words.length > 1) return words.slice(0, 2).map(word => word[0]).join('').toUpperCase()
+  return props.project.title.replace(/[^A-Za-z0-9\u4e00-\u9fff]/g, '').slice(0, 2).toUpperCase() || 'P'
+})
 
-    if (diff < 60) return '刚刚'
-    if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`
-    if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`
-    if (diff < 2592000) return `${Math.floor(diff / 86400)}天前`
-    return date.toLocaleDateString()
-}
+const markClass = computed(() => {
+  const seed = [...props.project.title].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 4
+  return ['bg-indie-primary', 'bg-indie-secondary', 'bg-indie-accent', 'bg-white'][seed]
+})
+
+const getCategoryLabel = (value: string) => PROJECT_CATEGORIES.find(item => item.value === value)?.label || value
+const getIndustryLabel = (value: string) => PROJECT_INDUSTRIES.find(item => item.value === value)?.label || value
+const getRoleLabel = (value: string) => ROLES.find(item => item.value === value)?.label || value
 </script>
