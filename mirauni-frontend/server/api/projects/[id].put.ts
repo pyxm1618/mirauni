@@ -9,8 +9,6 @@ export default defineEventHandler(async (event) => {
     }
 
     const body = await readBody(event)
-
-    // Validate
     const result = projectSchema.safeParse(body)
     if (!result.success) {
         throw createError({
@@ -23,11 +21,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const client = await serverSupabaseClient(event)
-
-    // Verify ownership
     const { data: existing, error: fetchError } = await client
         .from('mirauni_projects')
-        .select('user_id')
+        .select('user_id, listing_type')
         .eq('id', id)
         .single()
 
@@ -39,10 +35,20 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 403, message: 'Forbidden' })
     }
 
-    // Update
+    if (existing.listing_type === 'curated') {
+        throw createError({ statusCode: 403, message: 'Curated projects are managed by the platform' })
+    }
+
     const { data, error } = await client
         .from('mirauni_projects')
-        .update(result.data)
+        .update({
+            ...result.data,
+            listing_type: 'owner',
+            source_repo: null,
+            source_url: null,
+            curated_meta: {},
+            curation_rank: null
+        })
         .eq('id', id)
         .select()
         .single()
