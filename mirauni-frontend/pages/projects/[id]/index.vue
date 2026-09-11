@@ -1,35 +1,33 @@
 <template>
-  <div class="container mx-auto px-4 py-12">
-    <div v-if="pending" class="text-center py-12 font-bold text-xl uppercase">LOADING...</div>
-    <div v-else-if="error" class="text-center py-12 text-red-600 font-bold border-3 border-red-600 bg-red-100 uppercase">
-      ERROR: {{ error.message }}
+  <div class="container mx-auto px-4 py-10 md:py-12">
+    <div v-if="pending" class="border-3 border-black bg-gray-50 py-16 text-center text-xl font-black">加载项目中...</div>
+    <div v-else-if="error" class="border-3 border-red-600 bg-red-100 p-8 text-center font-bold text-red-700">
+      项目加载失败：{{ error.message }}
     </div>
-    <div v-else-if="project">
-      <component :is="activeTheme" :project="project" @unlock="handleUnlockRequest" />
-      
-      <ClientOnly>
-        <UnlockModal 
-            :visible="showUnlockModal"
-            :credits="user?.unlock_credits || 0"
-            :cost="1"
-            :loading="unlockLoading"
-            @close="showUnlockModal = false"
-            @confirm="handleConfirmUnlock"
-            @recharge="handleRecharge"
+    <template v-else-if="project">
+      <CuratedProjectDetail v-if="isCurated" :project="project" />
+      <BrutalistTheme v-else :project="project" @unlock="handleUnlockRequest" />
+
+      <ClientOnly v-if="isRecruitingOwner">
+        <UnlockModal
+          :visible="showUnlockModal"
+          :credits="user?.unlock_credits || 0"
+          :cost="1"
+          :loading="unlockLoading"
+          @close="showUnlockModal = false"
+          @confirm="handleConfirmUnlock"
+          @recharge="handleRecharge"
         />
       </ClientOnly>
-    </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-const { t } = useI18n()
 import type { Project } from '~/types'
-
-// Theme Components
 import BrutalistTheme from '~/components/project/theme/Brutalist.vue'
-import MinimalistTheme from '~/components/project/theme/Minimalist.vue'
-import CyberTheme from '~/components/project/theme/Cyber.vue'
+import CuratedProjectDetail from '~/components/project/CuratedProjectDetail.vue'
+import UnlockModal from '~/components/project/UnlockModal.vue'
 
 interface ProjectDetailResponse {
   success: boolean
@@ -46,126 +44,110 @@ interface ProjectDetailResponse {
 }
 
 const route = useRoute()
+const { t } = useI18n()
 const { data, pending, error, refresh } = await useFetch<ProjectDetailResponse>(`/api/projects/${route.params.id}`)
 const project = computed(() => data.value?.data)
+const isCurated = computed(() => project.value?.listing_type === 'curated')
+const isRecruitingOwner = computed(() => project.value?.listing_type === 'owner' && project.value?.is_recruiting)
 
-// Deterministic Theme Selection
-const activeTheme = computed(() => {
-  if (!project.value) return BrutalistTheme
-  
-  // Sum all char codes to get a better distribution than just the first char
-  const hash = project.value.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  const themeIndex = hash % 3
-
-  switch (themeIndex) {
-    case 0: return BrutalistTheme
-    case 1: return MinimalistTheme
-    case 2: return CyberTheme
-    default: return BrutalistTheme
-  }
-})
-
-// Unlock Modal & Logic
-import UnlockModal from '~/components/project/UnlockModal.vue'
 const showUnlockModal = ref(false)
 const unlockLoading = ref(false)
 const { user, refreshUser } = useAuth()
 
 const handleUnlockRequest = () => {
-  if (!user.value) {
-    return navigateTo(`/login?redirect=${route.fullPath}`)
-  }
+  if (!isRecruitingOwner.value || !project.value) return
+  if (!user.value) return navigateTo(`/login?redirect=${route.fullPath}`)
   showUnlockModal.value = true
 }
 
 const handleConfirmUnlock = async () => {
-    if (!project.value) return
-    
-    unlockLoading.value = true
-    try {
-        const response = await $fetch<{ success: boolean; message?: string }>('/api/unlock/purchase', {
-            method: 'POST',
-            body: { targetUserId: project.value.user_id }
-        })
-        
-        if (!response.success) throw new Error(response.message || 'Unlock failed')
+  if (!project.value || !isRecruitingOwner.value) return
 
-        showUnlockModal.value = false
-        // Refresh project data to show unlocked content
-        await refresh()
-        // Refresh user to update credits
-        await refreshUser()
-    } catch (e: any) {
-        alert(e.message || 'Unlock failed')
-    } finally {
-        unlockLoading.value = false
-    }
+  unlockLoading.value = true
+  try {
+    const response = await $fetch<{ success: boolean; message?: string }>('/api/unlock/purchase', {
+      method: 'POST',
+      body: { targetUserId: project.value.user_id }
+    })
+    if (!response.success) throw new Error(response.message || 'Unlock failed')
+
+    showUnlockModal.value = false
+    await refresh()
+    await refreshUser()
+  } catch (e: any) {
+    alert(e.message || 'Unlock failed')
+  } finally {
+    unlockLoading.value = false
+  }
 }
 
-const handleRecharge = () => {
-    navigateTo('/me/recharge')
-}
+const handleRecharge = () => navigateTo('/me/recharge')
 
 const resolveOgImage = useOgImageResolver()
 const ogImage = computed(() => resolveOgImage())
 
 useSeoMeta({
-  title: () => project.value ? `${project.value.title}｜创业项目招募开发者 - ${t('common.appName')}` : t('project.title'),
-  description: () => project.value?.summary || '创业项目招募开发者，查看项目背景、合作方式与角色需求。',
-  keywords: () => project.value ? `找技术合伙人,创业项目招募开发者,${project.value.category},${project.value.roles_needed?.join(',')}` : '找技术合伙人,创业项目招募开发者',
-  ogTitle: () => project.value ? `${project.value.title}｜创业项目招募开发者` : t('project.title'),
+  title: () => project.value
+    ? (isCurated.value ? `${project.value.title}｜小概率精选项目` : `${project.value.title}｜项目广场 - ${t('common.appName')}`)
+    : '项目广场 - 小概率',
+  description: () => project.value?.summary || '浏览真实独立产品和正在寻找合作伙伴的项目。',
+  keywords: () => project.value
+    ? [project.value.title, project.value.industry, project.value.category, ...(isRecruitingOwner.value ? project.value.roles_needed || [] : [])].filter(Boolean).join(',')
+    : '独立产品,项目广场',
+  ogTitle: () => project.value?.title || '项目广场',
   ogDescription: () => project.value?.summary,
   ogImage: () => ogImage.value,
-  ogType: 'article'
+  ogType: 'article',
+  robots: () => isCurated.value ? 'noindex, follow' : 'index, follow'
 })
 
 useCanonical(`/projects/${route.params.id}`)
 
-// 结构化数据 - JobPosting
-const structuredData = computed(() => project.value ? JSON.stringify({
+const breadcrumbStructuredData = computed(() => JSON.stringify({
   '@context': 'https://schema.org',
-  '@type': 'JobPosting',
-  title: project.value.title,
-  description: project.value.summary,
-  datePosted: project.value.created_at,
-  employmentType: project.value.work_mode === 'remote' ? 'CONTRACTOR' : 'FULL_TIME',
-  hiringOrganization: {
-    '@type': 'Organization',
-    name: t('common.appName'),
-    url: 'https://mirauni.com'
-  },
-  jobLocation: {
-    '@type': 'Place',
-    address: project.value.work_mode === 'remote' ? t('project.workModes.remote') : 'China'
-  }
-}) : '{}')
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: '首页', item: 'https://mirauni.com/' },
+    { '@type': 'ListItem', position: 2, name: '项目广场', item: 'https://mirauni.com/projects' },
+    { '@type': 'ListItem', position: 3, name: project.value?.title || '项目详情', item: `https://mirauni.com/projects/${route.params.id}` }
+  ]
+}))
 
-useHead({
+const jobPostingStructuredData = computed(() => {
+  if (!isRecruitingOwner.value || !project.value) return null
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title: project.value.title,
+    description: project.value.summary,
+    datePosted: project.value.created_at,
+    employmentType: project.value.work_mode === 'remote' ? 'CONTRACTOR' : 'FULL_TIME',
+    hiringOrganization: {
+      '@type': 'Organization',
+      name: t('common.appName'),
+      url: 'https://mirauni.com'
+    },
+    jobLocation: project.value.work_mode === 'remote'
+      ? { '@type': 'VirtualLocation', url: `https://mirauni.com/projects/${project.value.id}` }
+      : { '@type': 'Place', address: 'China' }
+  })
+})
+
+useHead(() => ({
   script: [
     {
       type: 'application/ld+json',
-      innerHTML: structuredData
+      innerHTML: breadcrumbStructuredData.value
     },
-    {
+    ...(jobPostingStructuredData.value ? [{
       type: 'application/ld+json',
-      innerHTML: computed(() => JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: '首页', item: 'https://mirauni.com/' },
-          { '@type': 'ListItem', position: 2, name: '项目广场', item: 'https://mirauni.com/projects' },
-          { '@type': 'ListItem', position: 3, name: project.value?.title || '项目详情', item: `https://mirauni.com/projects/${route.params.id}` }
-        ]
-      }))
-    }
+      innerHTML: jobPostingStructuredData.value
+    }] : [])
   ]
-})
+}))
 
-// 页面浏览埋点
 const { trackProjectView } = useTrack()
 onMounted(() => {
-  if (project.value?.id) {
-    trackProjectView(project.value.id)
-  }
+  if (project.value?.id) trackProjectView(project.value.id)
 })
 </script>
