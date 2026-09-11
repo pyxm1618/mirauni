@@ -1,17 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
 import { CURATED_PROJECTS } from '../data/project-square/curated-projects'
 
-const supabaseUrl = process.env.SUPABASE_URL
+const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, '')
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const platformUserId = process.env.PROJECT_SQUARE_PLATFORM_USER_ID
 
 if (!supabaseUrl || !serviceRoleKey || !platformUserId) {
   throw new Error('SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and PROJECT_SQUARE_PLATFORM_USER_ID are required')
 }
-
-const client = createClient(supabaseUrl, serviceRoleKey, {
-  auth: { persistSession: false, autoRefreshToken: false }
-})
 
 const quickIChing = {
   id: 'd9e2b8f1-0c61-4a5d-8d65-3c79f6a20000',
@@ -58,20 +53,40 @@ const curatedRows = CURATED_PROJECTS.map(project => ({
 }))
 
 const rows = [quickIChing, ...curatedRows]
+const endpoint = `${supabaseUrl}/rest/v1/mirauni_projects?on_conflict=id`
+const headers = {
+  apikey: serviceRoleKey,
+  Authorization: `Bearer ${serviceRoleKey}`,
+  'Content-Type': 'application/json',
+  Prefer: 'resolution=merge-duplicates,return=minimal'
+}
 
-const { error } = await client
-  .from('mirauni_projects')
-  .upsert(rows, { onConflict: 'id' })
+const upsert = await fetch(endpoint, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify(rows)
+})
 
-if (error) throw error
+if (!upsert.ok) {
+  throw new Error(`project upsert failed (${upsert.status}): ${await upsert.text()}`)
+}
 
-const { count, error: countError } = await client
-  .from('mirauni_projects')
-  .select('id', { count: 'exact', head: true })
-  .in('id', rows.map(row => row.id))
-  .eq('status', 'active')
+const ids = rows.map(row => row.id).join(',')
+const verify = await fetch(`${supabaseUrl}/rest/v1/mirauni_projects?select=id&status=eq.active&id=in.(${ids})`, {
+  headers: {
+    apikey: serviceRoleKey,
+    Authorization: `Bearer ${serviceRoleKey}`,
+    Accept: 'application/json'
+  }
+})
 
-if (countError) throw countError
-if (count !== 20) throw new Error(`expected 20 seeded active projects, got ${count}`)
+if (!verify.ok) {
+  throw new Error(`project verification failed (${verify.status}): ${await verify.text()}`)
+}
+
+const verifiedRows = await verify.json() as Array<{ id: string }>
+if (verifiedRows.length !== 20) {
+  throw new Error(`expected 20 seeded active projects, got ${verifiedRows.length}`)
+}
 
 console.log('Project Square seed complete: 20 active projects.')
