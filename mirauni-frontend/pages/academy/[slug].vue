@@ -38,7 +38,6 @@
             <span class="bg-indie-secondary px-3 py-1 font-black border-2 border-black text-sm">
               {{ article.series || categoryInfo?.label }}
             </span>
-            <span class="font-bold text-sm text-gray-600">{{ formatDate(article.created_at) }}</span>
           </div>
 
           <h1 class="text-4xl md:text-6xl lg:text-7xl font-black font-display leading-[1.03] tracking-tight mb-7">
@@ -229,11 +228,6 @@ const relatedArticles = computed(() => {
     .slice(0, 3)
 })
 
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return ''
-  return new Date(dateStr).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
 const shareState = ref('')
 const shareArticle = async () => {
   if (!import.meta.client || !article.value) return
@@ -278,8 +272,6 @@ const structuredData = computed(() => article.value ? JSON.stringify({
   headline: article.value.title,
   description: article.value.summary,
   ...(article.value.cover_url ? { image: article.value.cover_url } : {}),
-  datePublished: article.value.created_at,
-  dateModified: article.value.updated_at || article.value.created_at,
   author: {
     '@type': 'Organization',
     name: article.value.author?.username || '小概率编辑部',
