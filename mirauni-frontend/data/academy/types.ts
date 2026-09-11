@@ -16,7 +16,9 @@ export interface AcademyArticle {
   featured?: boolean
   content: string
   sources: AcademySource[]
+  /** Internal ordering/storage timestamp. Do not present this as an editorial publication date. */
   created_at: string
+  /** Internal update timestamp. Do not present this as an editorial publication date. */
   updated_at: string
   view_count: number
   cover_url?: string
