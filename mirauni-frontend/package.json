@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "test:academy": "tsx scripts/validate-academy-content.ts",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {

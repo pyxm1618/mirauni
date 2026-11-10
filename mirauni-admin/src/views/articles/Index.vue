@@ -12,16 +12,20 @@ const form = ref({
   slug: '',
   summary: '',
   content: '',
-  category: 'tutorial',
+  category: 'stories',
   status: 'draft'
 })
 
 const categories = [
-  { value: 'tutorial', label: '教程' },
-  { value: 'case', label: '案例' },
-  { value: 'insight', label: '洞察' },
-  { value: 'news', label: '资讯' }
+  { value: 'stories', label: '独立开发故事' },
+  { value: 'business', label: '小生意拆解' },
+  { value: 'opportunities', label: '机会雷达' },
+  { value: 'build', label: '从 0 到 1' },
+  { value: 'growth', label: '增长实验室' },
+  { value: 'operations', label: '经营手册' }
 ]
+
+const categoryLabel = (value) => categories.find((item) => item.value === value)?.label || value
 
 const fetchArticles = async () => {
   loading.value = true
@@ -43,7 +47,7 @@ const openEditor = (article = null) => {
     form.value = { ...article }
   } else {
     editingArticle.value = null
-    form.value = { title: '', slug: '', summary: '', content: '', category: 'tutorial', status: 'draft' }
+    form.value = { title: '', slug: '', summary: '', content: '', category: 'stories', status: 'draft' }
   }
   showEditor.value = true
 }
@@ -89,11 +93,10 @@ onMounted(() => {
         @click="openEditor()"
         class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
       >
-        + 发布文章
+        + 新建文章
       </button>
     </div>
     
-    <!-- 文章列表 -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
       <table class="w-full">
         <thead class="bg-gray-50">
@@ -114,7 +117,7 @@ onMounted(() => {
               <p class="font-medium text-gray-800">{{ article.title }}</p>
               <p class="text-sm text-gray-500">/academy/{{ article.slug }}</p>
             </td>
-            <td class="px-6 py-4 text-gray-600">{{ article.category }}</td>
+            <td class="px-6 py-4 text-gray-600">{{ categoryLabel(article.category) }}</td>
             <td class="px-6 py-4">
               <span :class="['px-2 py-1 rounded-full text-xs', article.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700']">
                 {{ article.status === 'published' ? '已发布' : '草稿' }}
@@ -131,10 +134,9 @@ onMounted(() => {
       </table>
     </div>
     
-    <!-- 编辑器弹窗 -->
     <div v-if="showEditor" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div class="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
-        <h2 class="text-xl font-bold mb-6">{{ editingArticle ? '编辑文章' : '发布文章' }}</h2>
+        <h2 class="text-xl font-bold mb-6">{{ editingArticle ? '编辑文章' : '新建文章' }}</h2>
         
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
@@ -144,7 +146,7 @@ onMounted(() => {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">URL Slug</label>
-              <input v-model="form.slug" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="如: how-to-find-cofounder" />
+              <input v-model="form.slug" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="如: how-to-find-an-opportunity" />
             </div>
           </div>
           
@@ -170,7 +172,7 @@ onMounted(() => {
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">内容 (Markdown)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">内容</label>
             <textarea v-model="form.content" rows="15" class="w-full px-4 py-2 border rounded-lg font-mono text-sm"></textarea>
           </div>
         </div>
